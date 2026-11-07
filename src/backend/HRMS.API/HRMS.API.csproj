@@ -1,10 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
-  <PropertyGroup>
-    <RootNamespace>HRMS.API</RootNamespace>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.1" />
-    <ProjectReference Include="..\HRMS.Application\HRMS.Application.csproj" />
-    <ProjectReference Include="..\HRMS.Infrastructure\HRMS.Infrastructure.csproj" />
-  </ItemGroup>
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup>
+		<RootNamespace>HRMS.API</RootNamespace>
+		<UserSecretsId>10358704-0d03-42f5-8998-6513ca419f01</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.1" />
+		<ProjectReference Include="..\HRMS.Application\HRMS.Application.csproj" />
+		<ProjectReference Include="..\HRMS.Infrastructure\HRMS.Infrastructure.csproj" />
+	</ItemGroup>
 </Project>
