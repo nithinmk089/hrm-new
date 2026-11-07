@@ -216,7 +216,11 @@ internal sealed class SqlDatabaseMigrator(
             }
 
             var content = await File.ReadAllTextAsync(file, cancellationToken);
-            var checksum = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(content)));
+            var normalizedContent = content
+                .Replace("\r\n", "\n", StringComparison.Ordinal)
+                .Replace('\r', '\n');
+            var checksum = Convert.ToHexString(
+                SHA256.HashData(Encoding.UTF8.GetBytes(normalizedContent)));
 
             scripts.Add(new MigrationScript(migrationId, content, checksum));
         }
