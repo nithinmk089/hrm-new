@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>HRMS.API</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HRMS.Application\HRMS.Application.csproj" />
+    <ProjectReference Include="..\HRMS.Infrastructure\HRMS.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
