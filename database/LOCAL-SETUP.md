@@ -1,28 +1,20 @@
 # Local SQL Server development setup
 
-This guide is for a developer-owned local SQL Server instance. It does not configure production.
+This guide uses the detected local SQL Server Express instance. It does not configure production.
 
-## Prerequisites
+## Detected environment
 
-- SQL Server 2022 or later (Developer edition is suitable for local development).
-- SQL Server Management Studio (SSMS) or the `sqlcmd` utility.
-- Windows Authentication is recommended for local development.
+- Instance: `Nithin\SQLEXPRESS01`
+- Edition: SQL Server Express (64-bit)
+- Version: `16.0.1000.6` (SQL Server 2022)
+- Server collation: `Latin1_General_CI_AS`
+- HRMS database collation: `SQL_Latin1_General_CP1_CI_AS`
 
-Check the server version before applying migrations:
-
-```sql
-SELECT
-    @@SERVERNAME AS ServerName,
-    SERVERPROPERTY('ProductVersion') AS ProductVersion,
-    SERVERPROPERTY('ProductLevel') AS ProductLevel,
-    SERVERPROPERTY('Edition') AS Edition;
-```
-
-The current database baseline targets SQL Server 2022+ and compatibility level 160.
+The server collation and database collation may differ. The HRMS database is explicitly created with the database collation required by the project standards.
 
 ## 1. Create the development database
 
-Connect to the local instance using SSMS and execute this once:
+Connect to `Nithin\SQLEXPRESS01` using SSMS and execute once:
 
 ```sql
 IF DB_ID(N'HRMS_Dev') IS NULL
@@ -34,46 +26,27 @@ GO
 
 ALTER DATABASE HRMS_Dev SET COMPATIBILITY_LEVEL = 160;
 GO
-
-SELECT name, compatibility_level, collation_name
-FROM sys.databases
-WHERE name = N'HRMS_Dev';
-GO
 ```
 
-If your local SQL Server instance is older than SQL Server 2022, do not lower the compatibility level silently. Confirm the supported version and revise the architecture baseline deliberately.
+## 2. Run database migrations
 
-## 2. Apply the current migrations
-
-For the initial local setup, use SSMS:
-
-1. Open `database/migrations/0001_foundation.sql`.
-2. Connect to your local SQL Server instance and select `HRMS_Dev` as the query database.
-3. Execute the complete script and confirm there are no errors.
-4. Repeat for `database/migrations/0002_foundation_procedures.sql`.
-
-The scripts use SQL Server batch separators (`GO`), so execute them with SSMS or `sqlcmd`; do not submit the entire file as one ordinary ADO.NET command.
-
-Example using Windows Authentication from PowerShell (replace the instance name if needed):
+From the repository root, use PowerShell:
 
 ```powershell
-sqlcmd -S "Nithin\\SQLEXPRESS01" -E -d "HRMS_Dev" -b -i "database/migrations/0001_foundation.sql"
-if ($LASTEXITCODE -ne 0) { throw "Migration 0001 failed." }
-
-sqlcmd -S "Nithin\\SQLEXPRESS01" -E -d "HRMS_Dev" -b -i "database/migrations/0002_foundation_procedures.sql"
-if ($LASTEXITCODE -ne 0) { throw "Migration 0002 failed." }
+$env:HRMS_CONNECTION_STRING = "Server=Nithin\SQLEXPRESS01;Database=HRMS_Dev;Trusted_Connection=True;TrustServerCertificate=True;"
+dotnet run --project src/tools/HRMS.DatabaseMigrator
 ```
 
-For your current local instance, use `Nithin\\SQLEXPRESS01`. For a default instance, the server argument may be `.` or `localhost`.
+The runner applies migrations in order, handles standalone `GO` batch separators, records successful versions, skips already recorded versions and detects changes to scripts that have a recorded checksum.
 
-**Migration tracking note:** migration 0001 records itself in `platform.DatabaseVersions`. Migration 0002 is currently tracked by the deployment process after successful execution; until that runner is implemented, do not manually insert a version record before verifying the script has completed successfully.
+The runner is safe to use against the current database where migration 0001 is recorded and migration 0002 was executed manually but not recorded: it will skip 0001, re-run the idempotent 0002 script and record version 0002.
 
 ## 3. Verify the database
 
 Run against `HRMS_Dev`:
 
 ```sql
-SELECT VersionNumber, Description, AppliedAtUtc, AppliedBy
+SELECT VersionNumber, Description, AppliedAtUtc, AppliedBy, ScriptChecksum
 FROM platform.DatabaseVersions
 ORDER BY VersionNumber;
 
@@ -93,30 +66,29 @@ WHERE name IN
 )
 ORDER BY SchemaName, ProcedureName;
 
-SELECT PermissionCode, PermissionName, ModuleCode
-FROM security.Permissions
-ORDER BY ModuleCode, PermissionCode;
+SELECT COUNT(*) AS TotalPermissions
+FROM security.Permissions;
 ```
 
-Expected foundation schemas: `platform`, `security`, and `audit`.
+Expected results:
+- 11 foundation tables across `platform`, `security`, and `audit`.
+- Four foundation stored procedures.
+- 11 initial permissions.
+- Migration versions `0001` and `0002` recorded after the runner completes.
 
-Expected migration 0001 tables: `DatabaseVersions`, `Tenants`, `Configurations`, `Permissions`, `Users`, `Roles`, `UserRoles`, `RolePermissions`, `RefreshTokens`, `AuditLogs`, and `ErrorLogs`.
+## 4. Local API connection configuration
 
-Expected migration 0002 procedures: the four procedures listed in the verification query, plus the initial permission catalog.
-
-## 4. Local connection string
-
-When the API project is created, configure the connection string with .NET User Secrets rather than committing credentials:
+When the API project is created, configure its connection string with .NET User Secrets:
 
 ```powershell
 dotnet user-secrets init --project src/backend/HRMS.API
-dotnet user-secrets set "ConnectionStrings:Hrms" "Server=localhost;Database=HRMS_Dev;Trusted_Connection=True;TrustServerCertificate=True;" --project src/backend/HRMS.API
+dotnet user-secrets set "ConnectionStrings:Hrms" "Server=Nithin\SQLEXPRESS01;Database=HRMS_Dev;Trusted_Connection=True;TrustServerCertificate=True;" --project src/backend/HRMS.API
 ```
 
-For your current instance, use `Server=Nithin\\SQLEXPRESS01`. Change this if your SQL Server instance name changes. Use `TrustServerCertificate=True` only for local development; configure trusted certificates for deployed environments.
+Do not use a SQL Server administrator account as the API runtime identity. The migration identity and application identity must remain separate. `TrustServerCertificate=True` is for local development only.
 
-Do not use a SQL Server administrator account as the API runtime identity. Before connecting the API, create a dedicated local application login/user with only the required procedure execution permissions. The migration identity and application identity must remain separate.
+## 5. Limitations and validation
 
-## 5. What is not yet validated
+SQL Server Express is suitable for local development, but has a 10 GB maximum relational database size. No production deployment configuration is implied by this guide.
 
-No migration has been executed against your local SQL Server by this repository workflow yet. After you apply the scripts, share the SQL verification output (omit any sensitive server details) so we can confirm the schema and procedures before adding the migration runner and database integration tests.
+The repository runner has not yet been executed in your local environment. Run it and share the console output plus the verification query results before we mark automated migration execution as validated.
