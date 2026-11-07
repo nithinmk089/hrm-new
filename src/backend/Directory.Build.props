@@ -7,4 +7,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- Keep the transitive SQL client PKCS dependency on the patched .NET 10 line. -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+  </ItemGroup>
 </Project>
