@@ -1,11 +1,12 @@
 using System.Reflection;
 using HRMS.Application.Abstractions.Persistence;
 using HRMS.Infrastructure;
+using HRMS.API.ErrorHandling;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
