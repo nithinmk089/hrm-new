@@ -57,14 +57,14 @@ The scripts use SQL Server batch separators (`GO`), so execute them with SSMS or
 Example using Windows Authentication from PowerShell (replace the instance name if needed):
 
 ```powershell
-sqlcmd -S ".\\SQLEXPRESS" -E -d "HRMS_Dev" -b -i "database/migrations/0001_foundation.sql"
+sqlcmd -S "Nithin\\SQLEXPRESS01" -E -d "HRMS_Dev" -b -i "database/migrations/0001_foundation.sql"
 if ($LASTEXITCODE -ne 0) { throw "Migration 0001 failed." }
 
-sqlcmd -S ".\\SQLEXPRESS" -E -d "HRMS_Dev" -b -i "database/migrations/0002_foundation_procedures.sql"
+sqlcmd -S "Nithin\\SQLEXPRESS01" -E -d "HRMS_Dev" -b -i "database/migrations/0002_foundation_procedures.sql"
 if ($LASTEXITCODE -ne 0) { throw "Migration 0002 failed." }
 ```
 
-For a default instance, the server argument may be `.` or `localhost`. Use the actual instance name shown in SSMS.
+For your current local instance, use `Nithin\\SQLEXPRESS01`. For a default instance, the server argument may be `.` or `localhost`.
 
 **Migration tracking note:** migration 0001 records itself in `platform.DatabaseVersions`. Migration 0002 is currently tracked by the deployment process after successful execution; until that runner is implemented, do not manually insert a version record before verifying the script has completed successfully.
 
@@ -113,7 +113,7 @@ dotnet user-secrets init --project src/backend/HRMS.API
 dotnet user-secrets set "ConnectionStrings:Hrms" "Server=localhost;Database=HRMS_Dev;Trusted_Connection=True;TrustServerCertificate=True;" --project src/backend/HRMS.API
 ```
 
-Change `Server=localhost` to your named instance (for example, `Server=.\\SQLEXPRESS`) when applicable. Use `TrustServerCertificate=True` only for local development; configure trusted certificates for deployed environments.
+For your current instance, use `Server=Nithin\\SQLEXPRESS01`. Change this if your SQL Server instance name changes. Use `TrustServerCertificate=True` only for local development; configure trusted certificates for deployed environments.
 
 Do not use a SQL Server administrator account as the API runtime identity. Before connecting the API, create a dedicated local application login/user with only the required procedure execution permissions. The migration identity and application identity must remain separate.
 
