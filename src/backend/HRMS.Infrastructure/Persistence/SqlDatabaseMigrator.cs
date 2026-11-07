@@ -89,6 +89,21 @@ internal sealed class SqlDatabaseMigrator(
                     cancellationToken: cancellationToken)))
                 .ToDictionary(item => item.MigrationId, StringComparer.OrdinalIgnoreCase);
 
+            var currentMigrationIds = scripts
+                .Select(script => script.MigrationId)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var missingScripts = appliedMigrations.Keys
+                .Where(migrationId => !currentMigrationIds.Contains(migrationId))
+                .ToArray();
+
+            if (missingScripts.Length > 0)
+            {
+                throw new InvalidOperationException(
+                    "Previously applied migration script(s) are missing from the repository: " +
+                    string.Join(", ", missingScripts));
+            }
+
             var pendingScripts = new List<MigrationScript>();
 
             foreach (var script in scripts)
@@ -175,7 +190,7 @@ internal sealed class SqlDatabaseMigrator(
         CancellationToken cancellationToken)
     {
         var files = Directory.GetFiles(migrationDirectory, "*.sql")
-            .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(file => Path.GetFileName(file), StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
         var scripts = new List<MigrationScript>(files.Length);
