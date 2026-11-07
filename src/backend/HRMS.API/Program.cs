@@ -20,6 +20,21 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 
+// Apply database migrations only when explicitly requested.
+// This keeps normal API startup free from schema-changing operations.
+if (args.Contains("--migrate", StringComparer.OrdinalIgnoreCase))
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var migrator = scope.ServiceProvider.GetRequiredService<IDatabaseMigrator>();
+    var appliedCount = await migrator.MigrateAsync();
+
+    app.Logger.LogInformation(
+        "Database migration command completed. {AppliedCount} migration(s) applied.",
+        appliedCount);
+
+    return;
+}
+
 // Swagger UI is enabled only in the Development environment.
 if (app.Environment.IsDevelopment())
 {
