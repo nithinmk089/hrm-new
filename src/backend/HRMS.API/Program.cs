@@ -5,14 +5,29 @@ using HRMS.API.ErrorHandling;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// API documentation
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Exception handling
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+// Infrastructure
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
 app.UseExceptionHandler();
 
+// Swagger UI is enabled only in the Development environment.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Liveness
 app.MapGet("/api/v1/health/live", () => Results.Ok(new
 {
     status = "Healthy",
@@ -21,6 +36,7 @@ app.MapGet("/api/v1/health/live", () => Results.Ok(new
 .WithName("GetLiveness")
 .WithTags("Health");
 
+// Readiness
 app.MapGet("/api/v1/health/ready", async (
     IDbConnectionFactory connectionFactory,
     CancellationToken cancellationToken) =>
@@ -37,10 +53,12 @@ app.MapGet("/api/v1/health/ready", async (
 .WithName("GetReadiness")
 .WithTags("Health");
 
+// Version
 app.MapGet("/api/v1/version", () => Results.Ok(new
 {
     application = "HRMS.API",
-    version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown",
+    version = Assembly.GetExecutingAssembly()
+        .GetName().Version?.ToString() ?? "unknown",
     environment = app.Environment.EnvironmentName
 }))
 .WithName("GetApplicationVersion")
