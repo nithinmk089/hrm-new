@@ -15,6 +15,8 @@ public static class DependencyInjection
         ArgumentNullException.ThrowIfNull(configuration);
 
         services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
+        services.AddSingleton<IDatabaseMigrator, SqlDatabaseMigrator>();
+
         return services;
     }
 }
