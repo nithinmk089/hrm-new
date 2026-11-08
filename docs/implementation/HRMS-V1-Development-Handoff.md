@@ -144,3 +144,30 @@ Frontend stack: Angular 21+, strict TypeScript, standalone components, Bootstrap
 - Shell: PowerShell on Windows.
 - Backend API has previously run on `http://localhost:5000`; use current launch settings as source of truth.
 - SQL Server database is local development database configured by the repository's appsettings/user secrets. Never put connection strings or credentials in this document.
+
+
+## 8. UI-01 progress (2026-11-08)
+
+Status: **In progress — initial Angular workspace and responsive shell committed to the feature branch; local build/test verification is still pending.**
+
+- Feature branch: `feature/angular-application-shell`, created from the current `main` head `3382d1a028e1e9f4b4a9dfccb742f2ba63770432`.
+- Confirmed that `src/frontend/` did not exist on `main`; no existing frontend files were overwritten.
+- Angular workspace: `src/frontend/hrms-web/`, Angular 21 standalone application, strict TypeScript, Bootstrap 5 and Bootstrap Icons.
+- Added responsive dark enterprise sidebar, top header, mobile navigation drawer/backdrop, workspace navigation, dashboard landing page and explicit placeholders for the not-yet-implemented V1 feature routes.
+- Added shared global design tokens/styles, API base URL injection token, production and development environment files (development API base URL defaults to `http://localhost:5000/api/v1`), and an application-shell smoke test.
+- Dashboard intentionally displays no fabricated business metrics. Authentication/session handling remains UI-02; placeholder routes are not functional module screens.
+- Files are under `src/frontend/hrms-web/`; the workspace README documents local setup.
+- No local Node/npm execution environment was used in this repository operation. **Do not mark build or tests as passing yet.**
+
+### Next UI-01 actions
+
+1. In PowerShell, run `git fetch origin`, `git switch feature/angular-application-shell`, and `git pull --rebase origin feature/angular-application-shell` (preserve any local work).
+2. From `src/frontend/hrms-web`, run `npm install`, `npm run build`, and `npm test`; resolve any Angular CLI/compiler/test-runner issues.
+3. Review responsive behavior at desktop/tablet/mobile widths and keyboard navigation/focus visibility.
+4. Update this handoff with actual build/test results, then open a PR into `main`. Do not start UI-02 until UI-01 exit criteria are met.
+
+
+UI-01 repository checkpoint:
+- Latest feature branch commit at this checkpoint: `ebc51b1fa6c517081ff1cc5e81f8b95e5e3e225b`.
+- Angular CLI development build is configured to replace the production environment with the local API URL. The API URL is centralized through the `API_BASE_URL` injection token.
+- Registered Angular HttpClient for upcoming centralized API services. Added a Vitest smoke test for the application shell. It has been committed but has **not yet been executed**.
