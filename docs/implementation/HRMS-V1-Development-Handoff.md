@@ -212,3 +212,28 @@ The backend's CORS policy and `HasTrustedOrigin()` check both use `Authenticatio
 3. Configure the development API allowed origin as described above, restart the API, and verify the login request/cookie behavior in the browser.
 4. Complete 401 refresh/retry behavior, logout UI, current-user display, permission retrieval and permission-aware navigation only after confirming the backend permission model/endpoint.
 5. Add focused auth service/interceptor/guard tests, then complete the UI-02 exit criteria and merge the branch into `main`.
+
+
+### UI-02 runtime verification update (2026-11-08)
+
+The user has now verified the following locally against the backend:
+- Angular production build succeeded.
+- Vitest suite passed: 1 test file, 1 test.
+- Login succeeded against the API at `http://localhost:54480/api/v1`.
+- Browser refresh restored the authenticated session using the HttpOnly refresh cookie.
+- Logout worked; navigating directly to `/dashboard` after logout redirected to `/login`.
+- A visible Sign out action was added to the application header (commit `9c94b0b051e89bfe794289fbdaf681008b7129f2`).
+- Development API base URL was corrected to `http://localhost:54480/api/v1` to match `src/backend/HRMS.API/Properties/launchSettings.json` (commit `7e2ba9b31eaddfdb96985b0d741de5278699b050`).
+
+### UI-02 security hardening commits
+
+- `6affda10a5912733e3c56fb7a09bde6e3a389f56`: bearer-token interceptor is scoped to the configured HRMS API base URL; anonymous login/refresh/logout calls do not receive an Authorization header.
+- `52802b77c833a9d1c243b263cdcb222e1e614f5d`: concurrent route-guard session restoration shares a single refresh request using RxJS shareReplay.
+
+### Remaining UI-02 verification
+
+- User still needs to verify invalid credentials produce the expected user-friendly 401 message.
+- Re-run `npm install` only if dependencies changed; then run `npm run build` and `npm test` after the latest hardening commits.
+- Add focused unit tests for authentication service/interceptor/guard behavior before final phase closure if practical.
+- Do not claim these latest hardening changes have passed local build/tests until the user supplies the results.
+- Once verification is complete, update this handoff and implementation plan, merge UI-02 into `main` through a PR, and create the next feature branch from the resulting latest `main` commit.
