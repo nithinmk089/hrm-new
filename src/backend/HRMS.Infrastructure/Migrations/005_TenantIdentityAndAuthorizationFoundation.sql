@@ -391,7 +391,31 @@ IF NOT EXISTS
         FOREIGN KEY ([UserId]) REFERENCES [security].[Users] ([UserId]);
 
 -------------------------------------------------------------------------------
--- 8. Explicitly mark legacy duplicate HRMS security tables as deprecated.
+-- 8. Enforce tenant and actor references on the canonical audit store.
+-------------------------------------------------------------------------------
+IF NOT EXISTS
+(
+    SELECT 1 FROM sys.foreign_keys
+    WHERE parent_object_id = OBJECT_ID(N'audit.AuditLogs')
+      AND name = N'FK_AuditLogs_Tenant'
+)
+    ALTER TABLE [audit].[AuditLogs]
+        ADD CONSTRAINT [FK_AuditLogs_Tenant]
+        FOREIGN KEY ([TenantId]) REFERENCES [platform].[Tenants] ([TenantId]);
+
+IF COL_LENGTH(N'audit.AuditLogs', N'ActorUserId') IS NOT NULL
+   AND NOT EXISTS
+   (
+       SELECT 1 FROM sys.foreign_keys
+       WHERE parent_object_id = OBJECT_ID(N'audit.AuditLogs')
+         AND name = N'FK_AuditLogs_GlobalActor'
+   )
+    ALTER TABLE [audit].[AuditLogs]
+        ADD CONSTRAINT [FK_AuditLogs_GlobalActor]
+        FOREIGN KEY ([ActorUserId]) REFERENCES [security].[Users] ([UserId]);
+
+-------------------------------------------------------------------------------
+-- 9. Explicitly mark legacy duplicate HRMS security tables as deprecated.
 --    No rows are deleted and no existing objects are dropped in this migration.
 -------------------------------------------------------------------------------
 EXEC sys.sp_addextendedproperty
@@ -399,6 +423,12 @@ EXEC sys.sp_addextendedproperty
     @value = N'Legacy duplicate. Use security.Users and security.UserTenantMemberships.',
     @level0type = N'SCHEMA', @level0name = N'hrms',
     @level1type = N'TABLE', @level1name = N'Users';
+
+EXEC sys.sp_addextendedproperty
+    @name = N'HRMS_Deprecated',
+    @value = N'Legacy duplicate. Use security.UserTenantMemberships.',
+    @level0type = N'SCHEMA', @level0name = N'hrms',
+    @level1type = N'TABLE', @level1name = N'CompanyUserMemberships';
 
 EXEC sys.sp_addextendedproperty
     @name = N'HRMS_Deprecated',
