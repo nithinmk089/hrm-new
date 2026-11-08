@@ -22,11 +22,11 @@ public sealed class LeaveDayCalculatorTests
 
         Assert.Equal(4m, result.ChargeableDays);
         Assert.Equal(
-            [new DateOnly(2026, 11, 9), new DateOnly(2026, 11, 10),
-             new DateOnly(2026, 11, 12), new DateOnly(2026, 11, 13)],
+            new[] { new DateOnly(2026, 11, 9), new DateOnly(2026, 11, 10),
+                new DateOnly(2026, 11, 12), new DateOnly(2026, 11, 13) },
             result.ChargeableDates);
         Assert.Equal(
-            [new DateOnly(2026, 11, 11), new DateOnly(2026, 11, 14), new DateOnly(2026, 11, 15)],
+            new[] { new DateOnly(2026, 11, 11), new DateOnly(2026, 11, 14), new DateOnly(2026, 11, 15) },
             result.ExcludedDates);
     }
 
