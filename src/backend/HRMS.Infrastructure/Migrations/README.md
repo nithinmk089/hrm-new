@@ -12,10 +12,12 @@ Use a zero-padded, increasing numeric prefix followed by a short description:
 - `003_CreateEmployeeManagementTables.sql`
 - `004_CreateIdentityAndSecurityTables.sql`
 - `005_TenantIdentityAndAuthorizationFoundation.sql`
+- `006_RefreshTokenFamilyAndMembership.sql`
+- `007_CompanyPermissions.sql`
 - `008_OrganizationMasterPermissions.sql`
 - `009_DepartmentStoredProcedures.sql`
-- `011_OfficeStoredProcedures.sql`
 - `010_CreateApiErrorLogs.sql`
+- `011_OfficeStoredProcedures.sql`
 
 Once a migration has been applied to any shared environment, do not edit or
 delete it. Add a new migration to change the schema.
