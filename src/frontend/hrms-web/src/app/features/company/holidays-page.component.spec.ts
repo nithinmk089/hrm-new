@@ -1,0 +1,27 @@
+import { TestBed } from '@angular/core/testing';
+import { describe, expect, it, vi } from 'vitest';
+import { of, throwError } from 'rxjs';
+import { CompanyApiService } from '../../core/company/company-api.service';
+import { CompanySummary, Holiday } from '../../core/company/company.models';
+import { HolidaysPageComponent } from './holidays-page.component';
+
+const company:CompanySummary={companyId:'company-1',companyCode:'DEMO',legalName:'Demo Technologies Pvt Ltd',displayName:'Demo Technologies',isActive:true};
+const holiday:Holiday={holidayId:'holiday-1',companyId:'company-1',holidayName:'Independence Day',holidayDate:'2027-08-15',description:'National holiday',isOptional:false,isActive:true,createdAtUtc:'2026-11-08T00:00:00Z',updatedAtUtc:null,rowVersion:'AAAAAAAAB9E='};
+
+describe('HolidaysPageComponent',()=>{
+ const setup=async(companies:CompanySummary[]=[company],items:Holiday[]=[holiday])=>{
+  const api={getCompanies:vi.fn().mockReturnValue(of(companies)),getHolidays:vi.fn().mockReturnValue(of(items)),createHoliday:vi.fn().mockReturnValue(of(holiday)),updateHoliday:vi.fn().mockReturnValue(of(holiday)),deactivateHoliday:vi.fn().mockReturnValue(of(void 0))};
+  await TestBed.configureTestingModule({imports:[HolidaysPageComponent],providers:[{provide:CompanyApiService,useValue:api}]}).compileComponents();
+  const fixture=TestBed.createComponent(HolidaysPageComponent);fixture.detectChanges();await fixture.whenStable();fixture.detectChanges();return{fixture,component:fixture.componentInstance,api};
+ };
+ it('loads the selected company and holiday directory',async()=>{const{fixture,api}=await setup();expect(api.getHolidays).toHaveBeenCalledWith('company-1');expect(fixture.nativeElement.querySelector('#companySelect').value).toBe('company-1');expect(fixture.nativeElement.textContent).toContain('Independence Day');expect(fixture.nativeElement.textContent).toContain('Company holiday');});
+ it('shows an empty state when no active companies are available',async()=>{const{fixture,api}=await setup([]);expect(fixture.nativeElement.textContent).toContain('No companies available');expect(api.getHolidays).not.toHaveBeenCalled();});
+ it('loads holidays when a different company is selected',async()=>{const other={...company,companyId:'company-2',companyCode:'OTHER',displayName:'Other Company'};const{component,api}=await setup([company,other]);component.onCompanyChange({target:{value:'company-2'}} as unknown as Event);expect(component.selectedCompanyId()).toBe('company-2');expect(api.getHolidays).toHaveBeenLastCalledWith('company-2');});
+ it('validates required holiday name and date',async()=>{const{component}=await setup();component.openCreate();expect(component.form.invalid).toBe(true);component.form.patchValue({holidayName:'Holiday'});expect(component.form.invalid).toBe(true);component.form.patchValue({holidayDate:'2027-08-15'});expect(component.form.valid).toBe(true);});
+ it('creates a holiday with trimmed values and date-only payload',async()=>{const{component,api}=await setup();component.openCreate();component.form.patchValue({holidayName:' Independence Day ',holidayDate:'2027-08-15',description:' National holiday ',isOptional:false});component.save();expect(api.createHoliday).toHaveBeenCalledWith('company-1',{holidayName:'Independence Day',holidayDate:'2027-08-15',description:'National holiday',isOptional:false});expect(component.notice()).toBe('Holiday created successfully.');});
+ it('updates a holiday with the current RowVersion',async()=>{const{component,api}=await setup();component.openEdit(holiday);component.form.patchValue({holidayName:'Updated Independence Day'});component.save();expect(api.updateHoliday).toHaveBeenCalledWith('company-1','holiday-1',expect.objectContaining({holidayName:'Updated Independence Day',holidayDate:'2027-08-15',rowVersion:holiday.rowVersion}));});
+ it('shows a clear duplicate-date validation message',async()=>{const{component,api}=await setup();api.createHoliday.mockReturnValue(throwError(()=>({status:400,error:{detail:'A holiday is already registered for 2027-08-15.'}})));component.openCreate();component.form.patchValue({holidayName:'Another Holiday',holidayDate:'2027-08-15'});component.save();expect(component.editorError()).toContain('already registered for this date');});
+ it('requires confirmation and sends RowVersion before deactivation',async()=>{const{component,api}=await setup();component.deactivate(holiday);expect(api.deactivateHoliday).not.toHaveBeenCalled();component.confirmDeactivate();expect(api.deactivateHoliday).toHaveBeenCalledWith('company-1','holiday-1',holiday.rowVersion);expect(component.confirmTarget()).toBeNull();expect(component.notice()).toBe('Holiday deactivated successfully.');});
+ it('keeps the confirmation open when deactivation returns a conflict',async()=>{const{component,api}=await setup();api.deactivateHoliday.mockReturnValue(throwError(()=>({status:409})));component.deactivate(holiday);component.confirmDeactivate();expect(component.confirmTarget()).toEqual(holiday);expect(component.confirmError()).toContain('changed or is in use');});
+ it('shows inactive holidays without edit or deactivate actions',async()=>{const inactive={...holiday,isActive:false};const{fixture}=await setup([company],[inactive]);expect(fixture.nativeElement.textContent).toContain('Inactive');expect(fixture.nativeElement.querySelector('[aria-label="Edit holiday"]').disabled).toBe(true);expect(fixture.nativeElement.querySelector('[aria-label="Deactivate holiday"]')).toBeNull();});
+});
