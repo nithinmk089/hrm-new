@@ -237,3 +237,32 @@ The user has now verified the following locally against the backend:
 - Add focused unit tests for authentication service/interceptor/guard behavior before final phase closure if practical.
 - Do not claim these latest hardening changes have passed local build/tests until the user supplies the results.
 - Once verification is complete, update this handoff and implementation plan, merge UI-02 into `main` through a PR, and create the next feature branch from the resulting latest `main` commit.
+
+
+### UI-02 final verification (2026-11-08)
+
+Status: **Completed and ready for integration.**
+
+The user confirmed all final local checks are good after pulling the latest authentication hardening commits:
+- Angular build succeeds.
+- Frontend test suite succeeds.
+- Login succeeds against local API `http://localhost:54480/api/v1`.
+- Invalid credentials show the expected user-friendly 401 message while preserving the entered workspace code and email.
+- Browser refresh restores the session using the backend HttpOnly refresh cookie.
+- Logout revokes/clears the refresh session and clears the in-memory access-token session.
+- Direct navigation to protected `/dashboard` after logout redirects to `/login`.
+- Header exposes a working Sign out action.
+- Access token interceptor is restricted to the configured HRMS API base URL.
+- Concurrent session restoration is shared across simultaneous guard subscribers.
+
+Key UI-02 commits include:
+- `7e2ba9b31eaddfdb96985b0d741de5278699b050` — local API port 54480.
+- `9c94b0b051e89bfe794289fbdaf681008b7129f2` — visible sign-out action.
+- `6affda10a5912733e3c56fb7a09bde6e3a389f56` — API-scoped bearer interceptor.
+- `52802b77c833a9d1c243b263cdcb222e1e614f5d` — shared concurrent session restoration.
+- `128bb2e3e62faba897b6f1d8d93e6c8c0528330f` — interceptor regex syntax correction.
+- `ce0c7f1a87474c929773910efb79d8e99fc661c0` — previous handoff checkpoint.
+
+UI-02 does not yet include effective-permission retrieval or permission-aware menu/action visibility because the current `/auth/me` backend contract does not expose permissions and no verified effective-permissions endpoint has been integrated. Do not hardcode permissions. Treat that as a follow-up authorization slice after inspecting/adding the backend contract.
+
+Next: open and merge the UI-02 PR into `main`. Only after merge, create the next UI feature branch from the resulting latest `main` commit. The planned next phase is UI-03 Dashboard.
