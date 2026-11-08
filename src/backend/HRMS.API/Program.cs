@@ -7,23 +7,17 @@ using HRMS.Application.Abstractions.Security;
 using HRMS.Infrastructure;
 using HRMS.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// API documentation
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-// Exception handling
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-
-// Infrastructure
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// JWT bearer authentication. A missing signing key prevents token issuance
-// and causes supplied bearer tokens to fail validation; it does not block health checks.
 var jwtSection = builder.Configuration.GetSection(JwtOptions.SectionName);
 var jwtIssuer = jwtSection["Issuer"] ?? string.Empty;
 var jwtAudience = jwtSection["Audience"] ?? string.Empty;
@@ -57,25 +51,18 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
-
 app.UseExceptionHandler();
 
-// Apply database migrations only when explicitly requested.
-// This keeps normal API startup free from schema-changing operations.
 if (args.Contains("--migrate", StringComparer.OrdinalIgnoreCase))
 {
     await using var scope = app.Services.CreateAsyncScope();
     var migrator = scope.ServiceProvider.GetRequiredService<IDatabaseMigrator>();
     var appliedCount = await migrator.MigrateAsync();
-
     app.Logger.LogInformation(
-        "Database migration command completed. {AppliedCount} migration(s) applied.",
-        appliedCount);
-
+        "Database migration command completed. {AppliedCount} migration(s) applied.", appliedCount);
     return;
 }
 
-// Swagger UI is enabled only in the Development environment.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -85,7 +72,51 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Liveness
+const string refreshCookieName = "hrms_refresh";
+const string authCookiePath = "/api/v1/auth";
+
+CookieOptions BuildRefreshCookieOptions(HttpContext context, DateTime expiresAtUtc) => new()
+{
+    HttpOnly = true,
+    Secure = !app.Environment.IsDevelopment() || context.Request.IsHttps,
+    SameSite = SameSiteMode.Strict,
+    Path = authCookiePath,
+    Expires = new DateTimeOffset(DateTime.SpecifyKind(expiresAtUtc, DateTimeKind.Utc)),
+    IsEssential = true
+};
+
+bool HasTrustedOrigin(HttpContext context)
+{
+    var origin = context.Request.Headers.Origin.ToString();
+    if (string.IsNullOrWhiteSpace(origin))
+    {
+        return true;
+    }
+
+    var configuredOrigins = builder.Configuration
+        .GetSection("Authentication:AllowedOrigins")
+        .Get<string[]>() ?? [];
+
+    if (configuredOrigins.Length > 0)
+    {
+        return configuredOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);
+    }
+
+    return Uri.TryCreate(origin, UriKind.Absolute, out var originUri) &&
+           string.Equals(originUri.Scheme, context.Request.Scheme, StringComparison.OrdinalIgnoreCase) &&
+           string.Equals(originUri.Authority, context.Request.Host.Value, StringComparison.OrdinalIgnoreCase);
+}
+
+IResult SetSessionCookieAndReturnLogin(HttpContext context, LoginSessionResult session)
+{
+    context.Response.Cookies.Append(
+        refreshCookieName,
+        session.RefreshToken,
+        BuildRefreshCookieOptions(context, session.RefreshTokenExpiresAtUtc));
+
+    return Results.Ok(session.Login);
+}
+
 app.MapGet("/api/v1/health/live", () => Results.Ok(new
 {
     status = "Healthy",
@@ -94,38 +125,105 @@ app.MapGet("/api/v1/health/live", () => Results.Ok(new
 .WithName("GetLiveness")
 .WithTags("Health");
 
-// Readiness
 app.MapGet("/api/v1/health/ready", async (
     IDbConnectionFactory connectionFactory,
     CancellationToken cancellationToken) =>
 {
     await using var connection = connectionFactory.CreateConnection();
     await connection.OpenAsync(cancellationToken);
-
-    return Results.Ok(new
-    {
-        status = "Ready",
-        database = "Connected"
-    });
+    return Results.Ok(new { status = "Ready", database = "Connected" });
 })
 .WithName("GetReadiness")
 .WithTags("Health");
 
-// Login
 app.MapPost("/api/v1/auth/login", async (
+    HttpContext context,
     LoginRequest request,
     IAuthenticationService authenticationService,
     CancellationToken cancellationToken) =>
 {
-    var result = await authenticationService.LoginAsync(request, cancellationToken);
-    return result is null ? Results.Unauthorized() : Results.Ok(result);
+    var session = await authenticationService.LoginAsync(
+        request, context.Connection.RemoteIpAddress?.ToString(), cancellationToken);
+
+    return session is null
+        ? Results.Unauthorized()
+        : SetSessionCookieAndReturnLogin(context, session);
 })
 .AllowAnonymous()
 .WithName("Login")
 .WithTags("Authentication");
 
-// Current authenticated identity. Permission and scope checks will be added
-// in the authorization increment; this endpoint only verifies bearer-token validation.
+app.MapPost("/api/v1/auth/refresh", async (
+    HttpContext context,
+    IRefreshTokenService refreshTokenService,
+    CancellationToken cancellationToken) =>
+{
+    if (!HasTrustedOrigin(context))
+    {
+        return Results.Forbid();
+    }
+
+    if (!context.Request.Cookies.TryGetValue(refreshCookieName, out var refreshToken) ||
+        string.IsNullOrWhiteSpace(refreshToken))
+    {
+        context.Response.Cookies.Delete(refreshCookieName, BuildRefreshCookieOptions(
+            context, DateTime.UtcNow.AddDays(-1)));
+        return Results.Unauthorized();
+    }
+
+    var result = await refreshTokenService.RefreshAsync(
+        refreshToken, context.Connection.RemoteIpAddress?.ToString(), cancellationToken);
+
+    if (result.Status != RefreshTokenRotationStatus.Rotated || result.Session is null)
+    {
+        context.Response.Cookies.Delete(refreshCookieName, BuildRefreshCookieOptions(
+            context, DateTime.UtcNow.AddDays(-1)));
+        return Results.Unauthorized();
+    }
+
+    return SetSessionCookieAndReturnLogin(context, new LoginSessionResult(
+        new LoginResult(
+            result.Session.AccessToken.Value,
+            "Bearer",
+            result.Session.AccessToken.ExpiresAtUtc,
+            result.Session.User.UserId,
+            result.Session.User.DisplayName,
+            result.Session.User.TenantId,
+            result.Session.User.TenantCode,
+            result.Session.User.TenantName),
+        result.Session.RefreshToken,
+        result.Session.RefreshTokenExpiresAtUtc));
+})
+.AllowAnonymous()
+.WithName("RefreshAuthentication")
+.WithTags("Authentication");
+
+app.MapPost("/api/v1/auth/logout", async (
+    HttpContext context,
+    IRefreshTokenService refreshTokenService,
+    CancellationToken cancellationToken) =>
+{
+    if (!HasTrustedOrigin(context))
+    {
+        return Results.Forbid();
+    }
+
+    if (context.Request.Cookies.TryGetValue(refreshCookieName, out var refreshToken) &&
+        !string.IsNullOrWhiteSpace(refreshToken))
+    {
+        await refreshTokenService.RevokeAsync(
+            refreshToken, context.Connection.RemoteIpAddress?.ToString(),
+            "Logout", cancellationToken);
+    }
+
+    context.Response.Cookies.Delete(refreshCookieName, BuildRefreshCookieOptions(
+        context, DateTime.UtcNow.AddDays(-1)));
+    return Results.NoContent();
+})
+.AllowAnonymous()
+.WithName("Logout")
+.WithTags("Authentication");
+
 app.MapGet("/api/v1/auth/me", (System.Security.Claims.ClaimsPrincipal principal) =>
 {
     return Results.Ok(new
@@ -141,12 +239,10 @@ app.MapGet("/api/v1/auth/me", (System.Security.Claims.ClaimsPrincipal principal)
 .WithName("GetCurrentIdentity")
 .WithTags("Authentication");
 
-// Version
 app.MapGet("/api/v1/version", () => Results.Ok(new
 {
     application = "HRMS.API",
-    version = Assembly.GetExecutingAssembly()
-        .GetName().Version?.ToString() ?? "unknown",
+    version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown",
     environment = app.Environment.EnvironmentName
 }))
 .WithName("GetApplicationVersion")

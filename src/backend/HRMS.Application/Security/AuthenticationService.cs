@@ -2,18 +2,19 @@ using HRMS.Application.Abstractions.Security;
 
 namespace HRMS.Application.Security;
 
-/// <summary>Validates credentials and issues access tokens only for active tenant memberships.</summary>
+/// <summary>Validates credentials and creates a refresh-backed session for active tenant memberships.</summary>
 public sealed class AuthenticationService(
     IUserIdentityRepository identityRepository,
     IPasswordHasher passwordHasher,
-    IAccessTokenGenerator accessTokenGenerator,
+    IRefreshTokenService refreshTokenService,
     TimeProvider timeProvider) : IAuthenticationService
 {
     private const int MaxFailedAttempts = 5;
     private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
 
-    public async Task<LoginResult?> LoginAsync(
+    public async Task<LoginSessionResult?> LoginAsync(
         LoginRequest request,
+        string? ipAddress = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -29,9 +30,7 @@ public sealed class AuthenticationService(
         var normalizedTenantCode = request.TenantCode.Trim().ToUpperInvariant();
 
         var user = await identityRepository.FindForLoginAsync(
-            normalizedEmail,
-            normalizedTenantCode,
-            cancellationToken);
+            normalizedEmail, normalizedTenantCode, cancellationToken);
 
         if (user is null || !user.IsEnabled)
         {
@@ -44,44 +43,38 @@ public sealed class AuthenticationService(
             return null;
         }
 
-        var verification = passwordHasher.VerifyHashedPassword(
-            user.PasswordHash,
-            request.Password);
-
+        var verification = passwordHasher.VerifyHashedPassword(user.PasswordHash, request.Password);
         if (verification == PasswordVerificationOutcome.Failed)
         {
             await identityRepository.RecordFailedLoginAsync(
-                user.UserId,
-                MaxFailedAttempts,
-                LockoutDuration,
-                cancellationToken);
-
+                user.UserId, MaxFailedAttempts, LockoutDuration, cancellationToken);
             return null;
         }
 
         if (verification == PasswordVerificationOutcome.SuccessRehashNeeded)
         {
             var upgradedHash = passwordHasher.HashPassword(request.Password);
-            await identityRepository.UpdatePasswordHashAsync(
-                user.UserId,
-                upgradedHash,
-                cancellationToken);
+            await identityRepository.UpdatePasswordHashAsync(user.UserId, upgradedHash, cancellationToken);
         }
 
-        var accessToken = accessTokenGenerator.Generate(user);
+        await identityRepository.RecordSuccessfulLoginAsync(user.UserId, cancellationToken);
 
-        await identityRepository.RecordSuccessfulLoginAsync(
-            user.UserId,
-            cancellationToken);
+        var session = await refreshTokenService.CreateSessionAsync(user, ipAddress, cancellationToken);
+        if (session is null)
+        {
+            return null;
+        }
 
-        return new LoginResult(
-            accessToken.Value,
+        var login = new LoginResult(
+            session.AccessToken.Value,
             "Bearer",
-            accessToken.ExpiresAtUtc,
+            session.AccessToken.ExpiresAtUtc,
             user.UserId,
             user.DisplayName,
             user.TenantId,
             user.TenantCode,
             user.TenantName);
+
+        return new LoginSessionResult(login, session.RefreshToken, session.RefreshTokenExpiresAtUtc);
     }
 }
