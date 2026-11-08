@@ -8,7 +8,7 @@ import { EmployeeApiService } from '../../core/company/employee-api.service';
 
 const trimmedEmailValidator = (control: AbstractControl): ValidationErrors | null => {
   const value = String(control.value ?? '').trim();
-  return value && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value) ? { email: true } : null;
+  return value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? { email: true } : null;
 };
 
 @Component({
