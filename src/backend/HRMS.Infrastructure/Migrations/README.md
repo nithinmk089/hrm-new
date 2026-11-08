@@ -33,6 +33,7 @@ Use a zero-padded, increasing numeric prefix followed by a short description:
 - `024_LeaveRequestHistoryAndCancellation.sql`
 - `025_TimesheetManagementFoundation.sql`
 - `026_TimesheetPermissions.sql`
+- `027_TimesheetStoredProcedures.sql`
 
 Once a migration has been applied to any shared environment, do not edit or
 delete it. Add a new migration to change the schema.
