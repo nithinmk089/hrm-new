@@ -35,6 +35,10 @@ IF COL_LENGTH(N'security.RefreshTokens', N'MembershipId') IS NULL
 IF COL_LENGTH(N'security.RefreshTokens', N'TokenFamilyId') IS NULL
     ALTER TABLE security.RefreshTokens ADD TokenFamilyId uniqueidentifier NULL;
 
+-- SQL Server compiles each batch before executing it. Separate the ALTER
+-- statements from the next batch so the newly added columns are visible.
+GO
+
 -- Every refresh token must map to exactly one membership (enforced by
 -- UQ_UserTenantMemberships_Tenant_User from migration 005).
 UPDATE rt
