@@ -53,7 +53,7 @@ export class DesignationsPageComponent {
     designationCode:['',[Validators.required,Validators.maxLength(30)]],
     designationName:['',[Validators.required,Validators.maxLength(150)]],
     description:['',[Validators.maxLength(500)]],
-    jobLevel:[null as number|null,[Validators.min(1),Validators.max(32767),Validators.pattern(/^\\d+$/)]]
+    jobLevel:[null as number|null,[Validators.min(1),Validators.max(32767),Validators.pattern(/^\d+$/)]]
   });
   constructor(){this.api.getCompanies().pipe(finalize(()=>this.companiesLoading.set(false))).subscribe({next:items=>{const active=items.filter(x=>x.isActive);this.companies.set(active);if(active.length===1){this.selectedCompanyId.set(active[0].companyId);this.loadDesignations();}},error:e=>this.error.set(this.message(e,'Unable to load companies.'))});}
   onCompanyChange(event:Event):void{const id=(event.target as HTMLSelectElement).value;this.selectedCompanyId.set(id);this.designations.set([]);this.notice.set('');this.error.set('');if(id)this.loadDesignations();}
