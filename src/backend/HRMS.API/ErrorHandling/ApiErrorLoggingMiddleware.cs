@@ -38,7 +38,7 @@ public sealed class ApiErrorLoggingMiddleware(
             Limit(context.Request.Path.Value ?? "/", 2048),
             statusCode,
             Limit(exception?.GetType().FullName ?? "HttpFailure", 500),
-            exception?.Message,
+            exception?.Message ?? ((System.Net.HttpStatusCode)statusCode).ToString(),
             exception?.StackTrace);
 
         try
