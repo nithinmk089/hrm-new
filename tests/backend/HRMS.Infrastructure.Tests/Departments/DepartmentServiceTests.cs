@@ -155,6 +155,11 @@ public sealed class DepartmentServiceTests
             byte[] rowVersion, CancellationToken cancellationToken) =>
             Task.FromResult(true);
 
+        public Task<bool> ActivateAsync(
+            Guid tenantId, Guid companyId, Guid departmentId,
+            byte[] rowVersion, CancellationToken cancellationToken) =>
+            Task.FromResult(true);
+
         private static DepartmentDto CreateDto(
             Guid id, Guid companyId, string code, string name) =>
             new(id, companyId, code, name, null, null, true,

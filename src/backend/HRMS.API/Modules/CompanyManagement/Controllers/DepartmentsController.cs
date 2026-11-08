@@ -84,4 +84,20 @@ public sealed class DepartmentsController(IDepartmentService departmentService) 
             tenantId.Value, companyId, departmentId, request.RowVersion, cancellationToken);
         return deactivated ? NoContent() : Conflict();
     }
+    [HttpPatch("{departmentId:guid}/activate")]
+    [Authorize(Policy = "Permission:departments.update")]
+    public async Task<IActionResult> Activate(
+        Guid companyId,
+        Guid departmentId,
+        [FromBody] DeactivateDepartmentRequest request,
+        CancellationToken cancellationToken)
+    {
+        var tenantId = User.ReadTenantId();
+        if (tenantId is null) return Forbid();
+
+        var activated = await departmentService.ActivateAsync(
+            tenantId.Value, companyId, departmentId, request.RowVersion, cancellationToken);
+        return activated ? NoContent() : Conflict();
+    }
+
 }

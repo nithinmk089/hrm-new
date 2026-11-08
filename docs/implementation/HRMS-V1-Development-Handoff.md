@@ -322,3 +322,78 @@ The user confirmed the latest Angular build and test suite both succeeded after 
 UI-03 is complete and ready for PR integration. No dashboard summary endpoint was present in the inspected backend controllers. Existing module endpoints are permission-scoped and some require company/employee IDs; the dashboard deliberately does not guess these identifiers or query endpoints with fabricated context. Real metrics remain deferred pending a tenant-scoped, permission-safe dashboard API contract.
 
 Next phase: UI-04 — Departments, Offices, and Designations on `feature/ui-04-organization-masters`. Existing backend controllers are present under `src/backend/HRMS.API/Modules/CompanyManagement/Controllers/`; inspect their request/response contracts and permission policies before wiring frontend CRUD.
+
+
+### UI-03 integration completed (2026-11-08)
+
+- Pull request [#6](https://github.com/nithinmk089/hrm-new/pull/6), **feat(frontend): deliver authenticated HRMS dashboard**, was merged into `main`.
+- Merge commit: `816f9c1942e9ddc326f23fcb5ceee035adfbe0c5`.
+- The user confirmed the Angular build and tests passed after the final dashboard layout fix and supplied screenshots verifying the rendered dashboard.
+- The next branch, `feature/ui-04-organization-masters`, was created directly from the exact UI-03 merge commit above.
+
+## 12. Current implementation checkpoint — UI-04 Organization Masters
+
+Active branch: `feature/ui-04-organization-masters`.
+
+Scope for this phase:
+- Departments
+- Offices
+- Designations
+
+Existing API controllers:
+- `src/backend/HRMS.API/Modules/CompanyManagement/Controllers/DepartmentsController.cs`
+- `src/backend/HRMS.API/Modules/CompanyManagement/Controllers/OfficesController.cs`
+- `src/backend/HRMS.API/Modules/CompanyManagement/Controllers/DesignationsController.cs`
+
+Before implementing UI/API integration, inspect the complete controller request/response DTOs, Application services, validation, list filtering/pagination behavior, permission policy names, and SQL persistence contracts. Preserve tenant scoping and rowversion/deactivation semantics. Never assume the current tenant is a company ID; inspect the company selection/membership relationship and how the authenticated user is authorized for a company. Implement one vertical slice at a time, beginning with Departments, then Offices, then Designations. Update this handoff as each slice is verified.
+
+Local checkout:
+```powershell
+git switch main
+git pull --ff-only origin main
+git switch -c feature/ui-04-organization-masters origin/feature/ui-04-organization-masters
+```
+
+
+### UI-04A — Departments implementation checkpoint (2026-11-08)
+
+Status: **First frontend vertical slice committed; local build/test and API verification pending.**
+
+Backend contract inspected:
+- Company list: `GET /api/v1/companies`, returns tenant-scoped CompanyDto values with `companyId`, `companyCode`, `displayName`, and `isActive`.
+- Department list/detail/create/update/deactivate are under `/api/v1/companies/{companyId}/departments`.
+- Policies: `departments.read`, `departments.create`, `departments.update`, `departments.deactivate`.
+- Department create request: `departmentCode`, `departmentName`, `description`, `parentDepartmentId`.
+- Department update request: `departmentName`, `description`, `parentDepartmentId`, `rowVersion`.
+- Department DTO includes company ID, parent department ID, active flag, timestamps, and rowversion.
+- Department code is immutable during update; code is normalized uppercase by the application service. Parent must be an active department in the same company; self-parenting is rejected.
+- Deactivation requires the current 8-byte rowversion and returns conflict when concurrency/deactivation cannot be completed.
+
+Implemented:
+- `core/company/company.models.ts` — typed company and department contracts.
+- `core/company/company-api.service.ts` — company list and department CRUD/deactivation HTTP methods.
+- `features/company/departments-page.component.ts` — company selection, department list, active/inactive status, create/edit dialog, optional parent selection, deactivation confirmation, loading/empty/error states, and rowversion-based updates.
+- `app.routes.ts` — dedicated lazy-loaded `/company/departments` route ahead of generic company placeholder route.
+
+Company context:
+- The authenticated session exposes Tenant ID but not Company ID. The UI therefore loads companies using the tenant-scoped companies endpoint and uses the selected returned Company ID for department calls. It never substitutes Tenant ID for Company ID.
+- If exactly one active company is returned, it is selected automatically. With multiple companies, the user must select one. Only active companies are offered for maintenance.
+
+Pending:
+1. User pulls the branch and runs Angular build/tests.
+2. Verify the Departments page loads companies and departments against the local API; verify create, edit, parent selection, and deactivate using an authorized account.
+3. Resolve any compile/runtime/API contract issues before implementing Offices.
+4. Continue with Offices and Designations only after Departments is locally verified.
+
+
+### Department reactivation enhancement (2026-11-08)
+
+- Added `PATCH /api/v1/companies/{companyId}/departments/{departmentId}/activate`.
+- Reactivation requires the existing `departments.update` permission; this avoids introducing a new permission that would need role-grant/seed changes. It remains tenant/company scoped through the existing authorization handler and authenticated tenant claim.
+- Request body reuses `DeactivateDepartmentRequest` with the current 8-byte `rowVersion`.
+- Added `IDepartmentService.ActivateAsync`, repository contract/implementation and SQL procedure `hrms.usp_Departments_Activate`.
+- Added migration `028_DepartmentActivation.sql`; existing migrations remain immutable.
+- Department list now displays an Activate action for inactive records and calls the API with the latest rowversion. Activation refreshes the list and displays the success modal.
+- Updated DepartmentService test fake for the new repository contract.
+- Local backend build, migration, and frontend build/tests remain to be run by the user. Run migration 028 before testing the activation API.
+
