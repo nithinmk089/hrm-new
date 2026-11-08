@@ -2,7 +2,7 @@ namespace HRMS.Application.LeaveRequests;
 
 public sealed class LeaveRequestService(ILeaveRequestRepository repository) : ILeaveRequestService
 {
-    public Task<LeaveRequestSubmissionResult> SubmitAsync(
+    public async Task<LeaveRequestSubmissionResult> SubmitAsync(
         Guid tenantId, Guid companyId, Guid actorUserId,
         SubmitLeaveRequest request, CancellationToken cancellationToken = default)
     {
@@ -32,7 +32,33 @@ public sealed class LeaveRequestService(ILeaveRequestRepository repository) : IL
             throw new ArgumentException("Reason cannot exceed 1000 characters.", nameof(request));
 
         var normalized = request with { HalfDayPeriod = halfDayPeriod, Reason = reason };
-        return repository.SubmitAsync(tenantId, companyId, actorUserId, normalized, cancellationToken);
+        var context = await repository.GetCalculationContextAsync(
+            tenantId, companyId, actorUserId, normalized.LeaveTypeId,
+            normalized.FromDate, normalized.ToDate, cancellationToken);
+
+        var calculation = LeaveDayCalculator.Calculate(new LeaveDayCalculationRequest(
+            normalized.FromDate,
+            normalized.ToDate,
+            normalized.IsHalfDay,
+            context.AllowHalfDay,
+            context.CompanyWorkingWeek,
+            context.OfficeWorkingWeeks,
+            context.OfficeAssignments,
+            context.Holidays));
+
+        if (calculation.ChargeableDays <= 0)
+            throw new ArgumentException("The selected date range contains no chargeable working days.", nameof(request));
+
+        var allocations = calculation.ChargeableDates
+            .GroupBy(date => date.Year)
+            .OrderBy(group => group.Key)
+            .Select(group => new LeaveYearReservationDto(checked((short)group.Key),
+                normalized.IsHalfDay ? 0.5m : group.Count()))
+            .ToArray();
+
+        return await repository.SubmitCalculatedAsync(
+            tenantId, companyId, actorUserId, normalized, calculation.ChargeableDays,
+            allocations, calculation.ExcludedDates, cancellationToken);
     }
 
     private static void EnsureId(Guid id, string name)
