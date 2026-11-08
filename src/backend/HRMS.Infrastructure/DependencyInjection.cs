@@ -25,6 +25,8 @@ public static class DependencyInjection
         services.AddScoped<IUserIdentityRepository, UserIdentityRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+        services.AddScoped<IPermissionAuthorizationRepository, PermissionAuthorizationRepository>();
+        services.AddScoped<IPermissionAuthorizationService, PermissionAuthorizationService>();
         services.AddSingleton(new RefreshTokenSettings
         {
             LifetimeDays = configuration.GetValue<int?>(
