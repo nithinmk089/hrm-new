@@ -16,48 +16,43 @@ public sealed class ApiErrorLoggingMiddleware(
         HttpContext context,
         IApiErrorLogRepository repository)
     {
+        await next(context);
+
+        var statusCode = context.Response.StatusCode;
+        if (statusCode < StatusCodes.Status400BadRequest ||
+            statusCode is StatusCodes.Status401Unauthorized or StatusCodes.Status404NotFound)
+        {
+            return;
+        }
+
+        var exception = context.Items.TryGetValue(
+            GlobalExceptionHandler.ExceptionItemKey, out var value)
+            ? value as Exception
+            : null;
+
+        var entry = new ApiErrorLogEntry(
+            ParseGuid(context.User.FindFirst("tenant_id")?.Value),
+            ParseGuid(context.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value),
+            context.TraceIdentifier,
+            Limit(context.Request.Method, 10),
+            Limit(context.Request.Path.Value ?? "/", 2048),
+            statusCode,
+            Limit(exception?.GetType().FullName ?? "HttpFailure", 500),
+            exception?.Message,
+            exception?.StackTrace);
+
         try
         {
-            await next(context);
+            // Do not use RequestAborted: the client may disconnect after the
+            // server has already produced the failure response.
+            await repository.InsertAsync(entry, CancellationToken.None);
         }
-        finally
+        catch (Exception loggingException)
         {
-            var statusCode = context.Response.StatusCode;
-            if (statusCode < StatusCodes.Status400BadRequest ||
-                statusCode is StatusCodes.Status401Unauthorized or StatusCodes.Status404NotFound)
-            {
-                return;
-            }
-
-            var exception = context.Items.TryGetValue(
-                GlobalExceptionHandler.ExceptionItemKey, out var value)
-                ? value as Exception
-                : null;
-
-            var entry = new ApiErrorLogEntry(
-                ParseGuid(context.User.FindFirst("tenant_id")?.Value),
-                ParseGuid(context.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value),
-                context.TraceIdentifier,
-                Limit(context.Request.Method, 10),
-                Limit(context.Request.Path.Value ?? "/", 2048),
-                statusCode,
-                Limit(exception?.GetType().FullName ?? "HttpFailure", 500),
-                exception?.Message,
-                exception?.StackTrace);
-
-            try
-            {
-                // Do not use RequestAborted: the client may disconnect after the
-                // server has already produced the failure response.
-                await repository.InsertAsync(entry, CancellationToken.None);
-            }
-            catch (Exception loggingException)
-            {
-                // Error logging must never replace or hide the original API response.
-                logger.LogError(loggingException,
-                    "Failed to persist API error log for trace {TraceId}.",
-                    context.TraceIdentifier);
-            }
+            // Error logging must never replace or hide the original API response.
+            logger.LogError(loggingException,
+                "Failed to persist API error log for trace {TraceId}.",
+                context.TraceIdentifier);
         }
     }
 
