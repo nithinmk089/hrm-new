@@ -95,7 +95,7 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
-    IF @ToDate < @FromDate OR @DaysRequested <= 0
+    IF @ToDate < @FromDate OR @DaysRequested <= 0 OR NULLIF(LTRIM(RTRIM(@Reason)), N'') IS NULL
         THROW 51280, 'The leave date range or calculated leave days are invalid.', 1;
 
     IF ISJSON(@YearDaysJson) <> 1
@@ -152,7 +152,7 @@ BEGIN
         IF @RequiresApproval IS NULL
             THROW 51284, 'The leave type does not exist, is inactive, or is outside the authenticated company.', 1;
 
-        IF @IsHalfDay = 1 AND (@FromDate <> @ToDate OR @HalfDayPeriod NOT IN ('AM','PM'))
+        IF @IsHalfDay = 1 AND (@FromDate <> @ToDate OR @HalfDayPeriod IS NULL OR @HalfDayPeriod NOT IN ('AM','PM'))
             THROW 51285, 'A half-day request must cover one date and specify AM or PM.', 1;
 
         IF @IsHalfDay = 0 AND @HalfDayPeriod IS NOT NULL
@@ -204,7 +204,7 @@ BEGIN
             THROW 51288, 'One or more annual leave balances are missing or have insufficient available days.', 1;
 
         DECLARE @Status varchar(20) = CASE WHEN @RequiresApproval = 1 THEN 'Pending' ELSE 'Approved' END;
-        DECLARE @LeaveRequestId uniqueidentifier = NEWSEQUENTIALID();
+        DECLARE @LeaveRequestId uniqueidentifier = NEWID();
 
         INSERT INTO hrms.LeaveRequests
         (
