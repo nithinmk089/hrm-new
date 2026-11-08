@@ -102,11 +102,15 @@ BEGIN
     SELECT history.TimesheetId, history.[Action], history.ActorEmployeeId,
            history.Comments, history.ActionAtUtc
     FROM hrms.TimesheetHistory history
-    INNER JOIN hrms.Timesheets timesheet
-        ON timesheet.TenantId = history.TenantId AND timesheet.CompanyId = history.CompanyId
-       AND timesheet.TimesheetId = history.TimesheetId
+    INNER JOIN
+    (
+        SELECT TOP (100) TimesheetId
+        FROM hrms.Timesheets
+        WHERE TenantId = @TenantId AND CompanyId = @CompanyId
+          AND EmployeeId = @EmployeeId AND DeletedAtUtc IS NULL
+        ORDER BY WeekStartDate DESC
+    ) recent ON recent.TimesheetId = history.TimesheetId
     WHERE history.TenantId = @TenantId AND history.CompanyId = @CompanyId
-      AND timesheet.EmployeeId = @EmployeeId AND timesheet.DeletedAtUtc IS NULL
     ORDER BY history.ActionAtUtc DESC, history.TimesheetHistoryId DESC;
 END;
 GO
