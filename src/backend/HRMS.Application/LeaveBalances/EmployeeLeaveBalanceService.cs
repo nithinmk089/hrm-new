@@ -2,9 +2,6 @@ namespace HRMS.Application.LeaveBalances;
 
 public sealed class EmployeeLeaveBalanceService(IEmployeeLeaveBalanceRepository repository) : IEmployeeLeaveBalanceService
 {
-    private static readonly HashSet<string> SupportedTypes = new(StringComparer.OrdinalIgnoreCase)
-        { "Opening", "Accrual", "CarryForward", "Adjustment" };
-
     public Task<IReadOnlyList<EmployeeLeaveBalanceDto>> GetAllAsync(
         Guid tenantId, Guid companyId, Guid employeeId, short leaveYear, CancellationToken cancellationToken = default)
     {
@@ -22,7 +19,8 @@ public sealed class EmployeeLeaveBalanceService(IEmployeeLeaveBalanceRepository 
         ArgumentNullException.ThrowIfNull(request);
         EnsureId(request.LeaveTypeId, nameof(request.LeaveTypeId));
         EnsureYear(request.LeaveYear);
-        if (!SupportedTypes.Contains(request.TransactionType?.Trim() ?? string.Empty))
+        var requestedType = request.TransactionType?.Trim();
+        if (string.IsNullOrWhiteSpace(requestedType))
             throw new ArgumentException("TransactionType must be Opening, Accrual, CarryForward or Adjustment.", nameof(request.TransactionType));
         if (request.DaysDelta == 0 || request.DaysDelta is < -366 or > 366)
             throw new ArgumentException("DaysDelta must be non-zero and within -366 to 366.", nameof(request.DaysDelta));
@@ -30,7 +28,7 @@ public sealed class EmployeeLeaveBalanceService(IEmployeeLeaveBalanceRepository 
         if (notes?.Length > 500)
             throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(request.Notes));
 
-        var transactionType = request.TransactionType.Trim().ToLowerInvariant() switch
+        var transactionType = requestedType.ToLowerInvariant() switch
         {
             "opening" => "Opening",
             "accrual" => "Accrual",
