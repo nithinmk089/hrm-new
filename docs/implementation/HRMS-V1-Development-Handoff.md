@@ -384,3 +384,16 @@ Pending:
 2. Verify the Departments page loads companies and departments against the local API; verify create, edit, parent selection, and deactivate using an authorized account.
 3. Resolve any compile/runtime/API contract issues before implementing Offices.
 4. Continue with Offices and Designations only after Departments is locally verified.
+
+
+### Department reactivation enhancement (2026-11-08)
+
+- Added `PATCH /api/v1/companies/{companyId}/departments/{departmentId}/activate`.
+- Reactivation requires the existing `departments.update` permission; this avoids introducing a new permission that would need role-grant/seed changes. It remains tenant/company scoped through the existing authorization handler and authenticated tenant claim.
+- Request body reuses `DeactivateDepartmentRequest` with the current 8-byte `rowVersion`.
+- Added `IDepartmentService.ActivateAsync`, repository contract/implementation and SQL procedure `hrms.usp_Departments_Activate`.
+- Added migration `028_DepartmentActivation.sql`; existing migrations remain immutable.
+- Department list now displays an Activate action for inactive records and calls the API with the latest rowversion. Activation refreshes the list and displays the success modal.
+- Updated DepartmentService test fake for the new repository contract.
+- Local backend build, migration, and frontend build/tests remain to be run by the user. Run migration 028 before testing the activation API.
+
