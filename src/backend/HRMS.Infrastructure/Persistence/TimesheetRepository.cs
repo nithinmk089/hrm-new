@@ -16,10 +16,10 @@ internal sealed class TimesheetRepository(IDbConnectionFactory connectionFactory
         CancellationToken cancellationToken)
     {
         await using var connection = connectionFactory.CreateConnection();
-        using var grid = await connection.QueryMultipleAsync(new CommandDefinition(
+        using var grid = await ExecuteAsync(() => connection.QueryMultipleAsync(new CommandDefinition(
             "hrms.usp_Timesheets_GetMine",
             new { TenantId = tenantId, CompanyId = companyId, ActorUserId = actorUserId, WeekStartDate = weekStartDate },
-            commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
+            commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken)));
 
         var header = await grid.ReadSingleOrDefaultAsync<TimesheetHeaderRow>();
         var entries = (await grid.ReadAsync<TimesheetEntryDto>()).AsList();
@@ -35,10 +35,10 @@ internal sealed class TimesheetRepository(IDbConnectionFactory connectionFactory
         Guid tenantId, Guid companyId, Guid actorUserId, CancellationToken cancellationToken)
     {
         await using var connection = connectionFactory.CreateConnection();
-        using var grid = await connection.QueryMultipleAsync(new CommandDefinition(
+        using var grid = await ExecuteAsync(() => connection.QueryMultipleAsync(new CommandDefinition(
             "hrms.usp_Timesheets_GetMineHistory",
             new { TenantId = tenantId, CompanyId = companyId, ActorUserId = actorUserId },
-            commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
+            commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken)));
         var timesheets = (await grid.ReadAsync<TimesheetSummaryDto>()).AsList();
         var history = (await grid.ReadAsync<TimesheetHistoryItem>()).AsList();
         return new TimesheetHistoryResponse(timesheets, history);
@@ -91,10 +91,10 @@ internal sealed class TimesheetRepository(IDbConnectionFactory connectionFactory
         CancellationToken cancellationToken)
     {
         await using var connection = connectionFactory.CreateConnection();
-        using var grid = await connection.QueryMultipleAsync(new CommandDefinition(
+        using var grid = await ExecuteAsync(() => connection.QueryMultipleAsync(new CommandDefinition(
             "hrms.usp_Timesheets_GetForApproval",
             new { TenantId = tenantId, CompanyId = companyId, ActorUserId = actorUserId, TimesheetId = timesheetId },
-            commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
+            commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken)));
 
         var header = await grid.ReadSingleOrDefaultAsync<TimesheetApprovalHeaderRow>();
         var entries = (await grid.ReadAsync<TimesheetEntryDto>()).AsList();
