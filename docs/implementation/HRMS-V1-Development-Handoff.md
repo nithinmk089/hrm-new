@@ -165,3 +165,9 @@ Status: **In progress — initial Angular workspace and responsive shell committ
 2. From `src/frontend/hrms-web`, run `npm install`, `npm run build`, and `npm test`; resolve any Angular CLI/compiler/test-runner issues.
 3. Review responsive behavior at desktop/tablet/mobile widths and keyboard navigation/focus visibility.
 4. Update this handoff with actual build/test results, then open a PR into `main`. Do not start UI-02 until UI-01 exit criteria are met.
+
+
+UI-01 repository checkpoint:
+- Latest feature branch commit at this checkpoint: `6c0b8a5be6068a0a59cdcaa4135680fd6952ad52`.
+- Angular CLI development build is configured to replace the production environment with the local API URL. The API URL is centralized through the `API_BASE_URL` injection token.
+- Added a Vitest smoke test for the application shell. It has been committed but has **not yet been executed**.
