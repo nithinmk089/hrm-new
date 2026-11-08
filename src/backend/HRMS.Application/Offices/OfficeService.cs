@@ -27,7 +27,6 @@ public sealed class OfficeService(IOfficeRepository repository) : IOfficeService
 
         var code = Required(request.OfficeCode, nameof(request.OfficeCode), 30).ToUpperInvariant();
         var name = Required(request.OfficeName, nameof(request.OfficeName), 150);
-        var countryCode = CountryCode(request.CountryCode);
         var normalized = new CreateOfficeRequest(
             code,
             name,
@@ -36,7 +35,7 @@ public sealed class OfficeService(IOfficeRepository repository) : IOfficeService
             Optional(request.City, 100, nameof(request.City)),
             Optional(request.StateOrProvince, 100, nameof(request.StateOrProvince)),
             Optional(request.PostalCode, 20, nameof(request.PostalCode)),
-            countryCode,
+            CountryCode(request.CountryCode),
             Optional(request.TimeZoneId, 100, nameof(request.TimeZoneId)),
             request.IsHeadOffice);
 
@@ -57,6 +56,11 @@ public sealed class OfficeService(IOfficeRepository repository) : IOfficeService
         if (request.RowVersion is not { Length: 8 })
             throw new ArgumentException("A valid 8-byte RowVersion is required.", nameof(request.RowVersion));
 
+        var existing = await repository.GetByIdAsync(
+            tenantId, companyId, officeId, cancellationToken);
+        if (existing is null)
+            return null;
+
         var normalized = new UpdateOfficeRequest(
             Required(request.OfficeName, nameof(request.OfficeName), 150),
             Optional(request.AddressLine1, 200, nameof(request.AddressLine1)),
@@ -74,7 +78,7 @@ public sealed class OfficeService(IOfficeRepository repository) : IOfficeService
 
         if (updated is null)
             throw new InvalidOperationException(
-                "The office was changed by another user or no longer exists. Reload the office and retry your update.");
+                "The office was changed by another user. Reload the office and retry your update.");
 
         return updated;
     }
@@ -104,7 +108,7 @@ public sealed class OfficeService(IOfficeRepository repository) : IOfficeService
 
     private static string CountryCode(string? value)
     {
-        var normalized = Required(value, nameof(CreateOfficeRequest.CountryCode), 2).ToUpperInvariant();
+        var normalized = Required(value, "CountryCode", 2).ToUpperInvariant();
         if (normalized.Length != 2 || normalized.Any(character => character is < 'A' or > 'Z'))
             throw new ArgumentException("CountryCode must be a valid two-letter ISO country code.", nameof(value));
         return normalized;
