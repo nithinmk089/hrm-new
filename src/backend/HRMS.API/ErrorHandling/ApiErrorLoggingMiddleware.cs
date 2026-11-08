@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using HRMS.Application.Abstractions.Persistence;
+using Microsoft.Extensions.Hosting;
 
 namespace HRMS.API.ErrorHandling;
 
@@ -14,7 +15,8 @@ public sealed class ApiErrorLoggingMiddleware(
 {
     public async Task InvokeAsync(
         HttpContext context,
-        IApiErrorLogRepository repository)
+        IApiErrorLogRepository repository,
+        IHostEnvironment hostEnvironment)
     {
         await next(context);
 
@@ -33,13 +35,15 @@ public sealed class ApiErrorLoggingMiddleware(
         var entry = new ApiErrorLogEntry(
             ParseGuid(context.User.FindFirst("tenant_id")?.Value),
             ParseGuid(context.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value),
-            context.TraceIdentifier,
+            Limit(context.TraceIdentifier, 100),
             Limit(context.Request.Method, 10),
-            Limit(context.Request.Path.Value ?? "/", 2048),
+            Limit(context.Request.Path.Value ?? "/", 500),
             statusCode,
-            Limit(exception?.GetType().FullName ?? "HttpFailure", 500),
-            exception?.Message ?? ((System.Net.HttpStatusCode)statusCode).ToString(),
-            exception?.StackTrace);
+            Limit(exception?.GetType().FullName ?? "HttpFailure", 100),
+            Limit(exception?.Message ?? ((System.Net.HttpStatusCode)statusCode).ToString(), 2000),
+            exception?.ToString(),
+            Limit(hostEnvironment.ApplicationName, 100),
+            Limit(hostEnvironment.EnvironmentName, 50));
 
         try
         {
