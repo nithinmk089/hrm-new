@@ -28,7 +28,7 @@ HRMS.API/
 │   │       └── EmployeeUserMappingsController.cs
 │   ├── LeaveManagement/
 │   │   └── Controllers/
-│   │       ├── EmployeeLeaveBalancesController.cs\n│   │       └── LeaveRequestsController.cs
+│   │       ├── EmployeeLeaveBalancesController.cs\n│   │       └── LeaveApprovalsController, LeaveRequestsController.cs
 │   ├── TimesheetManagement/
 │   │   └── Controllers/
 │   ├── Platform/
