@@ -87,6 +87,15 @@ public sealed class DepartmentService(IDepartmentRepository repository) : IDepar
         return repository.DeactivateAsync(tenantId, companyId, departmentId, rowVersion, cancellationToken);
     }
 
+    public Task<bool> ActivateAsync(Guid tenantId, Guid companyId, Guid departmentId, byte[] rowVersion, CancellationToken cancellationToken = default)
+    {
+        EnsureScope(tenantId, companyId);
+        EnsureId(departmentId, nameof(departmentId));
+        if (rowVersion is not { Length: 8 })
+            throw new ArgumentException("A valid 8-byte RowVersion is required.", nameof(rowVersion));
+        return repository.ActivateAsync(tenantId, companyId, departmentId, rowVersion, cancellationToken);
+    }
+
     private async Task EnsureParentAsync(
         Guid tenantId, Guid companyId, Guid? parentDepartmentId, CancellationToken cancellationToken)
     {
