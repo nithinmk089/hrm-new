@@ -1,6 +1,7 @@
 using HRMS.Application.Abstractions.Persistence;
 using HRMS.Application.Abstractions.Security;
 using HRMS.Application.Companies;
+using HRMS.Application.Security;
 using HRMS.Infrastructure.Persistence;
 using HRMS.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +22,10 @@ public static class DependencyInjection
         services.AddSingleton<IDatabaseMigrator, SqlDatabaseMigrator>();
         services.AddSingleton<IPasswordHasher, AspNetCorePasswordHasher>();
         services.AddScoped<IUserIdentityRepository, UserIdentityRepository>();
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddSingleton<TimeProvider>(TimeProvider.System);
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.AddSingleton<IAccessTokenGenerator, JwtAccessTokenGenerator>();
 
         services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<ICompanyService, CompanyService>();

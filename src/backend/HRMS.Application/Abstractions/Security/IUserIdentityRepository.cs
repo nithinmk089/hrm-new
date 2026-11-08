@@ -17,4 +17,9 @@ public interface IUserIdentityRepository
     Task RecordSuccessfulLoginAsync(
         Guid userId,
         CancellationToken cancellationToken = default);
+
+    Task UpdatePasswordHashAsync(
+        Guid userId,
+        string passwordHash,
+        CancellationToken cancellationToken = default);
 }

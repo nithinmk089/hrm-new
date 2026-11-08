@@ -7,6 +7,7 @@ namespace HRMS.Application.Abstractions.Security;
 public sealed record UserLoginRecord(
     Guid UserId,
     string DisplayName,
+    string Email,
     string PasswordHash,
     bool IsEnabled,
     int FailedAccessCount,

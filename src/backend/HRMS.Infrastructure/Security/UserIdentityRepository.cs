@@ -20,6 +20,7 @@ internal sealed class UserIdentityRepository(IDbConnectionFactory connectionFact
             SELECT
                 u.UserId,
                 u.DisplayName,
+                u.Email,
                 u.PasswordHash,
                 u.IsEnabled,
                 u.FailedAccessCount,
@@ -114,6 +115,31 @@ internal sealed class UserIdentityRepository(IDbConnectionFactory connectionFact
             new CommandDefinition(
                 sql,
                 new { UserId = userId },
+                cancellationToken: cancellationToken));
+    }
+
+    public async Task UpdatePasswordHashAsync(
+        Guid userId,
+        string passwordHash,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureValidUserId(userId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
+
+        const string sql = """
+            UPDATE security.Users
+            SET PasswordHash = @PasswordHash,
+                UpdatedAtUtc = SYSUTCDATETIME()
+            WHERE UserId = @UserId
+              AND IsEnabled = 1
+              AND IsDeleted = 0;
+            """;
+
+        await using var connection = connectionFactory.CreateConnection();
+        await connection.ExecuteAsync(
+            new CommandDefinition(
+                sql,
+                new { UserId = userId, PasswordHash = passwordHash },
                 cancellationToken: cancellationToken));
     }
 
