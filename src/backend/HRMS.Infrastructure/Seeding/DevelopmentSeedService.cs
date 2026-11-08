@@ -308,6 +308,16 @@ internal sealed class DevelopmentSeedService(
         CancellationToken cancellationToken)
     {
         const string sql = """
+            IF
+            (
+                SELECT COUNT(*)
+                FROM security.Permissions
+                WHERE IsActive = 1
+                  AND PermissionCode IN
+                      ('companies.read', 'companies.create', 'companies.update', 'companies.deactivate')
+            ) <> 4
+                THROW 51107, 'Company permission catalogue is incomplete. Apply database migration 007 before seeding development data.', 1;
+
             INSERT INTO security.RolePermissions (TenantId, RoleId, PermissionId, GrantedBy)
             SELECT @TenantId, @RoleId, p.PermissionId, @Actor
             FROM security.Permissions AS p
