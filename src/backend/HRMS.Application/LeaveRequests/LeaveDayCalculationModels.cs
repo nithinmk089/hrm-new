@@ -23,3 +23,16 @@ public sealed record LeaveDayCalculationResult(
     decimal ChargeableDays,
     IReadOnlyList<DateOnly> ChargeableDates,
     IReadOnlyList<DateOnly> ExcludedDates);
+
+/// <summary>Database-resolved context used by the leave submission use case.</summary>
+public sealed record LeaveRequestCalculationContext(
+    Guid EmployeeId,
+    Guid LeaveTypeId,
+    string LeaveTypeCode,
+    string LeaveTypeName,
+    bool RequiresApproval,
+    bool AllowHalfDay,
+    IReadOnlyList<LeaveWorkingWeekDay> CompanyWorkingWeek,
+    IReadOnlyDictionary<Guid, IReadOnlyList<LeaveWorkingWeekDay>> OfficeWorkingWeeks,
+    IReadOnlyList<LeaveOfficeAssignment> OfficeAssignments,
+    IReadOnlyList<LeaveCalendarHoliday> Holidays);
