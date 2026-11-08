@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const accessToken = inject(AuthService).accessToken();
-  const apiBaseUrl = inject(API_BASE_URL).replace(/\\/+$/, '');
+  const apiBaseUrl = inject(API_BASE_URL).replace(/\/+$/, '');
   const isApiRequest = request.url === apiBaseUrl || request.url.startsWith(`${apiBaseUrl}/`);
 
   // Never attach HRMS credentials to unrelated origins or non-API requests.
