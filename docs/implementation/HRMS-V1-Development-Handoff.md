@@ -266,3 +266,59 @@ Key UI-02 commits include:
 UI-02 does not yet include effective-permission retrieval or permission-aware menu/action visibility because the current `/auth/me` backend contract does not expose permissions and no verified effective-permissions endpoint has been integrated. Do not hardcode permissions. Treat that as a follow-up authorization slice after inspecting/adding the backend contract.
 
 Next: open and merge the UI-02 PR into `main`. Only after merge, create the next UI feature branch from the resulting latest `main` commit. The planned next phase is UI-03 Dashboard.
+
+
+### UI-02 integration completed (2026-11-08)
+
+- Pull request [#5](https://github.com/nithinmk089/hrm-new/pull/5), **feat(frontend): complete UI-02 authentication experience**, was merged into `main`.
+- Merge commit: `284acf88eddc64c186274712e43abda03d3cf519`.
+- UI-02 was locally verified by the user: Angular build and tests passed; login, invalid-credential messaging, refresh/session restoration, logout, and protected-route redirection worked against the local API.
+- The next branch, `feature/ui-03-dashboard`, was created directly from the exact UI-02 merge commit above, following the agreed branch workflow.
+
+## 10. Current implementation checkpoint — UI-03 Dashboard
+
+Active branch: `feature/ui-03-dashboard`.
+
+Start UI-03 by inspecting existing dashboard component, shell, API contracts, and available dashboard-related backend endpoints. Do not invent metrics or display fabricated business data. First identify which real APIs/data can support the initial dashboard. If no dashboard aggregation endpoint exists, implement a useful navigation-first dashboard with accurate user/workspace context and clearly labeled empty states; propose a backend endpoint only when the required source data and authorization rules are confirmed.
+
+After implementation, update this handoff, ask the user to run local build/tests, then merge UI-03 into `main` before creating another feature branch.
+
+
+## 11. UI-03 Dashboard implementation checkpoint (2026-11-08)
+
+Status: **Initial dashboard vertical slice committed; local verification pending.**
+
+Backend/API inspection found no dedicated dashboard aggregation endpoint. Existing module APIs are permission-scoped and require company IDs and, for some employee-specific resources, employee IDs. Do not call these from the dashboard using guessed IDs or derive employee identity from email. No fabricated totals or pending counts are displayed.
+
+Implemented on `feature/ui-03-dashboard`:
+- Replaced generic dashboard welcome content with authenticated user display name from the in-memory AuthService session.
+- Added current workspace name and tenant code from the authenticated login/refresh response.
+- Added current date label and module quick-access links.
+- Added a clear note explaining that employee totals, leave summaries and approval counts will be displayed only after a dedicated tenant-scoped dashboard data contract is available.
+- Updated the global application header and sidebar tenant panel to show the authenticated display name and tenant name rather than hardcoded placeholder values.
+- Added initials derived from the actual user/workspace labels for their avatars.
+
+Commits:
+- `87030653553fa181c3cb2c28ac9d9eaf23845282` — personalized dashboard workspace landing page.
+- `3a5e3520dcca3c259e6b2c5409f1e97d973ca108` — authenticated identity in the global shell.
+- `2aa6481a44e0ea711d0e753f8418e464b7658691` — this handoff checkpoint.
+
+Next:
+1. User pulls `feature/ui-03-dashboard` and runs frontend build/tests.
+2. Visually verify dashboard on desktop and mobile; confirm display name and tenant match the authenticated account.
+3. If the user wants real metrics in UI-03, first define a backend dashboard summary endpoint with tenant scoping and permission-safe aggregates; do not infer company/employee identifiers in the browser.
+4. Once verified, merge UI-03 into `main`, then create the next feature branch from the exact latest main commit.
+
+
+### UI-03 final verification (2026-11-08)
+
+The user confirmed the latest Angular build and test suite both succeeded after the dashboard layout correction. The user also supplied screenshots confirming:
+- Authenticated display name is shown in the dashboard welcome panel and application header.
+- Authenticated tenant/workspace name and tenant code are displayed in the workspace panel and sidebar.
+- Welcome panel and workspace panel are left-aligned with the intended horizontal layout.
+- Quick-access cards and the dashboard information panel render correctly.
+- No fabricated business metrics are shown.
+
+UI-03 is complete and ready for PR integration. No dashboard summary endpoint was present in the inspected backend controllers. Existing module endpoints are permission-scoped and some require company/employee IDs; the dashboard deliberately does not guess these identifiers or query endpoints with fabricated context. Real metrics remain deferred pending a tenant-scoped, permission-safe dashboard API contract.
+
+Next phase: UI-04 — Departments, Offices, and Designations on `feature/ui-04-organization-masters`. Existing backend controllers are present under `src/backend/HRMS.API/Modules/CompanyManagement/Controllers/`; inspect their request/response contracts and permission policies before wiring frontend CRUD.
