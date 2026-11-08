@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, AspNetCorePasswordHasher>();
         services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<IUserIdentityRepository, UserIdentityRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddSingleton<TimeProvider>(TimeProvider.System);
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
