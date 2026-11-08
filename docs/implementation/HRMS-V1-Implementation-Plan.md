@@ -227,4 +227,4 @@ For each UI phase:
 
 ## 7. Immediate next task
 
-Start with **UI-01 — Angular foundation and application shell**. Before creating files, inspect the repository and confirm whether `src/frontend/` already exists on the current main branch. Do not overwrite unrelated frontend work. Keep the frontend implementation in a dedicated feature branch and use the repository's current backend/API conventions.
+UI-01 (Angular foundation and application shell) has been completed and merged into `main` through PR #4. The current task is **UI-02 — Authentication and authorization experience** on `feature/ui-02-authentication`. Continue from the latest branch state and development handoff. Do not create a new feature branch until UI-02 is completed, verified, and merged into `main`.
