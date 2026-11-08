@@ -8,6 +8,7 @@ using HRMS.Application.Abstractions.Security;
 using HRMS.Application.Companies;
 using HRMS.Infrastructure;
 using HRMS.Infrastructure.Security;
+using HRMS.Infrastructure.Seeding;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -84,6 +85,37 @@ if (args.Contains("--migrate", StringComparer.OrdinalIgnoreCase))
     var appliedCount = await migrator.MigrateAsync();
     app.Logger.LogInformation(
         "Database migration command completed. {AppliedCount} migration(s) applied.", appliedCount);
+    return;
+}
+
+if (args.Contains("--seed-development", StringComparer.OrdinalIgnoreCase))
+{
+    if (!app.Environment.IsDevelopment())
+    {
+        throw new InvalidOperationException(
+            "Development seed data can only be created when ASP.NET Core is running in the Development environment.");
+    }
+
+    if (!app.Configuration.GetValue<bool>("DevelopmentSeed:Enabled"))
+    {
+        throw new InvalidOperationException(
+            "Development seed is disabled. Set DevelopmentSeed:Enabled=true in local development configuration.");
+    }
+
+    await using var seedScope = app.Services.CreateAsyncScope();
+    var seedService = seedScope.ServiceProvider.GetRequiredService<IDevelopmentSeedService>();
+    var seedResult = await seedService.SeedAsync();
+
+    app.Logger.LogInformation(
+        "Development seed completed. Tenant {TenantCode}; user {UserEmail}; company {CompanyCode}; " +
+        "administrator role {RoleId}; {PermissionCount} active permission(s) granted; user created: {UserCreated}.",
+        seedResult.TenantCode,
+        seedResult.UserEmail,
+        seedResult.CompanyCode,
+        seedResult.RoleId,
+        seedResult.GrantedPermissionCount,
+        seedResult.UserCreated);
+
     return;
 }
 
