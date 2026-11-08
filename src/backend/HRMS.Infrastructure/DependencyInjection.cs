@@ -1,6 +1,7 @@
 using HRMS.Application.Abstractions.Persistence;
 using HRMS.Application.Abstractions.Security;
 using HRMS.Application.Companies;
+using HRMS.Application.Employees;
 using HRMS.Application.Departments;
 using HRMS.Application.Offices;
 using HRMS.Application.Designations;
@@ -50,6 +51,8 @@ public static class DependencyInjection
         services.AddScoped<IDevelopmentSeedService, DevelopmentSeedService>();
 
         services.AddScoped<ICompanyRepository, CompanyRepository>();
+        services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        services.AddScoped<IEmployeeService, EmployeeService>();
         services.AddScoped<ICompanyService, CompanyService>();
 
         services.AddScoped<IApiErrorLogRepository, ApiErrorLogRepository>();
