@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { of, throwError } from 'rxjs';
 import { CompanyApiService } from '../../core/company/company-api.service';
 import { CompanySummary } from '../../core/company/company.models';
-import { Employee, EmployeeApiService } from '../../core/company/employee.models';
+import { Employee } from '../../core/company/employee.models';
+import { EmployeeApiService } from '../../core/company/employee-api.service';
 import { EmployeesPageComponent } from './employees-page.component';
 
 const company:CompanySummary={companyId:'company-1',companyCode:'DEMO',legalName:'Demo Technologies Pvt Ltd',displayName:'Demo Technologies',isActive:true};
