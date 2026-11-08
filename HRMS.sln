@@ -25,18 +25,18 @@ Global
         {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
         {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F02}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F02}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F02}.Release|Any CPU.Build.0 = Any CPU
+        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F02}.Release|Any CPU.Build.0 = Release|Any CPU
         {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F03}.Debug|Any CPU.Build.0 = Any CPU
+        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F03}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F03}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F03}.Release|Any CPU.Build.0 = Any CPU
+        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F03}.Release|Any CPU.Build.0 = Release|Any CPU
         {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F04}.Debug|Any CPU.Build.0 = Any CPU
+        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F04}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F04}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F04}.Release|Any CPU.Build.0 = Any CPU
+        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F04}.Release|Any CPU.Build.0 = Release|Any CPU
         {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F05}.Debug|Any CPU.Build.0 = Any CPU
+        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F05}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F05}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F05}.Release|Any CPU.Build.0 = Any CPU
+        {D2E7CDE7-7D5D-4C3D-9C9C-8B4C70E18F05}.Release|Any CPU.Build.0 = Release|Any CPU
     EndGlobalSection
 EndGlobal
