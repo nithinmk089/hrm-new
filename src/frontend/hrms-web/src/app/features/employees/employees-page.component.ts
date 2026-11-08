@@ -76,6 +76,13 @@ const trimmedEmailValidator = (control: AbstractControl): ValidationErrors | nul
         <div class="actions"><button class="btn btn-light" type="button" (click)="closeEditor()" [disabled]="saving()">Cancel</button><button class="btn btn-primary" type="submit" [disabled]="form.invalid || saving()"><span [class.spinner-border]="saving()" [class.spinner-border-sm]="saving()" class="me-2"></span>{{saving() ? 'Saving…' : 'Save employee'}}</button></div>
       </form>
     </section></div>}
+    @if(confirmationOpen()){<div class="modal-backdrop-custom confirm-layer" (click)="cancelConfirmation()"><section class="dialog card confirmation-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmSaveTitle" (click)="$event.stopPropagation()">
+      <div class="confirm-icon"><i class="bi bi-question-circle"></i></div>
+      <h2 id="confirmSaveTitle">{{editing() ? 'Confirm employee changes' : 'Confirm new employee'}}</h2>
+      <p>{{editing() ? 'Are you sure you want to save the changes to this employee profile?' : 'Are you sure you want to create this employee with the entered details?'}}</p>
+      <div class="confirm-summary"><strong>{{form.controls.firstName.value}} {{form.controls.lastName.value}}</strong><span>{{editing() ? editing()?.employeeCode : form.controls.employeeCode.value.trim().toUpperCase()}}</span></div>
+      <div class="actions"><button class="btn btn-light" type="button" (click)="cancelConfirmation()" [disabled]="saving()">Go back</button><button class="btn btn-primary" type="button" (click)="confirmSave()" [disabled]="saving()"><span [class.spinner-border]="saving()" [class.spinner-border-sm]="saving()" class="me-2"></span>{{saving() ? 'Saving…' : 'Confirm and save'}}</button></div>
+    </section></div>}
   `,
   styles: [`
     :host{display:block}.page-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1.35rem}.eyebrow{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#58739a}.page-heading h1{font-size:1.45rem;font-weight:650;color:#1d2939;margin:.35rem 0}.page-heading p{font-size:.82rem;color:#667085;margin:0}
@@ -83,6 +90,7 @@ const trimmedEmailValidator = (control: AbstractControl): ValidationErrors | nul
     .table-card{overflow:hidden}.table-toolbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.15rem;border-bottom:1px solid #eaecf0}.table-toolbar strong,.table-toolbar small{display:block}.table-toolbar strong{font-size:.82rem;color:#344054}.table-toolbar small{margin-top:.2rem;color:#98a2b3;font-size:.68rem}.toolbar-filters{display:flex;align-items:center;gap:.5rem}.search-input{width:14rem}.status-filter{width:10rem}.table{font-size:.76rem}.table thead th{padding:.75rem 1rem;background:#f9fafb;color:#667085;font-size:.65rem;font-weight:700;white-space:nowrap}.table tbody td{padding:.8rem 1rem;color:#475467}.employee-name{display:flex;flex-direction:column;align-items:flex-start;padding:0;border:0;background:none;text-align:left}.employee-name strong{color:#344054;font-size:.76rem}.employee-name small{margin-top:.15rem;color:#98a2b3;font-size:.67rem}.code-chip{padding:.25rem .45rem;border-radius:.3rem;background:#f2f4f7;color:#475467;font-size:.68rem;font-weight:650}.status{display:inline-flex;padding:.25rem .5rem;border-radius:2rem;background:#ecfdf3;color:#027a48;font-size:.66rem;font-weight:600;white-space:nowrap}.status.inactive{background:#f2f4f7;color:#667085}.status.leave{background:#fff7e6;color:#93370d}
     .empty-state,.empty-inline{display:flex;align-items:center;flex-direction:column;text-align:center;color:#667085}.empty-state{padding:3rem 1.5rem}.empty-state>i{font-size:1.8rem;color:#7890b2}.empty-state h2{margin:.8rem 0 .35rem;color:#344054;font-size:1rem}.empty-state p{max-width:34rem;margin:0;font-size:.78rem;line-height:1.6}.empty-inline{padding:2.5rem 1rem;gap:.4rem}.empty-inline i{font-size:1.5rem;color:#7890b2}.empty-inline strong{color:#344054;font-size:.82rem}.empty-inline span{font-size:.74rem}.loading-state{padding:1.5rem;text-align:center;color:#667085;font-size:.78rem}
     .modal-backdrop-custom{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:1rem;background:rgb(16 24 40 / 48%)}.editor,.dialog{width:min(100%,38rem);max-height:90vh;overflow:auto;padding:1.35rem}.dialog{width:min(100%,34rem)}.dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.2rem}.dialog-heading h2{margin:.3rem 0 0;color:#1d2939;font-size:1.15rem;font-weight:650}.form-label{color:#344054;font-size:.75rem;font-weight:600}.required{color:#d92d20}.field-error{margin-top:.3rem;color:#d92d20;font-size:.68rem}.detail-grid{display:grid;grid-template-columns:9rem 1fr;gap:.65rem;margin:0 0 1.2rem;font-size:.78rem}.detail-grid dt{color:#667085;font-weight:500}.detail-grid dd{margin:0;color:#344054;font-weight:600;overflow-wrap:anywhere}.status-editor{border-top:1px solid #eaecf0;padding-top:1rem}.actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1.2rem;padding-top:1rem;border-top:1px solid #eaecf0}
+    .confirm-layer{z-index:1210}.confirmation-dialog{width:min(100%,26rem);text-align:center}.confirm-icon{display:grid;place-items:center;width:3rem;height:3rem;margin:0 auto .8rem;border-radius:50%;background:#eef3fa;color:#315b91;font-size:1.35rem}.confirmation-dialog h2{margin:0 0 .55rem;color:#1d2939;font-size:1.1rem;font-weight:650}.confirmation-dialog p{margin:0 auto .9rem;max-width:22rem;color:#667085;font-size:.78rem;line-height:1.55}.confirm-summary{display:flex;justify-content:space-between;gap:1rem;padding:.75rem .85rem;border:1px solid #eaecf0;border-radius:.5rem;background:#f9fafb;text-align:left;font-size:.76rem}.confirm-summary strong{color:#344054}.confirm-summary span{color:#667085}.confirmation-dialog .actions{margin-top:1rem}
     @media(max-width:850px){.table-toolbar{align-items:flex-start;flex-direction:column}.toolbar-filters{width:100%;flex-wrap:wrap}.search-input{flex:1;width:auto}}@media(max-width:575.98px){.page-heading{flex-direction:column}.page-heading>.btn{width:100%}.context-count{display:none}.editor,.dialog{padding:1rem}.toolbar-filters>*{flex:1}.search-input{min-width:100%}}
   `]
 })
@@ -98,7 +106,7 @@ export class EmployeesPageComponent {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly statusSaving = signal(false);
-  readonly editorOpen = signal(false);
+  readonly editorOpen = signal(false);\n  readonly confirmationOpen = signal(false);
   readonly editing = signal<Employee | null>(null);
   readonly detailTarget = signal<Employee | null>(null);
   readonly error = signal('');
@@ -152,18 +160,24 @@ export class EmployeesPageComponent {
   showError(name: keyof typeof this.form.controls): boolean { const control=this.form.controls[name]; return control.invalid && (control.touched || control.dirty); }
   save(): void {
     if (this.form.invalid || !this.selectedCompanyId()) { this.form.markAllAsTouched(); return; }
+    this.editorError.set('');
+    this.confirmationOpen.set(true);
+  }
+  cancelConfirmation(): void { if (!this.saving()) this.confirmationOpen.set(false); }
+  confirmSave(): void {
+    if (this.form.invalid || !this.selectedCompanyId() || !this.confirmationOpen()) return;
     const value=this.form.getRawValue(); const editing=this.editing(); this.saving.set(true); this.editorError.set('');
     const optional=(input:string)=>input.trim() || null;
     if (!editing) {
       const request:CreateEmployeeRequest={employeeCode:value.employeeCode.trim().toUpperCase(),firstName:value.firstName.trim(),middleName:optional(value.middleName),lastName:value.lastName.trim(),preferredName:optional(value.preferredName),workEmail:optional(value.workEmail)?.toLowerCase() ?? null,hireDate:value.hireDate};
       this.employeeApi.createEmployee(this.selectedCompanyId(),request).pipe(finalize(()=>this.saving.set(false))).subscribe({
-        next:()=>{this.editorOpen.set(false);this.notice.set('Employee created successfully.');this.loadEmployees();},
-        error:err=>this.editorError.set(this.message(err,'Unable to create employee. Check employees.create permission and employee code uniqueness.'))
+        next:()=>{this.confirmationOpen.set(false);this.editorOpen.set(false);this.notice.set('Employee created successfully.');this.loadEmployees();},
+        error:err=>{this.confirmationOpen.set(false);this.editorError.set(this.message(err,'Unable to create employee. Check employees.create permission and employee code uniqueness.'));}
       });
     } else {
       this.employeeApi.updateEmployee(this.selectedCompanyId(),editing.employeeId,{firstName:value.firstName.trim(),middleName:optional(value.middleName),lastName:value.lastName.trim(),preferredName:optional(value.preferredName),workEmail:optional(value.workEmail)?.toLowerCase() ?? null,hireDate:value.hireDate,rowVersion:editing.rowVersion}).pipe(finalize(()=>this.saving.set(false))).subscribe({
-        next:()=>{this.editorOpen.set(false);this.notice.set('Employee updated successfully.');this.loadEmployees();},
-        error:err=>this.editorError.set(this.message(err,'Unable to update employee. The profile may have changed; refresh and try again.'))
+        next:()=>{this.confirmationOpen.set(false);this.editorOpen.set(false);this.notice.set('Employee updated successfully.');this.loadEmployees();},
+        error:err=>{this.confirmationOpen.set(false);this.editorError.set(this.message(err,'Unable to update employee. The profile may have changed; refresh and try again.'));}
       });
     }
   }
