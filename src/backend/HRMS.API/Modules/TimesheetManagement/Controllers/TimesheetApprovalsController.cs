@@ -10,6 +10,21 @@ namespace HRMS.API.Modules.TimesheetManagement.Controllers;
 [Authorize]
 public sealed class TimesheetApprovalsController(ITimesheetService service) : ControllerBase
 {
+    [HttpGet("{timesheetId:guid}")]
+    [Authorize(Policy = "Permission:timesheets.read")]
+    public async Task<IActionResult> GetForApproval(
+        Guid companyId, Guid timesheetId, CancellationToken cancellationToken)
+    {
+        var tenantId = User.ReadTenantId();
+        var actorUserId = User.ReadUserId();
+        if (tenantId is null || actorUserId is null)
+            return Forbid();
+
+        var result = await service.GetForApprovalAsync(
+            tenantId.Value, companyId, actorUserId.Value, timesheetId, cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
     [HttpGet("pending-approvals")]
     [Authorize(Policy = "Permission:timesheets.read")]
     public async Task<IActionResult> GetPending(Guid companyId, CancellationToken cancellationToken)
