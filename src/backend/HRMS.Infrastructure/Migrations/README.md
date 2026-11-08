@@ -28,6 +28,7 @@ Use a zero-padded, increasing numeric prefix followed by a short description:
 - `019_WorkingWeekStoredProcedures.sql`
 - `020_EmployeeUserMappingProcedures.sql`
 - `021_EmployeeLeaveBalanceProcedures.sql`
+- `022_LeaveRequestSubmission.sql`
 
 Once a migration has been applied to any shared environment, do not edit or
 delete it. Add a new migration to change the schema.
