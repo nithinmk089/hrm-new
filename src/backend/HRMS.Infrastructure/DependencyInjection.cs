@@ -25,12 +25,6 @@ public static class DependencyInjection
         services.AddScoped<IUserIdentityRepository, UserIdentityRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
-        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
-        services.AddSingleton(new RefreshTokenSettings
-        {
-            LifetimeDays = configuration.GetValue<int?>(
-                "Authentication:RefreshToken:LifetimeDays") ?? RefreshTokenService.DefaultLifetimeDays
-        });
         services.AddSingleton<TimeProvider>(TimeProvider.System);
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddSingleton<IAccessTokenGenerator, JwtAccessTokenGenerator>();
