@@ -96,3 +96,26 @@ export interface UpdateDesignationRequest {
   jobLevel: number | null;
   rowVersion: string;
 }
+
+
+export interface Holiday {
+  holidayId: string;
+  companyId: string;
+  holidayName: string;
+  holidayDate: string;
+  description: string | null;
+  isOptional: boolean;
+  isActive: boolean;
+  createdAtUtc: string;
+  updatedAtUtc: string | null;
+  rowVersion: string;
+}
+export interface CreateHolidayRequest {
+  holidayName: string;
+  holidayDate: string;
+  description: string | null;
+  isOptional: boolean;
+}
+export interface UpdateHolidayRequest extends CreateHolidayRequest {
+  rowVersion: string;
+}
