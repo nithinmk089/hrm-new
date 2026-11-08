@@ -566,3 +566,46 @@ Local build, unit tests, and browser verification pending. No migration required
 - Development administrator initially received HTTP 403 for Holidays because the seeded SYSTEM_ADMIN role predated migration 014. Rerunning the repeatable development seed granted the newly active holiday permissions; user confirmed the Holidays page then worked.
 - UI-05 implementation includes typed API contracts, company-scoped listing, create/edit/deactivate, duplicate-date messaging, RowVersion concurrency, and ten component tests.
 - Next feature branch must be created from this merge commit on `main`.
+
+
+## 16. Current implementation checkpoint — UI-06 Employee Management
+
+Active branch: `feature/ui-06-employee-management`.
+
+### UI-06A — Employee Core API foundation
+
+Implemented on this branch:
+- Added employee core application contracts and service under `src/backend/HRMS.Application/Employees/`.
+- Added Dapper repository using stored procedures under `src/backend/HRMS.Infrastructure/Persistence/EmployeeRepository.cs`.
+- Added authenticated controller at `/api/v1/companies/{companyId}/employees`.
+- Added migration `029_EmployeeCoreManagement.sql` with `employees.read`, `employees.create`, and `employees.update` permissions and stored procedures for directory, detail, create, update and status changes.
+- Registered employee repository/service in Infrastructure dependency injection.
+- Directory supports optional search across employee code, names, preferred name and work email, and optional employment-status filtering.
+- Create/update core profile fields: employee code (immutable after create), first/middle/last/preferred name, work email and hire date.
+- Status changes support Preboarding, Active, OnLeave, Inactive and Terminated. Terminated requires a termination date; RowVersion is required for updates/status changes.
+- Tenant ID is always taken from authenticated claims. Company ID is an explicit route scope and every SQL operation includes both TenantId and CompanyId.
+- Employee assignment history, reporting-manager assignments, contacts, addresses, documents, pagination and frontend remain separate follow-up slices; no UI has been implemented yet.
+
+API contract:
+- `GET /api/v1/companies/{companyId}/employees?search=&status=`
+- `GET /api/v1/companies/{companyId}/employees/{employeeId}`
+- `POST /api/v1/companies/{companyId}/employees`
+- `PUT /api/v1/companies/{companyId}/employees/{employeeId}`
+- `PATCH /api/v1/companies/{companyId}/employees/{employeeId}/status`
+
+Permissions:
+- `employees.read`
+- `employees.create`
+- `employees.update`
+
+Migration:
+- Apply migration 029 explicitly with:
+  `dotnet run --project .\\src\\backend\\HRMS.API\\HRMS.API.csproj -- --migrate`
+- Re-run the repeatable development seed if the development administrator needs the newly introduced employee permissions:
+  `dotnet run --project .\\src\\backend\\HRMS.API\\HRMS.API.csproj -- --seed-development`
+  (only after confirming `DevelopmentSeed:Enabled=true` in local user-secrets).
+
+Verification status:
+- Repository changes are committed to this feature branch.
+- Assistant has not run the .NET build, SQL migration or integration tests against the user's local SQL Server. Local verification is required before extending the API or merging.
+- Next: run backend build and tests, apply migration 029, re-seed development permissions, then exercise the five endpoints in Swagger or an API client. Resolve any issues before beginning the employment-assignment slice.
