@@ -308,3 +308,17 @@ Next:
 2. Visually verify dashboard on desktop and mobile; confirm display name and tenant match the authenticated account.
 3. If the user wants real metrics in UI-03, first define a backend dashboard summary endpoint with tenant scoping and permission-safe aggregates; do not infer company/employee identifiers in the browser.
 4. Once verified, merge UI-03 into `main`, then create the next feature branch from the exact latest main commit.
+
+
+### UI-03 final verification (2026-11-08)
+
+The user confirmed the latest Angular build and test suite both succeeded after the dashboard layout correction. The user also supplied screenshots confirming:
+- Authenticated display name is shown in the dashboard welcome panel and application header.
+- Authenticated tenant/workspace name and tenant code are displayed in the workspace panel and sidebar.
+- Welcome panel and workspace panel are left-aligned with the intended horizontal layout.
+- Quick-access cards and the dashboard information panel render correctly.
+- No fabricated business metrics are shown.
+
+UI-03 is complete and ready for PR integration. No dashboard summary endpoint was present in the inspected backend controllers. Existing module endpoints are permission-scoped and some require company/employee IDs; the dashboard deliberately does not guess these identifiers or query endpoints with fabricated context. Real metrics remain deferred pending a tenant-scoped, permission-safe dashboard API contract.
+
+Next phase: UI-04 — Departments, Offices, and Designations on `feature/ui-04-organization-masters`. Existing backend controllers are present under `src/backend/HRMS.API/Modules/CompanyManagement/Controllers/`; inspect their request/response contracts and permission policies before wiring frontend CRUD.
