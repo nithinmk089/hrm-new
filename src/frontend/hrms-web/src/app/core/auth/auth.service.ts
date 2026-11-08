@@ -20,7 +20,21 @@ export class AuthService {
       withCredentials: true
     }).pipe(
       map(response => this.toSession(response)),
-      tap(session => this.sessionState.set(session))
+      tap(session => this.sessionState.set(session)),
+      switchMap(session => this.loadCurrentUser().pipe(
+        map(currentUser => {
+          const updatedSession = {
+            ...session,
+            userId: currentUser.userId,
+            tenantId: currentUser.tenantId,
+            tenantCode: currentUser.tenantCode,
+            email: currentUser.email,
+            membershipId: currentUser.membershipId
+          };
+          this.sessionState.set(updatedSession);
+          return updatedSession;
+        })
+      ))
     );
   }
 
