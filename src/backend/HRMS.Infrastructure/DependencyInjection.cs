@@ -2,6 +2,7 @@ using HRMS.Application.Abstractions.Persistence;
 using HRMS.Application.Abstractions.Security;
 using HRMS.Application.Companies;
 using HRMS.Application.Departments;
+using HRMS.Application.Offices;
 using HRMS.Application.Security;
 using HRMS.Infrastructure.Persistence;
 using HRMS.Infrastructure.Security;
@@ -47,6 +48,8 @@ public static class DependencyInjection
 
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<IDepartmentService, DepartmentService>();
+        services.AddScoped<IOfficeRepository, OfficeRepository>();
+        services.AddScoped<IOfficeService, OfficeService>();
 
         return services;
     }
