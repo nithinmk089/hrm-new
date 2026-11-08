@@ -50,6 +50,7 @@ CREATE TABLE [hrms].[CompanyUserMemberships]
     [RowVersion] rowversion NOT NULL,
     CONSTRAINT [PK_CompanyUserMemberships] PRIMARY KEY CLUSTERED ([MembershipId]),
     CONSTRAINT [UQ_CompanyUserMemberships_Company_Membership] UNIQUE ([CompanyId], [MembershipId]),
+    CONSTRAINT [UQ_CompanyUserMemberships_Membership_User] UNIQUE ([MembershipId], [UserId]),
     CONSTRAINT [UQ_CompanyUserMemberships_Company_User] UNIQUE ([CompanyId], [UserId]),
     CONSTRAINT [FK_CompanyUserMemberships_Company] FOREIGN KEY ([CompanyId]) REFERENCES [hrms].[Companies] ([CompanyId]),
     CONSTRAINT [FK_CompanyUserMemberships_User] FOREIGN KEY ([UserId]) REFERENCES [hrms].[Users] ([UserId]),
@@ -152,7 +153,7 @@ CREATE TABLE [hrms].[RefreshTokens]
     [RevokedByIp] varchar(45) NULL,
     CONSTRAINT [PK_RefreshTokens] PRIMARY KEY CLUSTERED ([RefreshTokenId]),
     CONSTRAINT [FK_RefreshTokens_User] FOREIGN KEY ([UserId]) REFERENCES [hrms].[Users] ([UserId]),
-    CONSTRAINT [FK_RefreshTokens_Membership] FOREIGN KEY ([MembershipId]) REFERENCES [hrms].[CompanyUserMemberships] ([MembershipId]),
+    CONSTRAINT [FK_RefreshTokens_Membership_User] FOREIGN KEY ([MembershipId], [UserId]) REFERENCES [hrms].[CompanyUserMemberships] ([MembershipId], [UserId]),
     CONSTRAINT [FK_RefreshTokens_ReplacedBy] FOREIGN KEY ([ReplacedByTokenId]) REFERENCES [hrms].[RefreshTokens] ([RefreshTokenId]),
     CONSTRAINT [CK_RefreshTokens_Expiry] CHECK ([ExpiresAtUtc] > [CreatedAtUtc])
 );
