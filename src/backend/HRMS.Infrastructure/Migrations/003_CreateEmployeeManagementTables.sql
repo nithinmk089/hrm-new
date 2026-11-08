@@ -164,6 +164,11 @@ CREATE INDEX [IX_EmployeeContacts_Company_Employee]
     WHERE [DeletedAtUtc] IS NULL;
 GO
 
+CREATE UNIQUE INDEX [UX_EmployeeContacts_OnePrimaryPerType]
+    ON [hrms].[EmployeeContacts] ([CompanyId], [EmployeeId], [ContactType])
+    WHERE [IsPrimary] = 1 AND [DeletedAtUtc] IS NULL;
+GO
+
 CREATE TABLE [hrms].[EmployeeAddresses]
 (
     [EmployeeAddressId] uniqueidentifier NOT NULL CONSTRAINT [DF_EmployeeAddresses_Id] DEFAULT NEWSEQUENTIALID(),
@@ -196,6 +201,11 @@ CREATE INDEX [IX_EmployeeAddresses_Company_Employee]
     ON [hrms].[EmployeeAddresses] ([CompanyId], [EmployeeId], [AddressType])
     INCLUDE ([City], [CountryCode], [IsPrimary])
     WHERE [DeletedAtUtc] IS NULL;
+GO
+
+CREATE UNIQUE INDEX [UX_EmployeeAddresses_OnePrimaryPerType]
+    ON [hrms].[EmployeeAddresses] ([CompanyId], [EmployeeId], [AddressType])
+    WHERE [IsPrimary] = 1 AND [DeletedAtUtc] IS NULL;
 GO
 
 CREATE TABLE [hrms].[EmployeeDocuments]
