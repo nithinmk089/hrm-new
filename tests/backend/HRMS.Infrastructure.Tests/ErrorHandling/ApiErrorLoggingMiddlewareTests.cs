@@ -2,6 +2,8 @@ using System.Security.Claims;
 using HRMS.API.ErrorHandling;
 using HRMS.Application.Abstractions.Persistence;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
@@ -20,21 +22,17 @@ public sealed class ApiErrorLoggingMiddlewareTests
     {
         var repository = new FakeApiErrorLogRepository();
         var context = CreateContext();
-        var middleware = new ApiErrorLoggingMiddleware(
-            httpContext =>
-            {
-                httpContext.Response.StatusCode = statusCode;
-                return Task.CompletedTask;
-            },
-            NullLogger<ApiErrorLoggingMiddleware>.Instance);
+        var middleware = CreateMiddleware(statusCode);
 
-        await middleware.InvokeAsync(context, repository);
+        await middleware.InvokeAsync(context, repository, CreateEnvironment());
 
         var entry = Assert.Single(repository.Entries);
         Assert.Equal(statusCode, entry.StatusCode);
         Assert.Equal("/api/v1/test", entry.RequestPath);
         Assert.Equal("POST", entry.HttpMethod);
         Assert.Equal(context.TraceIdentifier, entry.TraceId);
+        Assert.Equal("HRMS.API", entry.ApplicationName);
+        Assert.Equal("Development", entry.EnvironmentName);
     }
 
     [Theory]
@@ -46,15 +44,9 @@ public sealed class ApiErrorLoggingMiddlewareTests
     {
         var repository = new FakeApiErrorLogRepository();
         var context = CreateContext();
-        var middleware = new ApiErrorLoggingMiddleware(
-            httpContext =>
-            {
-                httpContext.Response.StatusCode = statusCode;
-                return Task.CompletedTask;
-            },
-            NullLogger<ApiErrorLoggingMiddleware>.Instance);
+        var middleware = CreateMiddleware(statusCode);
 
-        await middleware.InvokeAsync(context, repository);
+        await middleware.InvokeAsync(context, repository, CreateEnvironment());
 
         Assert.Empty(repository.Entries);
     }
@@ -75,21 +67,18 @@ public sealed class ApiErrorLoggingMiddlewareTests
         ], "Test"));
         context.Items[GlobalExceptionHandler.ExceptionItemKey] = exception;
 
-        var middleware = new ApiErrorLoggingMiddleware(
-            httpContext =>
-            {
-                httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
-                return Task.CompletedTask;
-            },
-            NullLogger<ApiErrorLoggingMiddleware>.Instance);
+        var middleware = CreateMiddleware(StatusCodes.Status409Conflict);
 
-        await middleware.InvokeAsync(context, repository);
+        await middleware.InvokeAsync(context, repository, CreateEnvironment());
 
         var entry = Assert.Single(repository.Entries);
         Assert.Equal(tenantId, entry.TenantId);
         Assert.Equal(userId, entry.UserId);
         Assert.Equal(typeof(InvalidOperationException).FullName, entry.ErrorType);
         Assert.Equal("Concurrency conflict.", entry.ErrorMessage);
+        Assert.Contains(nameof(InvalidOperationException), entry.StackTrace);
+        Assert.Equal("HRMS.API", entry.ApplicationName);
+        Assert.Equal("Development", entry.EnvironmentName);
     }
 
     [Fact]
@@ -100,18 +89,30 @@ public sealed class ApiErrorLoggingMiddlewareTests
             ExceptionToThrow = new InvalidOperationException("Database unavailable.")
         };
         var context = CreateContext();
-        var middleware = new ApiErrorLoggingMiddleware(
+        var middleware = CreateMiddleware(StatusCodes.Status500InternalServerError);
+
+        await middleware.InvokeAsync(context, repository, CreateEnvironment());
+
+        Assert.Equal(StatusCodes.Status500InternalServerError, context.Response.StatusCode);
+    }
+
+    private static ApiErrorLoggingMiddleware CreateMiddleware(int statusCode) =>
+        new(
             httpContext =>
             {
-                httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                httpContext.Response.StatusCode = statusCode;
                 return Task.CompletedTask;
             },
             NullLogger<ApiErrorLoggingMiddleware>.Instance);
 
-        await middleware.InvokeAsync(context, repository);
-
-        Assert.Equal(StatusCodes.Status500InternalServerError, context.Response.StatusCode);
-    }
+    private static IHostEnvironment CreateEnvironment() =>
+        new TestHostEnvironment
+        {
+            ApplicationName = "HRMS.API",
+            EnvironmentName = "Development",
+            ContentRootPath = AppContext.BaseDirectory,
+            ContentRootFileProvider = new NullFileProvider()
+        };
 
     private static DefaultHttpContext CreateContext()
     {
@@ -120,6 +121,14 @@ public sealed class ApiErrorLoggingMiddlewareTests
         context.Request.Path = "/api/v1/test";
         context.TraceIdentifier = "test-trace-id";
         return context;
+    }
+
+    private sealed class TestHostEnvironment : IHostEnvironment
+    {
+        public string EnvironmentName { get; set; } = Environments.Development;
+        public string ApplicationName { get; set; } = "HRMS.API";
+        public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
     }
 
     private sealed class FakeApiErrorLogRepository : IApiErrorLogRepository
