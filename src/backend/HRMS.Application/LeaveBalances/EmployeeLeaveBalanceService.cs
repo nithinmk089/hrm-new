@@ -30,7 +30,15 @@ public sealed class EmployeeLeaveBalanceService(IEmployeeLeaveBalanceRepository 
         if (notes?.Length > 500)
             throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(request.Notes));
 
-        var normalized = request with { TransactionType = request.TransactionType.Trim(), Notes = notes };
+        var transactionType = request.TransactionType.Trim().ToLowerInvariant() switch
+        {
+            "opening" => "Opening",
+            "accrual" => "Accrual",
+            "carryforward" => "CarryForward",
+            "adjustment" => "Adjustment",
+            _ => throw new ArgumentException("Unsupported transaction type.", nameof(request.TransactionType))
+        };
+        var normalized = request with { TransactionType = transactionType, Notes = notes };
         return repository.ApplyTransactionAsync(tenantId, companyId, employeeId, actorUserId, normalized, cancellationToken);
     }
 
