@@ -106,7 +106,8 @@ export class EmployeesPageComponent {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly statusSaving = signal(false);
-  readonly editorOpen = signal(false);\n  readonly confirmationOpen = signal(false);
+  readonly editorOpen = signal(false);
+  readonly confirmationOpen = signal(false);
   readonly editing = signal<Employee | null>(null);
   readonly detailTarget = signal<Employee | null>(null);
   readonly error = signal('');
