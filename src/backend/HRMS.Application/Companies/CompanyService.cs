@@ -115,7 +115,7 @@ public sealed class CompanyService(ICompanyRepository repository) : ICompanyServ
     private static string? Optional(string? value, int maxLength)
     {
         var normalized = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-        if (normalized?.Length > maxLength)
+        if (normalized is not null && normalized.Length > maxLength)
         {
             throw new ArgumentException($"Value cannot exceed {maxLength} characters.");
         }
