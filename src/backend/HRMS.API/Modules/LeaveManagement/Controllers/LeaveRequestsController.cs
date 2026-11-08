@@ -24,6 +24,6 @@ public sealed class LeaveRequestsController(ILeaveRequestService service) : Cont
 
         var result = await service.SubmitAsync(
             tenantId.Value, companyId, actorUserId.Value, request, cancellationToken);
-        return CreatedAtAction(nameof(Submit), new { companyId }, result);
+        return StatusCode(StatusCodes.Status201Created, result);
     }
 }
