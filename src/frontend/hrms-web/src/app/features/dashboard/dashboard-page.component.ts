@@ -68,14 +68,14 @@ import { AuthService } from '../../core/auth/auth.service';
     .page-header h1{margin:.35rem 0 0;color:#1d2939;font-size:1.45rem;font-weight:650}
     .page-header p{margin:.4rem 0 0;color:#667085;font-size:.82rem}
     .date-label{display:flex;align-items:center;gap:.45rem;padding:.5rem .7rem;border:1px solid #e4e7ec;border-radius:.45rem;background:#fff;color:#667085;font-size:.74rem}
-    .welcome-panel{display:flex;align-items:center;justify-content:space-between;min-height:12rem;padding:2rem 2.25rem;background:linear-gradient(110deg,#fff,#f7f9fc);overflow:hidden}
+    .welcome-panel{display:flex;flex-direction:row;align-items:center;justify-content:space-between;text-align:left;min-height:12rem;padding:2rem 2.25rem;background:linear-gradient(110deg,#fff,#f7f9fc);overflow:hidden}
     .welcome-copy{max-width:46rem}
     .welcome-panel h2{margin:.65rem 0 .45rem;color:#1d2939;font-size:1.35rem;font-weight:650}
     .welcome-panel p{max-width:40rem;margin:0;color:#667085;font-size:.82rem;line-height:1.65}
     .welcome-art{display:grid;place-items:center;width:7rem;height:7rem;flex:0 0 7rem;margin-right:2rem;border-radius:2rem;background:#eaf0f8;color:#46658e;font-size:3rem;transform:rotate(-8deg)}
-    .workspace-card{display:flex;align-items:center;gap:.9rem;padding:1rem 1.15rem}
+    .workspace-card{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;text-align:left;gap:.9rem;padding:1rem 1.15rem}
     .workspace-icon{display:grid;place-items:center;width:2.8rem;height:2.8rem;flex:0 0 2.8rem;border-radius:.6rem;background:#eef3fa;color:#3d5e88;font-size:1.15rem}
-    .workspace-details{display:flex;min-width:0;flex:1;flex-direction:column;gap:.18rem}
+    .workspace-details{display:flex;min-width:0;flex:1;flex-direction:column;align-items:flex-start;text-align:left;gap:.18rem}
     .field-label{color:#98a2b3;font-size:.61rem;font-weight:700;letter-spacing:.08em}
     .workspace-details strong{overflow:hidden;color:#344054;font-size:.82rem;text-overflow:ellipsis;white-space:nowrap}
     .workspace-details small{color:#7a8494;font-size:.7rem}
