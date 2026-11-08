@@ -10,6 +10,7 @@ using HRMS.Application.WorkingWeeks;
 using HRMS.Application.EmployeeUserMappings;
 using HRMS.Application.LeaveBalances;
 using HRMS.Application.LeaveRequests;
+using HRMS.Application.Timesheets;
 using HRMS.Application.Security;
 using HRMS.Infrastructure.Persistence;
 using HRMS.Infrastructure.Security;
@@ -75,6 +76,8 @@ public static class DependencyInjection
         services.AddScoped<ILeaveApprovalService, LeaveApprovalService>();
         services.AddScoped<ILeaveRequestLifecycleRepository, LeaveRequestLifecycleRepository>();
         services.AddScoped<ILeaveRequestLifecycleService, LeaveRequestLifecycleService>();
+        services.AddScoped<ITimesheetRepository, TimesheetRepository>();
+        services.AddScoped<ITimesheetService, TimesheetService>();
 
         return services;
     }
