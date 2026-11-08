@@ -20,14 +20,15 @@ public sealed class OfficeServiceTests
 
         Assert.Equal(tenantId, repository.CapturedTenantId);
         Assert.Equal(companyId, repository.CapturedCompanyId);
-        Assert.NotNull(repository.CapturedCreateRequest);
-        Assert.Equal("HQ", repository.CapturedCreateRequest!.OfficeCode);
-        Assert.Equal("Head Office", repository.CapturedCreateRequest.OfficeName);
-        Assert.Equal("IN", repository.CapturedCreateRequest.CountryCode);
-        Assert.Equal("1 Main Street", repository.CapturedCreateRequest.AddressLine1);
-        Assert.Equal("Kochi", repository.CapturedCreateRequest.City);
-        Assert.Equal("Asia/Kolkata", repository.CapturedCreateRequest.TimeZoneId);
-        Assert.True(repository.CapturedCreateRequest.IsHeadOffice);
+        var captured = repository.CapturedCreateRequest;
+        Assert.NotNull(captured);
+        Assert.Equal("HQ", captured.OfficeCode);
+        Assert.Equal("Head Office", captured.OfficeName);
+        Assert.Equal("IN", captured.CountryCode);
+        Assert.Equal("1 Main Street", captured.AddressLine1);
+        Assert.Equal("Kochi", captured.City);
+        Assert.Equal("Asia/Kolkata", captured.TimeZoneId);
+        Assert.True(captured.IsHeadOffice);
     }
 
     [Fact]
