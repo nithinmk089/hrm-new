@@ -6,6 +6,7 @@ using HRMS.API.ErrorHandling;
 using HRMS.Application.Abstractions.Persistence;
 using HRMS.Application.Abstractions.Security;
 using HRMS.Application.Companies;
+using HRMS.Application.Departments;
 using HRMS.Infrastructure;
 using HRMS.Infrastructure.Security;
 using HRMS.Infrastructure.Seeding;
@@ -353,6 +354,79 @@ app.MapPatch("/api/v1/companies/{companyId:guid}/deactivate", async Task<IResult
     return result ? Results.NoContent() : Results.Conflict();
 })
 .RequireAuthorization("Permission:companies.deactivate").WithName("DeactivateCompany").WithTags("Companies");
+
+
+app.MapGet("/api/v1/companies/{companyId:guid}/departments", async Task<IResult> (
+    Guid companyId, System.Security.Claims.ClaimsPrincipal principal,
+    IDepartmentService service, CancellationToken ct) =>
+{
+    var tenantId = ReadTenantId(principal);
+    return tenantId is null
+        ? Results.Forbid()
+        : Results.Ok(await service.GetAllAsync(tenantId.Value, companyId, ct));
+})
+.RequireAuthorization("Permission:departments.read")
+.WithName("GetDepartments")
+.WithTags("Departments");
+
+app.MapGet("/api/v1/companies/{companyId:guid}/departments/{departmentId:guid}", async Task<IResult> (
+    Guid companyId, Guid departmentId, System.Security.Claims.ClaimsPrincipal principal,
+    IDepartmentService service, CancellationToken ct) =>
+{
+    var tenantId = ReadTenantId(principal);
+    if (tenantId is null) return Results.Forbid();
+
+    var department = await service.GetByIdAsync(tenantId.Value, companyId, departmentId, ct);
+    return department is null ? Results.NotFound() : Results.Ok(department);
+})
+.RequireAuthorization("Permission:departments.read")
+.WithName("GetDepartmentById")
+.WithTags("Departments");
+
+app.MapPost("/api/v1/companies/{companyId:guid}/departments", async Task<IResult> (
+    Guid companyId, CreateDepartmentRequest request,
+    System.Security.Claims.ClaimsPrincipal principal, IDepartmentService service, CancellationToken ct) =>
+{
+    var tenantId = ReadTenantId(principal);
+    if (tenantId is null) return Results.Forbid();
+
+    var department = await service.CreateAsync(tenantId.Value, companyId, request, ct);
+    return Results.Created(
+        $"/api/v1/companies/{companyId}/departments/{department.DepartmentId}", department);
+})
+.RequireAuthorization("Permission:departments.create")
+.WithName("CreateDepartment")
+.WithTags("Departments");
+
+app.MapPut("/api/v1/companies/{companyId:guid}/departments/{departmentId:guid}", async Task<IResult> (
+    Guid companyId, Guid departmentId, UpdateDepartmentRequest request,
+    System.Security.Claims.ClaimsPrincipal principal, IDepartmentService service, CancellationToken ct) =>
+{
+    var tenantId = ReadTenantId(principal);
+    if (tenantId is null) return Results.Forbid();
+
+    var department = await service.UpdateAsync(
+        tenantId.Value, companyId, departmentId, request, ct);
+    return department is null ? Results.NotFound() : Results.Ok(department);
+})
+.RequireAuthorization("Permission:departments.update")
+.WithName("UpdateDepartment")
+.WithTags("Departments");
+
+app.MapPatch("/api/v1/companies/{companyId:guid}/departments/{departmentId:guid}/deactivate", async Task<IResult> (
+    Guid companyId, Guid departmentId, DeactivateDepartmentRequest request,
+    System.Security.Claims.ClaimsPrincipal principal, IDepartmentService service, CancellationToken ct) =>
+{
+    var tenantId = ReadTenantId(principal);
+    if (tenantId is null) return Results.Forbid();
+
+    var deactivated = await service.DeactivateAsync(
+        tenantId.Value, companyId, departmentId, request.RowVersion, ct);
+    return deactivated ? Results.NoContent() : Results.Conflict();
+})
+.RequireAuthorization("Permission:departments.deactivate")
+.WithName("DeactivateDepartment")
+.WithTags("Departments");
 
 Guid? ReadTenantId(System.Security.Claims.ClaimsPrincipal principal) =>
     Guid.TryParse(principal.FindFirst("tenant_id")?.Value, out var tenantId) && tenantId != Guid.Empty ? tenantId : null;
