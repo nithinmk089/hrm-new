@@ -50,6 +50,24 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Authentication:AllowedOrigins")
+    .Get<string[]>() ?? [];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("HrmsFrontend", policy =>
+    {
+        if (allowedOrigins.Length > 0)
+        {
+            policy.WithOrigins(allowedOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
+    });
+});
+
 var app = builder.Build();
 app.UseExceptionHandler();
 
@@ -69,6 +87,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("HrmsFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -87,7 +106,7 @@ CookieOptions BuildRefreshCookieOptions(HttpContext context, DateTime expiresAtU
 
 bool HasTrustedOrigin(HttpContext context)
 {
-    var origin = context.Request.Headers.Origin.ToString();
+    var origin = context.Request.Headers["Origin"].ToString();
     if (string.IsNullOrWhiteSpace(origin))
     {
         return true;
@@ -142,6 +161,11 @@ app.MapPost("/api/v1/auth/login", async (
     IAuthenticationService authenticationService,
     CancellationToken cancellationToken) =>
 {
+    if (!HasTrustedOrigin(context))
+    {
+        return Results.Forbid();
+    }
+
     var session = await authenticationService.LoginAsync(
         request, context.Connection.RemoteIpAddress?.ToString(), cancellationToken);
 
