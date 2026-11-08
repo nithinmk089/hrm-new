@@ -73,7 +73,7 @@ The current backend implementation covers authentication/authorization, company 
 
 **Exit criteria:** application builds; shell and navigation render responsively; shared styles/components are reusable.
 
-### UI-02 — Authentication and authorization experience
+### UI-02 — Authentication and authorization experience (completed 2026-11-08)
 - Login screen and authentication state management.
 - Integrate existing login, refresh, logout, and current-user APIs.
 - Implement secure token/session handling consistent with the existing backend cookie and refresh-token design; do not expose refresh tokens to browser JavaScript.
@@ -81,7 +81,7 @@ The current backend implementation covers authentication/authorization, company 
 - Add route guards and permission-aware menu/action visibility.
 - Handle expired sessions and logout cleanly.
 
-**Exit criteria:** login, refresh, current-user loading, protected routes, and logout work against the existing API.
+**Exit criteria:** login, refresh, current-user loading, protected routes, and logout work against the existing API. Completed and locally verified on 2026-11-08. Effective-permission retrieval and permission-aware navigation remain deferred until a verified backend permissions contract is available.
 
 ### UI-03 — Dashboard
 - Build an initial role-aware dashboard shell.
