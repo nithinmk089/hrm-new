@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, catchError, map, of, switchMap, tap } from 'rxjs';
+import { Observable, catchError, finalize, map, of, shareReplay, switchMap, tap } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
 import { AuthSession, CurrentUserResponse, LoginRequest, LoginResponse } from './auth.models';
 
@@ -73,11 +73,9 @@ export class AuthService {
 
     if (!this.restoreRequest) {
       this.restoreRequest = this.refreshSession().pipe(
-        tap(() => this.restoreRequest = undefined),
-        catchError(() => {
-          this.restoreRequest = undefined;
-          return of(false);
-        })
+        // Share one refresh-cookie rotation across concurrent route-guard subscribers.
+        finalize(() => this.restoreRequest = undefined),
+        shareReplay({ bufferSize: 1, refCount: false })
       );
     }
 
