@@ -279,14 +279,14 @@ app.MapGet("/api/v1/version", () => Results.Ok(new
 .WithTags("Platform");
 
 
-app.MapGet("/api/v1/companies", async (System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
+app.MapGet("/api/v1/companies", async Task<IResult> (System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
 {
     var tenantId = ReadTenantId(principal);
     return tenantId is null ? Results.Forbid() : Results.Ok(await service.GetAllAsync(tenantId.Value, ct));
 })
 .RequireAuthorization("Permission:companies.read").WithName("GetCompanies").WithTags("Companies");
 
-app.MapGet("/api/v1/companies/{companyId:guid}", async (Guid companyId, System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
+app.MapGet("/api/v1/companies/{companyId:guid}", async Task<IResult> (Guid companyId, System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
 {
     var tenantId = ReadTenantId(principal);
     if (tenantId is null) return Results.Forbid();
@@ -295,7 +295,7 @@ app.MapGet("/api/v1/companies/{companyId:guid}", async (Guid companyId, System.S
 })
 .RequireAuthorization("Permission:companies.read").WithName("GetCompanyById").WithTags("Companies");
 
-app.MapPost("/api/v1/companies", async (CreateCompanyRequest request, System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
+app.MapPost("/api/v1/companies", async Task<IResult> (CreateCompanyRequest request, System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
 {
     var tenantId = ReadTenantId(principal);
     if (tenantId is null) return Results.Forbid();
@@ -304,7 +304,7 @@ app.MapPost("/api/v1/companies", async (CreateCompanyRequest request, System.Sec
 })
 .RequireAuthorization("Permission:companies.create").WithName("CreateCompany").WithTags("Companies");
 
-app.MapPut("/api/v1/companies/{companyId:guid}", async (Guid companyId, UpdateCompanyRequest request, System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
+app.MapPut("/api/v1/companies/{companyId:guid}", async Task<IResult> (Guid companyId, UpdateCompanyRequest request, System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
 {
     var tenantId = ReadTenantId(principal);
     if (tenantId is null) return Results.Forbid();
@@ -313,7 +313,7 @@ app.MapPut("/api/v1/companies/{companyId:guid}", async (Guid companyId, UpdateCo
 })
 .RequireAuthorization("Permission:companies.update").WithName("UpdateCompany").WithTags("Companies");
 
-app.MapPatch("/api/v1/companies/{companyId:guid}/deactivate", async (Guid companyId, DeactivateCompanyRequest request, System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
+app.MapPatch("/api/v1/companies/{companyId:guid}/deactivate", async Task<IResult> (Guid companyId, DeactivateCompanyRequest request, System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
 {
     var tenantId = ReadTenantId(principal);
     if (tenantId is null) return Results.Forbid();

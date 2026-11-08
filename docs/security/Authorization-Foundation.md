@@ -74,3 +74,32 @@ stale permission claims embedded in the access token.
 Do not add `TenantId`, `UserId`, `MembershipId`, role or permission inputs
 to endpoint request DTOs. Do not expose module endpoints until each operation
 has an appropriate permission policy and its repository enforces tenant scope.
+
+
+## Company API authorization
+
+The initial company-management endpoints use the canonical permission catalogue
+codes introduced by migration 007:
+
+| Operation | Endpoint | Permission |
+|---|---|---|
+| List companies | GET /api/v1/companies | companies.read |
+| Get company | GET /api/v1/companies/{companyId} | companies.read |
+| Create company | POST /api/v1/companies | companies.create |
+| Update company | PUT /api/v1/companies/{companyId} | companies.update |
+| Deactivate company | PATCH /api/v1/companies/{companyId}/deactivate | companies.deactivate |
+
+The tenant ID for every operation is read from the validated `tenant_id`
+claim. Company request DTOs do not contain TenantId. Every company repository
+query, including updates and deactivation, includes TenantId in its predicate;
+company creation writes the claim-derived TenantId.
+
+The list endpoint has no company route scope, so it requires a tenant-scoped
+role assignment. Company-scoped assignments can read a company by its ID, but
+do not receive tenant-wide listing access. The permission evaluator also
+validates that requested company and office route resources exist and belong
+to the authenticated tenant before granting access.
+
+Migration 007 adds company permission codes without changing existing
+permission rows or IDs. New permissions must still be explicitly granted to
+tenant roles through `security.RolePermissions`.
