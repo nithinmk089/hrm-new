@@ -266,3 +266,19 @@ Key UI-02 commits include:
 UI-02 does not yet include effective-permission retrieval or permission-aware menu/action visibility because the current `/auth/me` backend contract does not expose permissions and no verified effective-permissions endpoint has been integrated. Do not hardcode permissions. Treat that as a follow-up authorization slice after inspecting/adding the backend contract.
 
 Next: open and merge the UI-02 PR into `main`. Only after merge, create the next UI feature branch from the resulting latest `main` commit. The planned next phase is UI-03 Dashboard.
+
+
+### UI-02 integration completed (2026-11-08)
+
+- Pull request [#5](https://github.com/nithinmk089/hrm-new/pull/5), **feat(frontend): complete UI-02 authentication experience**, was merged into `main`.
+- Merge commit: `284acf88eddc64c186274712e43abda03d3cf519`.
+- UI-02 was locally verified by the user: Angular build and tests passed; login, invalid-credential messaging, refresh/session restoration, logout, and protected-route redirection worked against the local API.
+- The next branch, `feature/ui-03-dashboard`, was created directly from the exact UI-02 merge commit above, following the agreed branch workflow.
+
+## 10. Current implementation checkpoint — UI-03 Dashboard
+
+Active branch: `feature/ui-03-dashboard`.
+
+Start UI-03 by inspecting existing dashboard component, shell, API contracts, and available dashboard-related backend endpoints. Do not invent metrics or display fabricated business data. First identify which real APIs/data can support the initial dashboard. If no dashboard aggregation endpoint exists, implement a useful navigation-first dashboard with accurate user/workspace context and clearly labeled empty states; propose a backend endpoint only when the required source data and authorization rules are confirmed.
+
+After implementation, update this handoff, ask the user to run local build/tests, then merge UI-03 into `main` before creating another feature branch.
