@@ -1,0 +1,31 @@
+import { TestBed } from '@angular/core/testing';
+import { describe, expect, it, vi } from 'vitest';
+import { of, throwError } from 'rxjs';
+import { CompanyApiService } from '../../core/company/company-api.service';
+import { CompanySummary } from '../../core/company/company.models';
+import { Employee } from '../../core/company/employee.models';
+import { EmployeeApiService } from '../../core/company/employee-api.service';
+import { EmployeesPageComponent } from './employees-page.component';
+
+const company:CompanySummary={companyId:'company-1',companyCode:'DEMO',legalName:'Demo Technologies Pvt Ltd',displayName:'Demo Technologies',isActive:true};
+const employee:Employee={employeeId:'employee-1',companyId:'company-1',employeeCode:'EMP-0001',firstName:'Asha',middleName:null,lastName:'Nair',preferredName:'Asha',workEmail:'asha@example.com',hireDate:'2026-11-01',employmentStatus:'Active',terminationDate:null,isActive:true,createdAtUtc:'2026-11-08T00:00:00Z',updatedAtUtc:null,rowVersion:'AAAAAAAAB9E='};
+
+describe('EmployeesPageComponent',()=>{
+ const setup=async(companies:CompanySummary[]=[company],items:Employee[]=[employee])=>{
+  const companyApi={getCompanies:vi.fn().mockReturnValue(of(companies))};
+  const employeeApi={getEmployees:vi.fn().mockReturnValue(of(items)),getEmployee:vi.fn().mockReturnValue(of(employee)),createEmployee:vi.fn().mockReturnValue(of(employee)),updateEmployee:vi.fn().mockReturnValue(of(employee)),updateEmployeeStatus:vi.fn().mockReturnValue(of(void 0))};
+  await TestBed.configureTestingModule({imports:[EmployeesPageComponent],providers:[{provide:CompanyApiService,useValue:companyApi},{provide:EmployeeApiService,useValue:employeeApi}]}).compileComponents();
+  const fixture=TestBed.createComponent(EmployeesPageComponent);fixture.detectChanges();await fixture.whenStable();fixture.detectChanges();return{fixture,component:fixture.componentInstance,companyApi,employeeApi};
+ };
+ it('loads active company and employee directory',async()=>{const{fixture,employeeApi}=await setup();expect(employeeApi.getEmployees).toHaveBeenCalledWith('company-1','','');expect(fixture.nativeElement.textContent).toContain('Asha Nair');expect(fixture.nativeElement.textContent).toContain('EMP-0001');});
+ it('shows no-company state without calling employee API',async()=>{const{fixture,employeeApi}=await setup([]);expect(fixture.nativeElement.textContent).toContain('No companies available');expect(employeeApi.getEmployees).not.toHaveBeenCalled();});
+ it('loads directory when company changes',async()=>{const other={...company,companyId:'company-2',companyCode:'OTHER'};const{component,employeeApi}=await setup([company,other]);component.onCompanyChange({target:{value:'company-2'}} as unknown as Event);expect(employeeApi.getEmployees).toHaveBeenLastCalledWith('company-2','','');});
+ it('applies search and status filters',async()=>{const{component,employeeApi}=await setup();component.onSearchInput({target:{value:'asha'}} as unknown as Event);component.statusFilter.set('Active');component.loadEmployees();expect(employeeApi.getEmployees).toHaveBeenLastCalledWith('company-1','asha','Active');});
+ it('validates required profile fields',async()=>{const{component}=await setup();component.openCreate();expect(component.form.invalid).toBe(true);component.form.patchValue({employeeCode:'E1',firstName:'Asha',lastName:'Nair',hireDate:'2026-11-01'});expect(component.form.valid).toBe(true);});
+ it('creates employee with normalized code and optional fields',async()=>{const{component,employeeApi}=await setup();component.openCreate();component.form.patchValue({employeeCode:' emp-2 ',firstName:' Asha ',lastName:' Nair ',workEmail:' ASHA@EXAMPLE.COM ',hireDate:'2026-11-01'});component.save();expect(component.confirmationOpen()).toBe(true);expect(employeeApi.createEmployee).not.toHaveBeenCalled();component.confirmSave();expect(employeeApi.createEmployee).toHaveBeenCalledWith('company-1',{employeeCode:'EMP-2',firstName:'Asha',middleName:null,lastName:'Nair',preferredName:null,workEmail:'asha@example.com',hireDate:'2026-11-01'});expect(component.notice()).toBe('Employee created successfully.');});
+ it('updates employee profile with immutable code and RowVersion',async()=>{const{component,employeeApi}=await setup();component.openEdit(employee);expect(component.form.controls.employeeCode.disabled).toBe(true);component.form.patchValue({firstName:'Asha Updated'});component.save();expect(employeeApi.updateEmployee).not.toHaveBeenCalled();component.confirmSave();expect(employeeApi.updateEmployee).toHaveBeenCalledWith('company-1','employee-1',expect.objectContaining({firstName:'Asha Updated',rowVersion:employee.rowVersion}));expect(employeeApi.updateEmployee.mock.calls[0][2]).not.toHaveProperty('employeeCode');});
+ it('requires confirmation before creating an employee and allows cancellation',async()=>{const{component,employeeApi}=await setup();component.openCreate();component.form.patchValue({employeeCode:'EMP-2',firstName:'Asha',lastName:'Nair',hireDate:'2026-11-01'});component.save();expect(component.confirmationOpen()).toBe(true);component.cancelConfirmation();expect(component.confirmationOpen()).toBe(false);expect(employeeApi.createEmployee).not.toHaveBeenCalled();});
+ it('requires termination date before status change',async()=>{const{component,employeeApi}=await setup();component.viewEmployee(employee);component.statusDraft.set('Terminated');component.saveStatus();expect(employeeApi.updateEmployeeStatus).not.toHaveBeenCalled();expect(component.statusError()).toContain('Termination date is required');});
+ it('updates employment status with current RowVersion',async()=>{const{component,employeeApi}=await setup();component.viewEmployee(employee);component.statusDraft.set('OnLeave');component.saveStatus();expect(employeeApi.updateEmployeeStatus).toHaveBeenCalledWith('company-1','employee-1',{employmentStatus:'OnLeave',terminationDate:null,rowVersion:employee.rowVersion});});
+ it('displays a clear concurrency error on profile update',async()=>{const{component,employeeApi}=await setup();employeeApi.updateEmployee.mockReturnValue(throwError(()=>({status:409})));component.openEdit(employee);component.save();component.confirmSave();expect(component.editorError()).toContain('record has changed');});
+});
