@@ -1,5 +1,5 @@
-import { AbstractControl, Component, ValidationErrors, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, computed, inject, signal } from '@angular/core';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { CompanyApiService } from '../../core/company/company-api.service';
 import { CompanySummary } from '../../core/company/company.models';
