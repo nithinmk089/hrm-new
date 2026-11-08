@@ -21,9 +21,11 @@ HRMS.API/
 │   │       ├── OfficesController.cs
 │   │       ├── DesignationsController.cs
 │   │       ├── HolidaysController.cs
-│   │       └── LeaveTypesController.cs
+│   │       ├── LeaveTypesController.cs
+│   │       └── WorkingWeeksController.cs
 │   ├── EmployeeManagement/
 │   │   └── Controllers/
+│   │       └── EmployeeUserMappingsController.cs
 │   ├── LeaveManagement/
 │   │   └── Controllers/
 │   ├── TimesheetManagement/
