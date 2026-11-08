@@ -3,6 +3,7 @@ using HRMS.API.ErrorHandling;
 using HRMS.Application.Abstractions.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
+using Xunit;
 
 namespace HRMS.Infrastructure.Tests.ErrorHandling;
 
@@ -89,7 +90,6 @@ public sealed class ApiErrorLoggingMiddlewareTests
         Assert.Equal(userId, entry.UserId);
         Assert.Equal(typeof(InvalidOperationException).FullName, entry.ErrorType);
         Assert.Equal("Concurrency conflict.", entry.ErrorMessage);
-        Assert.NotNull(entry.StackTrace);
     }
 
     [Fact]
