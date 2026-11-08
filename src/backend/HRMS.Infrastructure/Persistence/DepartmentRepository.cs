@@ -2,6 +2,7 @@ using System.Data;
 using Dapper;
 using HRMS.Application.Abstractions.Persistence;
 using HRMS.Application.Departments;
+using Microsoft.Data.SqlClient;
 
 namespace HRMS.Infrastructure.Persistence;
 
@@ -57,19 +58,38 @@ internal sealed class DepartmentRepository(IDbConnectionFactory connectionFactor
         Guid tenantId, Guid companyId, CreateDepartmentRequest request, CancellationToken cancellationToken)
     {
         await using var connection = connectionFactory.CreateConnection();
-        return await connection.QuerySingleAsync<DepartmentDto>(new CommandDefinition(
-            "hrms.usp_Departments_Create",
-            new
-            {
-                TenantId = tenantId,
-                CompanyId = companyId,
-                request.DepartmentCode,
-                request.DepartmentName,
-                request.Description,
-                request.ParentDepartmentId
-            },
-            commandType: CommandType.StoredProcedure,
-            cancellationToken: cancellationToken));
+        try
+        {
+            return await connection.QuerySingleAsync<DepartmentDto>(new CommandDefinition(
+                "hrms.usp_Departments_Create",
+                new
+                {
+                    TenantId = tenantId,
+                    CompanyId = companyId,
+                    request.DepartmentCode,
+                    request.DepartmentName,
+                    request.Description,
+                    request.ParentDepartmentId
+                },
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken));
+        }
+        catch (SqlException exception) when (exception.Number is 2601 or 2627)
+        {
+            throw new InvalidOperationException(
+                $"Department code '{request.DepartmentCode}' is already in use.", exception);
+        }
+        catch (SqlException exception) when (exception.Number == 51201)
+        {
+            throw new InvalidOperationException(
+                "The company does not exist, is inactive, or is outside the authenticated tenant.", exception);
+        }
+        catch (SqlException exception) when (exception.Number == 51202)
+        {
+            throw new ArgumentException(
+                "ParentDepartmentId must identify an active department in the same company.",
+                nameof(request.ParentDepartmentId), exception);
+        }
     }
 
     public async Task<DepartmentDto?> UpdateAsync(
@@ -77,20 +97,28 @@ internal sealed class DepartmentRepository(IDbConnectionFactory connectionFactor
         UpdateDepartmentRequest request, CancellationToken cancellationToken)
     {
         await using var connection = connectionFactory.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<DepartmentDto>(new CommandDefinition(
-            "hrms.usp_Departments_Update",
-            new
-            {
-                TenantId = tenantId,
-                CompanyId = companyId,
-                DepartmentId = departmentId,
-                request.DepartmentName,
-                request.Description,
-                request.ParentDepartmentId,
-                RowVersion = request.RowVersion
-            },
-            commandType: CommandType.StoredProcedure,
-            cancellationToken: cancellationToken));
+        try
+        {
+            return await connection.QuerySingleOrDefaultAsync<DepartmentDto>(new CommandDefinition(
+                "hrms.usp_Departments_Update",
+                new
+                {
+                    TenantId = tenantId,
+                    CompanyId = companyId,
+                    DepartmentId = departmentId,
+                    request.DepartmentName,
+                    request.Description,
+                    request.ParentDepartmentId,
+                    RowVersion = request.RowVersion
+                },
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken));
+        }
+        catch (SqlException exception) when (exception.Number is 51202 or 51203 or 51204)
+        {
+            throw new ArgumentException(
+                exception.Message, nameof(request.ParentDepartmentId), exception);
+        }
     }
 
     public async Task<bool> DeactivateAsync(
