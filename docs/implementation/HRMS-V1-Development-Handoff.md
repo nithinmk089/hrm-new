@@ -513,3 +513,45 @@ Local verification pending:
 - Run `npm test` and `npm run build` in `src/frontend/hrms-web`.
 - Verify list/create/edit/deactivate and duplicate code/invalid job-level scenarios in browser.
 - Do not merge or start the next feature until user confirms.
+
+
+### UI-04C Designations integrated (2026-11-08)
+
+- Pull request [#9](https://github.com/nithinmk089/hrm-new/pull/9), **feat(organization): add Designations management UI**, merged into `main`.
+- Merge commit: `047b744b6827e7a9cf9a60761e84e3574a954e39`.
+- User confirmed the selected-company dropdown issue was fixed and Designations UI works as expected. Unit-test/build verification was completed.
+- Next branch `feature/ui-05-holidays` created directly from the merge commit above.
+
+## 15. Current implementation checkpoint — UI-05 Holidays
+
+Active branch: `feature/ui-05-holidays`.
+
+Verified backend contract:
+- Base route: `/api/v1/companies/{companyId}/holidays`.
+- Permissions: `holidays.read`, `holidays.create`, `holidays.update`, `holidays.deactivate`.
+- Create: `holidayName`, `holidayDate`, `description`, `isOptional`.
+- Update: same fields plus current 8-byte RowVersion encoded as Base64.
+- Deactivate: PATCH `/{holidayId}/deactivate` with RowVersion.
+- Holiday name required, trimmed, max 150; date required and normalized to date-only; description optional max 500; one holiday per company per date.
+- Multi-day holidays are represented as one record per date. Recurrence, office-specific calendars and employee overrides are out of V1 scope.
+- Inactive holidays remain historical; no activation endpoint exists.
+- Existing migrations 013 and 014 provide schema/procedures and permissions; no new migration expected.
+
+Design requirements:
+- Company selection from tenant-scoped companies API; selected CompanyId only, never TenantId.
+- Directory ordered by date with date, name, description, optional/mandatory indicator and active/inactive state.
+- Create/edit modal with date, optional toggle and description; date-only payload should be sent as `YYYY-MM-DD` to avoid timezone shifts.
+- Duplicate-date conflicts should be presented as a clear validation error.
+- Deactivation uses confirmation modal and RowVersion.
+- Add focused Angular TestBed/Vitest unit tests for loading, no company, selection, validation, date serialization, duplicate-date API error, update RowVersion, deactivate confirmation and inactive state.
+
+
+Implemented on `feature/ui-05-holidays`:
+- Typed Holiday contracts and CompanyApiService list/create/update/deactivate methods.
+- Lazy authenticated route `/company/holidays`; existing sidebar Holidays link already targets this route.
+- Company-scoped holiday directory ordered by date, with mandatory/optional and active/inactive indicators.
+- Create/edit modal with date-only `YYYY-MM-DD` payload, optional flag and description.
+- Duplicate-date validation, RowVersion update/deactivation, styled confirmation and success dialogs.
+- Ten Angular TestBed/Vitest unit tests covering load, empty companies, company switch, validation, create/date payload, update RowVersion, duplicate date, deactivate confirmation, conflict and inactive actions.
+
+Local build, unit tests, and browser verification pending. No migration required; migrations 013/014 are already part of the baseline.
