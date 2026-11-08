@@ -435,3 +435,36 @@ git switch main
 git pull --ff-only origin main
 git switch -c feature/ui-04b-offices origin/feature/ui-04b-offices
 ```
+
+
+### UI-04B Offices frontend implementation checkpoint (2026-11-08)
+
+Status: **Frontend vertical slice committed; local build/test and API verification pending.**
+
+Implemented:
+- Typed `Office`, `CreateOfficeRequest`, and `UpdateOfficeRequest` contracts.
+- `CompanyApiService` methods for list, create, update, and deactivate office endpoints.
+- Lazy-loaded authenticated route `/company/offices`.
+- Office directory with code/name, city/state, country, timezone, head-office indicator, active/inactive status, and action tooltips.
+- Company selection uses the tenant-scoped `GET /api/v1/companies` response and the selected CompanyId; TenantId is never substituted for CompanyId.
+- Create/edit modal covers office code/name, address, city, state, postal code, two-letter country code, time-zone ID and head-office flag.
+- Office code is immutable during edit; request includes latest RowVersion.
+- Deactivation confirmation and success dialogs match Departments UI. Inactive records remain visible as historical records; no Activate action is shown because the current backend has no office activation endpoint.
+- Head-office uniqueness and duplicate office code errors are surfaced from API responses.
+
+Backend contract and persistence inspected:
+- Existing SQL procedures: `hrms.usp_Offices_GetAll`, `GetById`, `GetByCode`, `Create`, `Update`, `Deactivate`.
+- Create validates active company ownership in the authenticated tenant.
+- Only one active head office is enforced by database uniqueness constraints; update/create persistence translates duplicate key errors to user-facing validation errors.
+- Deactivation clears `IsHeadOffice` and sets `IsActive = 0`.
+- Update/deactivation use 8-byte RowVersion.
+- No SQL migration is required for the current UI slice; migration 011 already contains the office stored procedures.
+
+Local verification required:
+1. Pull `feature/ui-04b-offices`.
+2. Run `npm run build` and `npm test` in `src/frontend/hrms-web`.
+3. Open Offices and verify company list and office directory.
+4. Verify create with a unique code, edit fields, head-office selection, and deactivate.
+5. Verify duplicate office code and second active head-office errors are displayed clearly.
+6. Verify inactive offices remain visible and cannot be edited/deactivated again.
+7. Do not proceed to Designations until the user confirms local verification.
