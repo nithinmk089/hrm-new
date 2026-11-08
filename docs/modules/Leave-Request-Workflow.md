@@ -6,9 +6,9 @@ The leave-request workflow is implemented in incremental slices:
 
 1. Chargeable-day calculation (implemented).
 2. Tenant-scoped request submission, overlap protection and atomic balance reservation (implemented).
-3. Manager approval/rejection.
+3. Manager approval/rejection (implemented).
 4. Requester cancellation and balance restoration.
-5. Request history and approval queue.
+5. Employee request history and approval queue details.
 
 This document is the functional baseline for the remaining slices.
 
@@ -51,6 +51,8 @@ to explain how the total was derived.
 - Submission reserves balance days in the same SQL transaction as inserting
   the request and Submitted history record.
 - Approval moves reserved days to used days; rejection releases reserved days.
+- Only the employee's currently assigned reporting manager can approve or reject; a manager cannot decide their own request.
+- Decisions require the current RowVersion and update request, approval history, balance aggregates and ledger in one transaction.
 - A leave type that does not require approval is auto-approved at submission.
 - The reporting manager is resolved from the effective-dated
   `hrms.EmployeeReportingAssignments` table, not from request input.
@@ -79,8 +81,12 @@ Implemented:
 - Missing manager assignment, overlapping dates, missing annual balance or
   insufficient balance prevents submission.
 
+Implemented in the manager approval slice:
+- Manager pending-approval queue restricted to current direct reports.
+- Approve and reject endpoints resolve the manager through the authenticated employee mapping.
+- Decision-time manager assignment, pending status and RowVersion are rechecked in SQL.
+- Approval converts reservations to used days; rejection releases reservations. Both write approval history and ledger entries atomically.
+
 Not yet implemented:
-- Manager approval/rejection endpoints and authorization against the manager's
-  current employee mapping.
-- Employee request list/detail endpoints and manager approval queue.
-- Cancellation and balance restoration.
+- Employee request list/detail and approval history endpoints.
+- Requester cancellation and balance restoration.
