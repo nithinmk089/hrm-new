@@ -8,4 +8,5 @@ public interface IDepartmentService
     Task<DepartmentDto> CreateAsync(Guid tenantId, Guid companyId, CreateDepartmentRequest request, CancellationToken cancellationToken = default);
     Task<DepartmentDto?> UpdateAsync(Guid tenantId, Guid companyId, Guid departmentId, UpdateDepartmentRequest request, CancellationToken cancellationToken = default);
     Task<bool> DeactivateAsync(Guid tenantId, Guid companyId, Guid departmentId, byte[] rowVersion, CancellationToken cancellationToken = default);
+    Task<bool> ActivateAsync(Guid tenantId, Guid companyId, Guid departmentId, byte[] rowVersion, CancellationToken cancellationToken = default);
 }
