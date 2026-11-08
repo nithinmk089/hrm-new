@@ -4,11 +4,11 @@
 
 The leave-request workflow is implemented in incremental slices:
 
-1. Chargeable-day calculation (implemented in this slice).
-2. Tenant-scoped request submission and request history.
-3. Atomic balance reservation and overlap protection.
-4. Manager approval/rejection.
-5. Requester cancellation and balance restoration.
+1. Chargeable-day calculation (implemented).
+2. Tenant-scoped request submission, overlap protection and atomic balance reservation (implemented).
+3. Manager approval/rejection.
+4. Requester cancellation and balance restoration.
+5. Request history and approval queue.
 
 This document is the functional baseline for the remaining slices.
 
@@ -61,3 +61,26 @@ to explain how the total was derived.
   transactions must commit or roll back together.
 - All SQL operations must include authenticated TenantId and CompanyId
   predicates. RowVersion protects request transitions against stale updates.
+
+
+## Submission API status
+
+Implemented:
+- `POST /api/v1/companies/{companyId}/leave-requests`.
+- Requester identity is resolved from the authenticated user mapping.
+- Active leave type, company calendar, office assignments and holiday data are
+  loaded through a tenant/company-scoped stored procedure.
+- Chargeable dates are split into calendar-year allocations.
+- Pending requests reserve days; leave types not requiring approval are
+  auto-approved and move the days directly to UsedDays.
+- SQL migration 022 adds the context and submission procedures. The request,
+  Submitted/automatic-approval history, balance aggregates and ledger entries
+  are committed in one transaction.
+- Missing manager assignment, overlapping dates, missing annual balance or
+  insufficient balance prevents submission.
+
+Not yet implemented:
+- Manager approval/rejection endpoints and authorization against the manager's
+  current employee mapping.
+- Employee request list/detail endpoints and manager approval queue.
+- Cancellation and balance restoration.
