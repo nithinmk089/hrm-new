@@ -1,6 +1,7 @@
 using HRMS.API.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using Xunit;
 
 namespace HRMS.Infrastructure.Tests.Security;
 

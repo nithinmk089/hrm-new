@@ -4,6 +4,7 @@ using HRMS.Application.Abstractions.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace HRMS.Infrastructure.Tests.Security;
 
