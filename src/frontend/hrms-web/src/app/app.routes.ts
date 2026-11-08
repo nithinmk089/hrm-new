@@ -9,6 +9,7 @@ export const routes: Routes = [
   { path: 'company/departments', title: 'Departments | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/departments-page.component').then(m => m.DepartmentsPageComponent) },
   { path: 'company/offices', title: 'Offices | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/offices-page.component').then(m => m.OfficesPageComponent) },
   { path: 'company/designations', title: 'Designations | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/designations-page.component').then(m => m.DesignationsPageComponent) },
+  { path: 'company/holidays', title: 'Holidays | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/holidays-page.component').then(m => m.HolidaysPageComponent) },
   { path: 'company/:section', title: 'Company administration | HRMS', component: PlaceholderPageComponent, canActivate: [authGuard] },
   { path: 'employees', title: 'Employees | HRMS', component: PlaceholderPageComponent, canActivate: [authGuard], data: { title: 'Employee management', description: 'Employee directory and lifecycle management will be delivered in UI-06.' } },
   { path: 'leave', title: 'Leave management | HRMS', component: PlaceholderPageComponent, canActivate: [authGuard], data: { title: 'Leave management', description: 'Leave balances, requests and approvals will be delivered in UI-08.' } },
