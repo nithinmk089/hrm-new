@@ -8,8 +8,8 @@ SQL migration scripts are stored in this directory and are applied by the
 Use a zero-padded, increasing numeric prefix followed by a short description:
 
 - `001_CreateHrmsSchema.sql`
-- `002_CreateEmployeeTables.sql`
-- `003_AddEmployeeIndexes.sql`
+- `002_CreateCompanyOrganizationMasters.sql`
+- `003_CreateEmployeeTables.sql`
 
 Once a migration has been applied to any shared environment, do not edit or
 delete it. Add a new migration to change the schema.
@@ -43,3 +43,9 @@ explicitly before starting the API after a schema change.
 - SQLCMD-style `GO` batch separators are supported when `GO` appears alone on
   a line (an optional trailing SQL comment is allowed).
 - A migration failure rolls back the pending migration transaction.
+
+## Database design standards
+
+See [Database Standards](../../../../docs/database/Database-Standards.md) for
+schema naming, keys, company isolation, audit columns, soft deletion, and
+concurrency conventions.
