@@ -84,6 +84,15 @@ public sealed class TimesheetService(ITimesheetRepository repository, TimeProvid
         return repository.SubmitAsync(tenantId, companyId, actorUserId, timesheetId, request.RowVersion, cancellationToken);
     }
 
+    public Task<TimesheetApprovalDetailDto?> GetForApprovalAsync(
+        Guid tenantId, Guid companyId, Guid actorUserId, Guid timesheetId,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureIds(tenantId, companyId, actorUserId);
+        EnsureId(timesheetId, nameof(timesheetId));
+        return repository.GetForApprovalAsync(tenantId, companyId, actorUserId, timesheetId, cancellationToken);
+    }
+
     public Task<IReadOnlyList<TimesheetApprovalQueueItem>> GetPendingApprovalsAsync(
         Guid tenantId, Guid companyId, Guid actorUserId, CancellationToken cancellationToken = default)
     {
