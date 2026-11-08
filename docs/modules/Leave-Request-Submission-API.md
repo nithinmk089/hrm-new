@@ -51,10 +51,10 @@ Dates are calendar dates and use ISO `yyyy-MM-dd` representation.
 - `201 Created`: request submitted.
 - `400 Bad Request`: invalid input or invalid/unconfigured calendar.
 - `401 Unauthorized`: no valid access token.
-- `403 Forbidden`: permission or authenticated employee mapping missing.
-- `404 Not Found`: leave type/employee not available in the company.
-- `409 Conflict`: overlapping request, missing/insufficient balance, or
-  manager assignment required for approval is unavailable.
+- `403 Forbidden`: the caller lacks the `leave-requests.create` permission.
+- `409 Conflict`: employee mapping or leave type is unavailable, a reporting
+  manager is missing, dates overlap, or a required annual balance is missing
+  or insufficient.
 
 Manager decisions, cancellation and request-history read endpoints are
 implemented in subsequent workflow stages.
