@@ -11,7 +11,7 @@ public static class OfficeEndpoints
         var group = endpoints.MapGroup("/api/v1/companies/{companyId:guid}/offices")
             .WithTags("Offices");
 
-        group.MapGet("/", async Task<IResult> (
+        group.MapGet("", async Task<IResult> (
             Guid companyId, System.Security.Claims.ClaimsPrincipal principal,
             IOfficeService service, CancellationToken cancellationToken) =>
         {
@@ -37,7 +37,7 @@ public static class OfficeEndpoints
         .RequireAuthorization("Permission:offices.read")
         .WithName("GetOfficeById");
 
-        group.MapPost("/", async Task<IResult> (
+        group.MapPost("", async Task<IResult> (
             Guid companyId, CreateOfficeRequest request,
             System.Security.Claims.ClaimsPrincipal principal,
             IOfficeService service, CancellationToken cancellationToken) =>
