@@ -25,7 +25,10 @@ BEGIN
         ON membership.TenantId = m.TenantId AND membership.UserId = m.UserId
     INNER JOIN hrms.LeaveTypes lt
         ON lt.TenantId = m.TenantId AND lt.CompanyId = m.CompanyId
-    WHERE m.TenantId = @TenantId AND m.CompanyId = @CompanyId
+    INNER JOIN hrms.Companies company
+        ON company.TenantId = m.TenantId AND company.CompanyId = m.CompanyId
+    WHERE company.IsActive = 1 AND company.DeletedAtUtc IS NULL
+      AND m.TenantId = @TenantId AND m.CompanyId = @CompanyId
       AND m.UserId = @ActorUserId AND m.IsActive = 1
       AND membership.MembershipStatus = 'Active'
       AND e.IsActive = 1 AND e.DeletedAtUtc IS NULL
@@ -126,6 +129,8 @@ BEGIN
 
         SELECT @EmployeeId = e.EmployeeId
         FROM hrms.EmployeeUserMappings m WITH (UPDLOCK, HOLDLOCK)
+        INNER JOIN hrms.Companies company
+            ON company.TenantId = m.TenantId AND company.CompanyId = m.CompanyId
         INNER JOIN hrms.Employees e
             ON e.TenantId = m.TenantId AND e.CompanyId = m.CompanyId AND e.EmployeeId = m.EmployeeId
         INNER JOIN security.UserTenantMemberships membership
@@ -133,6 +138,7 @@ BEGIN
         WHERE m.TenantId = @TenantId AND m.CompanyId = @CompanyId
           AND m.UserId = @ActorUserId AND m.IsActive = 1
           AND membership.MembershipStatus = 'Active'
+          AND company.IsActive = 1 AND company.DeletedAtUtc IS NULL
           AND e.IsActive = 1 AND e.DeletedAtUtc IS NULL;
 
         IF @EmployeeId IS NULL
