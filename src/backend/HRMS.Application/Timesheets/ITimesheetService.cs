@@ -21,6 +21,10 @@ public interface ITimesheetService
         Guid tenantId, Guid companyId, Guid actorUserId, Guid timesheetId,
         TimesheetSubmitRequest request, CancellationToken cancellationToken = default);
 
+    Task<TimesheetApprovalDetailDto?> GetForApprovalAsync(
+        Guid tenantId, Guid companyId, Guid actorUserId, Guid timesheetId,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<TimesheetApprovalQueueItem>> GetPendingApprovalsAsync(
         Guid tenantId, Guid companyId, Guid actorUserId, CancellationToken cancellationToken = default);
 
