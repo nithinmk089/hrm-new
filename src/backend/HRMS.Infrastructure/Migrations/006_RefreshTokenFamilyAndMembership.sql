@@ -56,6 +56,13 @@ IF EXISTS
 )
     THROW 51063, 'One or more refresh tokens could not be mapped to a tenant membership. Review the records before retrying migration 006.', 1;
 
+-- Make the backfilled identity mandatory before adding the composite FK.
+ALTER TABLE security.RefreshTokens
+    ALTER COLUMN MembershipId uniqueidentifier NOT NULL;
+
+ALTER TABLE security.RefreshTokens
+    ALTER COLUMN TokenFamilyId uniqueidentifier NOT NULL;
+
 -- The composite FK proves that the stored membership belongs to the same
 -- tenant and user as the refresh-token record.
 IF NOT EXISTS
@@ -77,12 +84,6 @@ IF NOT EXISTS
         ADD CONSTRAINT FK_RefreshTokens_TenantMembershipIdentity
         FOREIGN KEY (TenantId, MembershipId, UserId)
         REFERENCES security.UserTenantMemberships (TenantId, MembershipId, UserId);
-
-ALTER TABLE security.RefreshTokens
-    ALTER COLUMN MembershipId uniqueidentifier NOT NULL;
-
-ALTER TABLE security.RefreshTokens
-    ALTER COLUMN TokenFamilyId uniqueidentifier NOT NULL;
 
 IF NOT EXISTS
 (
