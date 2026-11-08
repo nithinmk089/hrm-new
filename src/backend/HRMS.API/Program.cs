@@ -96,6 +96,7 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+app.UseMiddleware<ApiErrorLoggingMiddleware>();
 app.UseExceptionHandler();
 
 if (args.Contains("--migrate", StringComparer.OrdinalIgnoreCase))
