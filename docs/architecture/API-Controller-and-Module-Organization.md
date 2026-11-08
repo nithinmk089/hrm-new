@@ -20,7 +20,8 @@ HRMS.API/
 │   │       ├── DepartmentsController.cs
 │   │       ├── OfficesController.cs
 │   │       ├── DesignationsController.cs
-│   │       └── HolidaysController.cs
+│   │       ├── HolidaysController.cs
+│   │       └── LeaveTypesController.cs
 │   ├── EmployeeManagement/
 │   │   └── Controllers/
 │   ├── LeaveManagement/
