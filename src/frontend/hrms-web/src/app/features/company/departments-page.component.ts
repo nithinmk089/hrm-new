@@ -37,7 +37,7 @@ import { CompanySummary, Department } from '../../core/company/company.models';
         @else {
           <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Department</th><th>Code</th><th>Parent department</th><th>Status</th><th class="text-end">Actions</th></tr></thead><tbody>
             @for (department of departments(); track department.departmentId) {
-              <tr><td><strong>{{ department.departmentName }}</strong>@if(department.description){<small class="d-block text-muted">{{ department.description }}</small>}</td><td><span class="code-chip">{{ department.departmentCode }}</span></td><td>{{ parentName(department.parentDepartmentId) }}</td><td><span class="status" [class.inactive]="!department.isActive">{{ department.isActive ? 'Active' : 'Inactive' }}</span></td><td class="text-end"><button class="btn btn-sm btn-light me-1 action-button" type="button" (click)="openEdit(department)" [disabled]="!department.isActive" aria-label="Edit department" title="Edit department" data-bs-toggle="tooltip"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-light text-danger action-button" type="button" (click)="deactivate(department)" [disabled]="!department.isActive || busyId() === department.departmentId" aria-label="Deactivate department" title="Deactivate department" data-bs-toggle="tooltip"><i class="bi bi-person-dash"></i></button></td></tr>
+              <tr><td><strong>{{ department.departmentName }}</strong>@if(department.description){<small class="d-block text-muted">{{ department.description }}</small>}</td><td><span class="code-chip">{{ department.departmentCode }}</span></td><td>{{ parentName(department.parentDepartmentId) }}</td><td><span class="status" [class.inactive]="!department.isActive">{{ department.isActive ? 'Active' : 'Inactive' }}</span></td><td class="text-end"><button class="btn btn-sm btn-light me-1 action-button" type="button" (click)="openEdit(department)" [disabled]="!department.isActive" aria-label="Edit department" title="Edit department"><i class="bi bi-pencil"></i></button>@if(department.isActive){<button class="btn btn-sm btn-light text-danger action-button" type="button" (click)="deactivate(department)" [disabled]="busyId() === department.departmentId" aria-label="Deactivate department" title="Deactivate department"><i class="bi bi-person-dash"></i></button>}@else{<button class="btn btn-sm btn-light text-success action-button" type="button" (click)="activate(department)" [disabled]="busyId() === department.departmentId" aria-label="Activate department" title="Activate department"><i class="bi bi-person-check"></i></button>}</td></tr>
             }
           </tbody></table></div>
         }
@@ -212,6 +212,21 @@ export class DepartmentsPageComponent {
     });
   }
 
+
+
+  activate(item: Department): void {
+    if (item.isActive || this.busyId()) return;
+    this.busyId.set(item.departmentId);
+    this.api.activateDepartment(this.selectedCompanyId(), item.departmentId, item.rowVersion)
+      .pipe(finalize(() => this.busyId.set('')))
+      .subscribe({
+        next: () => {
+          this.notice.set('Department activated successfully.');
+          this.loadDepartments();
+        },
+        error: err => this.error.set(this.message(err, 'Unable to activate the department. Refresh the list and try again.'))
+      });
+  }
 
   deactivate(item: Department): void {
     if (!item.isActive || this.busyId()) return;
