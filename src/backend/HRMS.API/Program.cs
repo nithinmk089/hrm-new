@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text;
 using HRMS.API.Authorization;
 using HRMS.API.ErrorHandling;
+using HRMS.API.Endpoints;
 using HRMS.Application.Abstractions.Persistence;
 using HRMS.Application.Abstractions.Security;
 using HRMS.Application.Companies;
@@ -447,6 +448,8 @@ app.MapPatch("/api/v1/companies/{companyId:guid}/departments/{departmentId:guid}
 .RequireAuthorization("Permission:departments.deactivate")
 .WithName("DeactivateDepartment")
 .WithTags("Departments");
+
+app.MapOfficeEndpoints();
 
 Guid? ReadTenantId(System.Security.Claims.ClaimsPrincipal principal) =>
     Guid.TryParse(principal.FindFirst("tenant_id")?.Value, out var tenantId) && tenantId != Guid.Empty ? tenantId : null;
