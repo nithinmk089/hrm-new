@@ -31,10 +31,10 @@ CREATE TABLE [hrms].[Timesheets]
     CONSTRAINT [UQ_Timesheets_Tenant_Company_Id] UNIQUE ([TenantId], [CompanyId], [TimesheetId]),
     CONSTRAINT [FK_Timesheets_Company] FOREIGN KEY ([TenantId], [CompanyId])
         REFERENCES [hrms].[Companies] ([TenantId], [CompanyId]),
-    CONSTRAINT [FK_Timesheets_Employee] FOREIGN KEY ([TenantId], [CompanyId], [EmployeeId])
-        REFERENCES [hrms].[Employees] ([TenantId], [CompanyId], [EmployeeId]),
-    CONSTRAINT [FK_Timesheets_Reviewer] FOREIGN KEY ([TenantId], [CompanyId], [ReviewedByEmployeeId])
-        REFERENCES [hrms].[Employees] ([TenantId], [CompanyId], [EmployeeId]),
+    CONSTRAINT [FK_Timesheets_Employee] FOREIGN KEY ([CompanyId], [EmployeeId])
+        REFERENCES [hrms].[Employees] ([CompanyId], [EmployeeId]),
+    CONSTRAINT [FK_Timesheets_Reviewer] FOREIGN KEY ([CompanyId], [ReviewedByEmployeeId])
+        REFERENCES [hrms].[Employees] ([CompanyId], [EmployeeId]),
     CONSTRAINT [CK_Timesheets_WeekRange] CHECK
         ([WeekEndDate] = DATEADD(day, 6, [WeekStartDate])
          AND DATEDIFF(day, CONVERT(date, '19000101'), [WeekStartDate]) % 7 = 0),
@@ -112,8 +112,8 @@ CREATE TABLE [hrms].[TimesheetHistory]
     CONSTRAINT [PK_TimesheetHistory] PRIMARY KEY CLUSTERED ([TimesheetHistoryId]),
     CONSTRAINT [FK_TimesheetHistory_Timesheet] FOREIGN KEY ([TenantId], [CompanyId], [TimesheetId])
         REFERENCES [hrms].[Timesheets] ([TenantId], [CompanyId], [TimesheetId]),
-    CONSTRAINT [FK_TimesheetHistory_Actor] FOREIGN KEY ([TenantId], [CompanyId], [ActorEmployeeId])
-        REFERENCES [hrms].[Employees] ([TenantId], [CompanyId], [EmployeeId]),
+    CONSTRAINT [FK_TimesheetHistory_Actor] FOREIGN KEY ([CompanyId], [ActorEmployeeId])
+        REFERENCES [hrms].[Employees] ([CompanyId], [EmployeeId]),
     CONSTRAINT [CK_TimesheetHistory_Action] CHECK
         ([Action] IN ('Created', 'Submitted', 'Approved', 'Rejected', 'Resubmitted'))
 );
