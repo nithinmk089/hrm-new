@@ -124,13 +124,15 @@ IF NOT EXISTS
 -- Re-establish simple user FKs after the tenant column is removed.
 IF COL_LENGTH(N'security.UserRoles', N'UserId') IS NOT NULL
     ALTER TABLE [security].[UserRoles]
-        ADD CONSTRAINT [FK_UserRoles_GlobalUser]
-        FOREIGN KEY ([UserId]) REFERENCES [security].[Users] ([UserId]);
+        ADD CONSTRAINT [FK_UserRoles_TenantMembership]
+        FOREIGN KEY ([TenantId], [UserId])
+        REFERENCES [security].[UserTenantMemberships] ([TenantId], [UserId]);
 
 IF COL_LENGTH(N'security.RefreshTokens', N'UserId') IS NOT NULL
     ALTER TABLE [security].[RefreshTokens]
-        ADD CONSTRAINT [FK_RefreshTokens_GlobalUser]
-        FOREIGN KEY ([UserId]) REFERENCES [security].[Users] ([UserId]);
+        ADD CONSTRAINT [FK_RefreshTokens_TenantMembership]
+        FOREIGN KEY ([TenantId], [UserId])
+        REFERENCES [security].[UserTenantMemberships] ([TenantId], [UserId]);
 
 -------------------------------------------------------------------------------
 -- 3. Tenant membership and scoped role assignments.
@@ -219,6 +221,10 @@ ALTER TABLE [hrms].[Departments]
     ADD CONSTRAINT [FK_Departments_TenantCompany]
         FOREIGN KEY ([TenantId], [CompanyId])
         REFERENCES [hrms].[Companies] ([TenantId], [CompanyId]);
+
+ALTER TABLE [hrms].[Offices]
+    ADD CONSTRAINT [UQ_Offices_Tenant_Company_Office]
+        UNIQUE ([TenantId], [CompanyId], [OfficeId]);
 
 ALTER TABLE [hrms].[Offices]
     ADD CONSTRAINT [FK_Offices_TenantCompany]
@@ -368,7 +374,7 @@ IF NOT EXISTS
 (
     SELECT 1 FROM sys.foreign_keys
     WHERE parent_object_id = OBJECT_ID(N'security.UserRoles')
-      AND name = N'FK_UserRoles_GlobalUser'
+      AND name = N'FK_UserRoles_TenantMembership'
 )
     ALTER TABLE [security].[UserRoles]
         ADD CONSTRAINT [FK_UserRoles_GlobalUser]
@@ -378,7 +384,7 @@ IF NOT EXISTS
 (
     SELECT 1 FROM sys.foreign_keys
     WHERE parent_object_id = OBJECT_ID(N'security.RefreshTokens')
-      AND name = N'FK_RefreshTokens_GlobalUser'
+      AND name = N'FK_RefreshTokens_TenantMembership'
 )
     ALTER TABLE [security].[RefreshTokens]
         ADD CONSTRAINT [FK_RefreshTokens_GlobalUser]
