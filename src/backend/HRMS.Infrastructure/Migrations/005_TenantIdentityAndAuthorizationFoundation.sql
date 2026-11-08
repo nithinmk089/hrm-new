@@ -122,19 +122,6 @@ IF NOT EXISTS
     CREATE UNIQUE INDEX [UX_Users_NormalizedEmail_Global]
         ON [security].[Users] ([NormalizedEmail]);
 
--- Re-establish simple user FKs after the tenant column is removed.
-IF COL_LENGTH(N'security.UserRoles', N'UserId') IS NOT NULL
-    ALTER TABLE [security].[UserRoles]
-        ADD CONSTRAINT [FK_UserRoles_TenantMembership]
-        FOREIGN KEY ([TenantId], [UserId])
-        REFERENCES [security].[UserTenantMemberships] ([TenantId], [UserId]);
-
-IF COL_LENGTH(N'security.RefreshTokens', N'UserId') IS NOT NULL
-    ALTER TABLE [security].[RefreshTokens]
-        ADD CONSTRAINT [FK_RefreshTokens_TenantMembership]
-        FOREIGN KEY ([TenantId], [UserId])
-        REFERENCES [security].[UserTenantMemberships] ([TenantId], [UserId]);
-
 -------------------------------------------------------------------------------
 -- 3. Tenant membership and scoped role assignments.
 -------------------------------------------------------------------------------
@@ -175,12 +162,27 @@ CREATE INDEX [IX_UserTenantMemberships_User_Status]
     ON [security].[UserTenantMemberships] ([UserId], [MembershipStatus])
     INCLUDE ([TenantId], [IsDefault]);
 
+-- Re-establish tenant membership references only after the parent table exists.
+ALTER TABLE [security].[UserRoles]
+    ADD CONSTRAINT [FK_UserRoles_TenantMembership]
+    FOREIGN KEY ([TenantId], [UserId])
+    REFERENCES [security].[UserTenantMemberships] ([TenantId], [UserId]);
+
+ALTER TABLE [security].[RefreshTokens]
+    ADD CONSTRAINT [FK_RefreshTokens_TenantMembership]
+    FOREIGN KEY ([TenantId], [UserId])
+    REFERENCES [security].[UserTenantMemberships] ([TenantId], [UserId]);
+
+GO
+
 -------------------------------------------------------------------------------
 -- 4. Make companies tenant-owned and add same-tenant parent hierarchy.
 -------------------------------------------------------------------------------
 ALTER TABLE [hrms].[Companies]
     ADD [TenantId] uniqueidentifier NOT NULL,
         [ParentCompanyId] uniqueidentifier NULL;
+
+GO
 
 ALTER TABLE [hrms].[Companies]
     ADD CONSTRAINT [FK_Companies_Tenant]
