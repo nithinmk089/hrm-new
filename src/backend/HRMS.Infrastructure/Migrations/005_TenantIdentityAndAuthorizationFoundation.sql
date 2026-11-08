@@ -220,6 +220,8 @@ ALTER TABLE [hrms].[EmployeeContacts] ADD [TenantId] uniqueidentifier NOT NULL;
 ALTER TABLE [hrms].[EmployeeAddresses] ADD [TenantId] uniqueidentifier NOT NULL;
 ALTER TABLE [hrms].[EmployeeDocuments] ADD [TenantId] uniqueidentifier NOT NULL;
 
+GO
+
 ALTER TABLE [hrms].[Departments]
     ADD CONSTRAINT [FK_Departments_TenantCompany]
         FOREIGN KEY ([TenantId], [CompanyId])
