@@ -219,10 +219,10 @@ BEGIN
 
     DECLARE @Entries TABLE
     (
-        WorkDate date NOT NULL,
-        WorkCategory varchar(30) NOT NULL,
-        [Description] nvarchar(1000) NOT NULL,
-        Hours decimal(5,2) NOT NULL
+        WorkDate date NULL,
+        WorkCategory varchar(30) NULL,
+        [Description] nvarchar(1000) NULL,
+        Hours decimal(5,2) NULL
     );
 
     INSERT INTO @Entries (WorkDate, WorkCategory, [Description], Hours)
@@ -245,11 +245,11 @@ BEGIN
     IF EXISTS
     (
         SELECT 1 FROM @Entries
-        WHERE WorkDate IS NULL OR WorkCategory NOT IN
+        WHERE WorkDate IS NULL OR WorkCategory IS NULL OR WorkCategory NOT IN
             ('ClientWork', 'Internal', 'Meeting', 'Training', 'Administration', 'Other')
            OR NULLIF(LTRIM(RTRIM([Description])), N'') IS NULL
            OR LEN([Description]) > 1000
-           OR Hours <= 0 OR Hours > 24 OR Hours * 4 <> FLOOR(Hours * 4)
+           OR Hours IS NULL OR Hours <= 0 OR Hours > 24 OR Hours * 4 <> FLOOR(Hours * 4)
     )
         THROW 51408, 'One or more time entries contain invalid values.', 1;
 
