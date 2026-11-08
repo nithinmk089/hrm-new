@@ -604,3 +604,95 @@ BEGIN
     END CATCH;
 END;
 GO
+
+
+CREATE OR ALTER PROCEDURE [hrms].[usp_Timesheets_GetForApproval]
+    @TenantId uniqueidentifier,
+    @CompanyId uniqueidentifier,
+    @ActorUserId uniqueidentifier,
+    @TimesheetId uniqueidentifier
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @ManagerEmployeeId uniqueidentifier;
+    SELECT @ManagerEmployeeId = mapping.EmployeeId
+    FROM hrms.EmployeeUserMappings mapping
+    INNER JOIN security.UserTenantMemberships membership
+        ON membership.TenantId = mapping.TenantId AND membership.UserId = mapping.UserId
+    INNER JOIN hrms.Employees managerEmployee
+        ON managerEmployee.TenantId = mapping.TenantId AND managerEmployee.CompanyId = mapping.CompanyId
+       AND managerEmployee.EmployeeId = mapping.EmployeeId
+    WHERE mapping.TenantId = @TenantId AND mapping.CompanyId = @CompanyId
+      AND mapping.UserId = @ActorUserId AND mapping.IsActive = 1
+      AND membership.MembershipStatus = 'Active'
+      AND managerEmployee.IsActive = 1 AND managerEmployee.DeletedAtUtc IS NULL;
+
+    IF @ManagerEmployeeId IS NULL
+        THROW 51417, 'The authenticated user is not mapped to an active manager employee.', 1;
+
+    SELECT timesheet.TimesheetId, timesheet.EmployeeId,
+           employee.EmployeeCode, employee.FirstName, employee.LastName,
+           timesheet.WeekStartDate, timesheet.WeekEndDate, timesheet.Status,
+           timesheet.SubmittedAtUtc, timesheet.ReviewedByEmployeeId,
+           timesheet.ReviewedAtUtc, timesheet.ReviewComments, timesheet.RowVersion,
+           COALESCE(SUM(entry.Hours), 0) AS TotalHours
+    FROM hrms.Timesheets timesheet
+    INNER JOIN hrms.Employees employee
+        ON employee.TenantId = timesheet.TenantId AND employee.CompanyId = timesheet.CompanyId
+       AND employee.EmployeeId = timesheet.EmployeeId
+    LEFT JOIN hrms.TimesheetEntries entry
+        ON entry.TenantId = timesheet.TenantId AND entry.CompanyId = timesheet.CompanyId
+       AND entry.TimesheetId = timesheet.TimesheetId AND entry.DeletedAtUtc IS NULL
+    WHERE timesheet.TenantId = @TenantId AND timesheet.CompanyId = @CompanyId
+      AND timesheet.TimesheetId = @TimesheetId
+      AND timesheet.Status = 'Submitted' AND timesheet.DeletedAtUtc IS NULL
+      AND employee.IsActive = 1 AND employee.DeletedAtUtc IS NULL
+      AND EXISTS
+      (
+          SELECT 1 FROM hrms.EmployeeReportingAssignments assignment
+          WHERE assignment.TenantId = @TenantId AND assignment.CompanyId = @CompanyId
+            AND assignment.EmployeeId = timesheet.EmployeeId
+            AND assignment.ManagerEmployeeId = @ManagerEmployeeId
+            AND assignment.StartDate <= CONVERT(date, SYSUTCDATETIME())
+            AND (assignment.EndDate IS NULL OR assignment.EndDate >= CONVERT(date, SYSUTCDATETIME()))
+            AND assignment.DeletedAtUtc IS NULL
+      )
+    GROUP BY timesheet.TimesheetId, timesheet.EmployeeId, employee.EmployeeCode,
+             employee.FirstName, employee.LastName, timesheet.WeekStartDate,
+             timesheet.WeekEndDate, timesheet.Status, timesheet.SubmittedAtUtc,
+             timesheet.ReviewedByEmployeeId, timesheet.ReviewedAtUtc,
+             timesheet.ReviewComments, timesheet.RowVersion;
+
+    SELECT entry.TimesheetEntryId, entry.WorkDate, entry.WorkCategory,
+           entry.Description, entry.Hours, entry.RowVersion
+    FROM hrms.TimesheetEntries entry
+    INNER JOIN hrms.Timesheets timesheet
+        ON timesheet.TenantId = entry.TenantId AND timesheet.CompanyId = entry.CompanyId
+       AND timesheet.TimesheetId = entry.TimesheetId
+    WHERE timesheet.TenantId = @TenantId AND timesheet.CompanyId = @CompanyId
+      AND timesheet.TimesheetId = @TimesheetId AND timesheet.Status = 'Submitted'
+      AND timesheet.DeletedAtUtc IS NULL AND entry.DeletedAtUtc IS NULL
+      AND EXISTS
+      (
+          SELECT 1
+          FROM hrms.EmployeeUserMappings mapping
+          INNER JOIN security.UserTenantMemberships membership
+              ON membership.TenantId = mapping.TenantId AND membership.UserId = mapping.UserId
+          WHERE mapping.TenantId = @TenantId AND mapping.CompanyId = @CompanyId
+            AND mapping.UserId = @ActorUserId AND mapping.IsActive = 1
+            AND membership.MembershipStatus = 'Active'
+            AND EXISTS
+            (
+                SELECT 1 FROM hrms.EmployeeReportingAssignments assignment
+                WHERE assignment.TenantId = @TenantId AND assignment.CompanyId = @CompanyId
+                  AND assignment.EmployeeId = timesheet.EmployeeId
+                  AND assignment.ManagerEmployeeId = mapping.EmployeeId
+                  AND assignment.StartDate <= CONVERT(date, SYSUTCDATETIME())
+                  AND (assignment.EndDate IS NULL OR assignment.EndDate >= CONVERT(date, SYSUTCDATETIME()))
+                  AND assignment.DeletedAtUtc IS NULL
+            )
+      )
+    ORDER BY entry.WorkDate, entry.TimesheetEntryId;
+END;
+GO
