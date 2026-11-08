@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace HRMS.API.ErrorHandling;
 public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
+    public const string ExceptionItemKey = "HRMS.Exception";
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
+        httpContext.Items[ExceptionItemKey] = exception;
         logger.LogError(exception, "An unhandled exception occurred while processing {Method} {Path}.",
             httpContext.Request.Method, httpContext.Request.Path);
         var (status, title, detail) = exception switch
