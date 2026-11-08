@@ -139,4 +139,17 @@ internal sealed class DepartmentRepository(IDbConnectionFactory connectionFactor
             cancellationToken: cancellationToken));
         return affected == 1;
     }
+    public async Task<bool> ActivateAsync(
+        Guid tenantId, Guid companyId, Guid departmentId,
+        byte[] rowVersion, CancellationToken cancellationToken)
+    {
+        await using var connection = connectionFactory.CreateConnection();
+        var affected = await connection.ExecuteScalarAsync<int>(new CommandDefinition(
+            "hrms.usp_Departments_Activate",
+            new { TenantId = tenantId, CompanyId = companyId, DepartmentId = departmentId, RowVersion = rowVersion },
+            commandType: CommandType.StoredProcedure,
+            cancellationToken: cancellationToken));
+        return affected == 1;
+    }
+
 }
