@@ -527,9 +527,13 @@ BEGIN
         FROM hrms.EmployeeUserMappings mapping WITH (UPDLOCK, HOLDLOCK)
         INNER JOIN security.UserTenantMemberships membership
             ON membership.TenantId = mapping.TenantId AND membership.UserId = mapping.UserId
+        INNER JOIN hrms.Employees managerEmployee
+            ON managerEmployee.TenantId = mapping.TenantId AND managerEmployee.CompanyId = mapping.CompanyId
+           AND managerEmployee.EmployeeId = mapping.EmployeeId
         WHERE mapping.TenantId = @TenantId AND mapping.CompanyId = @CompanyId
           AND mapping.UserId = @ActorUserId AND mapping.IsActive = 1
-          AND membership.MembershipStatus = 'Active';
+          AND membership.MembershipStatus = 'Active'
+          AND managerEmployee.IsActive = 1 AND managerEmployee.DeletedAtUtc IS NULL;
 
         IF @ManagerEmployeeId IS NULL
             THROW 51417, 'The authenticated user is not mapped to an active manager employee.', 1;
