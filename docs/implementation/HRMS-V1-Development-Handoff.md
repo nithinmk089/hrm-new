@@ -397,3 +397,83 @@ Pending:
 - Updated DepartmentService test fake for the new repository contract.
 - Local backend build, migration, and frontend build/tests remain to be run by the user. Run migration 028 before testing the activation API.
 
+
+
+### UI-04A Departments integrated (2026-11-08)
+
+- Pull request [#7](https://github.com/nithinmk089/hrm-new/pull/7), **feat(organization): complete department management**, merged into `main`.
+- Merge commit: `18067564f5c98462d1ed9745860f2860f1ef1f57`.
+- User confirmed backend build, migration 028, frontend build/tests, and department create/edit/deactivate/reactivate verification succeeded.
+- Next branch `feature/ui-04b-offices` was created directly from the merge commit above.
+
+## 13. Current implementation checkpoint — UI-04B Offices
+
+Active branch: `feature/ui-04b-offices`.
+
+Inspected backend contract:
+- Controller route: `/api/v1/companies/{companyId}/offices`.
+- Policies: `offices.read`, `offices.create`, `offices.update`, `offices.deactivate`.
+- Create request fields: `officeCode`, `officeName`, `addressLine1`, `addressLine2`, `city`, `stateOrProvince`, `postalCode`, `countryCode`, `timeZoneId`, `isHeadOffice`.
+- Update request fields are the same except officeCode is immutable and RowVersion is required.
+- DTO includes office/company IDs, code/name, address, country, time zone, head-office and active flags, timestamps and RowVersion.
+- Service normalizes office code and country code to uppercase; country code must be two ASCII letters; required code/name limits 30/150; address line max 200; city/state max 100; postal code max 20; timezone ID max 100.
+- Update/deactivation require an 8-byte RowVersion. Duplicate office codes are rejected within the company.
+- Deactivation exists; no reactivation endpoint currently exists. Do not display an Activate action until a backend endpoint and persistence implementation are added, if the product requires reactivation.
+- Company context must use the tenant-scoped company list endpoint and selected CompanyId, never TenantId.
+
+Planned vertical slice:
+1. Inspect repository SQL and stored procedure contracts and office-specific migrations before wiring UI.
+2. Implement offices list with active/inactive status, head-office indicator, address and timezone details.
+3. Implement create/edit modal with country/time-zone inputs and validation.
+4. Implement styled deactivate confirmation and success/error dialogs, preserving RowVersion.
+5. Add office reactivation only if supported through a deliberately added backend operation; confirm permission model and database constraints first.
+6. User runs build/tests/migration and verifies list/create/edit/deactivate locally before proceeding to Designations.
+
+Local checkout:
+```powershell
+git switch main
+git pull --ff-only origin main
+git switch -c feature/ui-04b-offices origin/feature/ui-04b-offices
+```
+
+
+### UI-04B Offices frontend implementation checkpoint (2026-11-08)
+
+Status: **Frontend vertical slice committed; local build/test and API verification pending.**
+
+Implemented:
+- Typed `Office`, `CreateOfficeRequest`, and `UpdateOfficeRequest` contracts.
+- `CompanyApiService` methods for list, create, update, and deactivate office endpoints.
+- Lazy-loaded authenticated route `/company/offices`.
+- Office directory with code/name, city/state, country, timezone, head-office indicator, active/inactive status, and action tooltips.
+- Company selection uses the tenant-scoped `GET /api/v1/companies` response and the selected CompanyId; TenantId is never substituted for CompanyId.
+- Create/edit modal covers office code/name, address, city, state, postal code, two-letter country code, time-zone ID and head-office flag.
+- Office code is immutable during edit; request includes latest RowVersion.
+- Deactivation confirmation and success dialogs match Departments UI. Inactive records remain visible as historical records; no Activate action is shown because the current backend has no office activation endpoint.
+- Head-office uniqueness and duplicate office code errors are surfaced from API responses.
+
+Backend contract and persistence inspected:
+- Existing SQL procedures: `hrms.usp_Offices_GetAll`, `GetById`, `GetByCode`, `Create`, `Update`, `Deactivate`.
+- Create validates active company ownership in the authenticated tenant.
+- Only one active head office is enforced by database uniqueness constraints; update/create persistence translates duplicate key errors to user-facing validation errors.
+- Deactivation clears `IsHeadOffice` and sets `IsActive = 0`.
+- Update/deactivation use 8-byte RowVersion.
+- No SQL migration is required for the current UI slice; migration 011 already contains the office stored procedures.
+
+Local verification required:
+1. Pull `feature/ui-04b-offices`.
+2. Run `npm run build` and `npm test` in `src/frontend/hrms-web`.
+3. Open Offices and verify company list and office directory.
+4. Verify create with a unique code, edit fields, head-office selection, and deactivate.
+5. Verify duplicate office code and second active head-office errors are displayed clearly.
+6. Verify inactive offices remain visible and cannot be edited/deactivated again.
+7. Do not proceed to Designations until the user confirms local verification.
+
+
+### Frontend unit testing standard and Offices coverage (2026-11-08)
+
+- UI unit tests are required for every feature page and shared service/interceptor/guard with meaningful behavior; do not treat a successful production build as sufficient UI verification.
+- Use the existing Vitest + Angular TestBed setup. Keep tests deterministic by mocking API services with RxJS `of` / `throwError`; no live API or database dependency.
+- Cover initial loading and empty/error states, company/tenant selection behavior, form validation, create/update payload mapping, RowVersion propagation, confirmation flows, success/error outcomes, and active/inactive actions.
+- Added `offices-page.component.spec.ts` with nine test cases: initial company/office loading and selected company, no companies, company switching, required/two-letter country validation, normalized create payload, immutable office code and RowVersion on update, explicit deactivation confirmation, conflict handling, and inactive-office action visibility.
+- Future UI pages should include their unit test file in the same feature branch before requesting merge. Shared components/services should receive focused tests where behavior warrants them.
