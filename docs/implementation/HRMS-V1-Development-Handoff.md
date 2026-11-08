@@ -171,3 +171,44 @@ UI-01 repository checkpoint:
 - Latest feature branch commit at this checkpoint: `ebc51b1fa6c517081ff1cc5e81f8b95e5e3e225b`.
 - Angular CLI development build is configured to replace the production environment with the local API URL. The API URL is centralized through the `API_BASE_URL` injection token.
 - Registered Angular HttpClient for upcoming centralized API services. Added a Vitest smoke test for the application shell. It has been committed but has **not yet been executed**.
+
+
+## 9. UI-02 progress checkpoint (2026-11-08)
+
+Status: **In progress — first authentication vertical slice committed to `feature/ui-02-authentication`; local build and runtime verification are pending.**
+
+- UI-01 was merged into `main` through PR [#4](https://github.com/nithinmk089/hrm-new/pull/4), merge commit `4e9983183a26d556dec79c591fa8bf80bf9e7803`.
+- UI-02 branch: `feature/ui-02-authentication`, created from that exact latest-main merge commit.
+- Added typed authentication contracts matching the backend `LoginRequest` and `LoginResult`.
+- Added an in-memory Angular signal-based authentication session; access tokens are not written to localStorage/sessionStorage. Refresh tokens remain in the backend-managed HttpOnly cookie.
+- Added login UI with tenant code, email and password, validation, loading and generic authentication error states.
+- Added auth guard for all existing application routes, a bearer-token interceptor, and a layout-free login route.
+- Login and refresh requests use `withCredentials: true`. Successful login/refresh also calls `GET /api/v1/auth/me` to load the current identity contract.
+- The backend `/auth/me` contract currently returns userId, email, tenantId, tenantCode and membershipId. It does not return effective permissions. Do not invent client-side permissions or role assumptions; permission endpoint/navigation work remains pending backend contract review.
+- Current UI-02 code has **not** been built or tested locally by the assistant. User verification is required before proceeding.
+
+### UI-02 files added/updated in this slice
+
+Added:
+- `src/frontend/hrms-web/src/app/core/auth/auth.models.ts`
+- `src/frontend/hrms-web/src/app/core/auth/auth.service.ts`
+- `src/frontend/hrms-web/src/app/core/auth/auth.guard.ts`
+- `src/frontend/hrms-web/src/app/core/auth/auth.interceptor.ts`
+- `src/frontend/hrms-web/src/app/features/auth/login-page.component.ts`
+
+Updated:
+- `src/frontend/hrms-web/src/app/app.routes.ts`
+- `src/frontend/hrms-web/src/app/app.config.ts`
+- `src/frontend/hrms-web/src/app/app.component.ts`
+
+### Important local development configuration
+
+The backend's CORS policy and `HasTrustedOrigin()` check both use `Authentication:AllowedOrigins`. The Angular development server uses `http://localhost:4200`, while the API uses `http://localhost:5000`. Configure the API Development environment with the exact origin `http://localhost:4200` before testing cross-origin login. Do not weaken origin validation or enable wildcard origins with credentials.
+
+### Next UI-02 actions
+
+1. Fetch and pull `feature/ui-02-authentication` locally.
+2. Run `npm run build` and `npm test` from `src/frontend/hrms-web`; share any compiler/test output before further changes.
+3. Configure the development API allowed origin as described above, restart the API, and verify the login request/cookie behavior in the browser.
+4. Complete 401 refresh/retry behavior, logout UI, current-user display, permission retrieval and permission-aware navigation only after confirming the backend permission model/endpoint.
+5. Add focused auth service/interceptor/guard tests, then complete the UI-02 exit criteria and merge the branch into `main`.
