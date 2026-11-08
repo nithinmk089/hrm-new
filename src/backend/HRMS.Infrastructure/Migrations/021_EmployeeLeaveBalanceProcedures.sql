@@ -108,15 +108,15 @@ BEGIN
             WHERE EmployeeLeaveBalanceId = @BalanceId;
         ELSE IF @TransactionType = 'Accrual'
             UPDATE hrms.EmployeeLeaveBalances SET AccruedDays = AccruedDays + @DaysDelta,
-                UpdatedAtUtc = SYSUTCDATETIME()
+                UpdatedAtUtc = SYSUTCDATETIME(), UpdatedByUserId = @ActorUserId
             WHERE EmployeeLeaveBalanceId = @BalanceId;
         ELSE IF @TransactionType = 'CarryForward'
             UPDATE hrms.EmployeeLeaveBalances SET CarriedForwardDays = CarriedForwardDays + @DaysDelta,
-                UpdatedAtUtc = SYSUTCDATETIME()
+                UpdatedAtUtc = SYSUTCDATETIME(), UpdatedByUserId = @ActorUserId
             WHERE EmployeeLeaveBalanceId = @BalanceId;
         ELSE
             UPDATE hrms.EmployeeLeaveBalances SET AdjustmentDays = AdjustmentDays + @DaysDelta,
-                UpdatedAtUtc = SYSUTCDATETIME()
+                UpdatedAtUtc = SYSUTCDATETIME(), UpdatedByUserId = @ActorUserId
             WHERE EmployeeLeaveBalanceId = @BalanceId;
 
         INSERT INTO hrms.EmployeeLeaveBalanceTransactions
