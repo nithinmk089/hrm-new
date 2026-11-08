@@ -37,6 +37,9 @@ builder.Services
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
+            RequireSignedTokens = true,
+            RequireExpirationTime = true,
+            ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
             IssuerSigningKey = string.IsNullOrWhiteSpace(jwtSigningKey)
                 ? null
                 : new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)),
