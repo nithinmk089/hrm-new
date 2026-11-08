@@ -13,6 +13,14 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    IF NOT EXISTS
+    (
+        SELECT 1 FROM hrms.Companies
+        WHERE TenantId = @TenantId AND CompanyId = @CompanyId
+          AND IsActive = 1 AND DeletedAtUtc IS NULL
+    )
+        RETURN;
+
     DECLARE @ManagerEmployeeId uniqueidentifier;
 
     SELECT @ManagerEmployeeId = mapping.EmployeeId
@@ -85,6 +93,14 @@ BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
 
+        IF NOT EXISTS
+        (
+            SELECT 1 FROM hrms.Companies
+            WHERE TenantId = @TenantId AND CompanyId = @CompanyId
+              AND IsActive = 1 AND DeletedAtUtc IS NULL
+        )
+            THROW 51299, 'The company does not exist or is inactive in the authenticated tenant.', 1;
+
         SELECT @ManagerEmployeeId = mapping.EmployeeId
         FROM hrms.EmployeeUserMappings mapping WITH (UPDLOCK, HOLDLOCK)
         INNER JOIN security.UserTenantMemberships membership
@@ -122,7 +138,7 @@ BEGIN
         IF NOT EXISTS
         (
             SELECT 1
-            FROM hrms.EmployeeReportingAssignments assignment
+            FROM hrms.EmployeeReportingAssignments assignment WITH (UPDLOCK, HOLDLOCK)
             WHERE assignment.TenantId = @TenantId AND assignment.CompanyId = @CompanyId
               AND assignment.EmployeeId = @EmployeeId
               AND assignment.ManagerEmployeeId = @ManagerEmployeeId
