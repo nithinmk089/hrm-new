@@ -2,6 +2,7 @@ using HRMS.Application.Abstractions.Security;
 using HRMS.Infrastructure.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using Xunit;
 
 namespace HRMS.Infrastructure.Tests.Security;
 
