@@ -21,7 +21,7 @@ import { CompanySummary, Department } from '../../core/company/company.models';
     </section>
 
     @if (error()) { <div class="alert alert-danger" role="alert">{{ error() }}</div> }
-    @if (notice()) { <div class="alert alert-success" role="status">{{ notice() }}</div> }
+    
 
     @if (companiesLoading()) {
       <div class="loading-state"><span class="spinner-border spinner-border-sm me-2"></span>Loading companies…</div>
@@ -37,13 +37,38 @@ import { CompanySummary, Department } from '../../core/company/company.models';
         @else {
           <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Department</th><th>Code</th><th>Parent department</th><th>Status</th><th class="text-end">Actions</th></tr></thead><tbody>
             @for (department of departments(); track department.departmentId) {
-              <tr><td><strong>{{ department.departmentName }}</strong>@if(department.description){<small class="d-block text-muted">{{ department.description }}</small>}</td><td><span class="code-chip">{{ department.departmentCode }}</span></td><td>{{ parentName(department.parentDepartmentId) }}</td><td><span class="status" [class.inactive]="!department.isActive">{{ department.isActive ? 'Active' : 'Inactive' }}</span></td><td class="text-end"><button class="btn btn-sm btn-light me-1" type="button" (click)="openEdit(department)" [disabled]="!department.isActive" aria-label="Edit department"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-light text-danger" type="button" (click)="deactivate(department)" [disabled]="!department.isActive || busyId() === department.departmentId" aria-label="Deactivate department"><i class="bi bi-person-dash"></i></button></td></tr>
+              <tr><td><strong>{{ department.departmentName }}</strong>@if(department.description){<small class="d-block text-muted">{{ department.description }}</small>}</td><td><span class="code-chip">{{ department.departmentCode }}</span></td><td>{{ parentName(department.parentDepartmentId) }}</td><td><span class="status" [class.inactive]="!department.isActive">{{ department.isActive ? 'Active' : 'Inactive' }}</span></td><td class="text-end"><button class="btn btn-sm btn-light me-1 action-button" type="button" (click)="openEdit(department)" [disabled]="!department.isActive" aria-label="Edit department" title="Edit department" data-bs-toggle="tooltip"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-light text-danger action-button" type="button" (click)="deactivate(department)" [disabled]="!department.isActive || busyId() === department.departmentId" aria-label="Deactivate department" title="Deactivate department" data-bs-toggle="tooltip"><i class="bi bi-person-dash"></i></button></td></tr>
             }
           </tbody></table></div>
         }
       </section>
     }
 
+
+    @if (confirmTarget()) {
+      <div class="modal-backdrop-custom" (click)="cancelDeactivate()">
+        <section class="confirm-dialog card" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" (click)="$event.stopPropagation()">
+          <div class="confirm-icon"><i class="bi bi-exclamation-triangle"></i></div>
+          <h2 id="confirmTitle">Deactivate department?</h2>
+          <p><strong>{{ confirmTarget()?.departmentName }}</strong> will be marked inactive and retained in historical records.</p>
+          @if (confirmError()) { <div class="alert alert-danger py-2">{{ confirmError() }}</div> }
+          <div class="editor-actions">
+            <button class="btn btn-light" type="button" (click)="cancelDeactivate()" [disabled]="busyId() !== ''">Cancel</button>
+            <button class="btn btn-danger" type="button" (click)="confirmDeactivate()" [disabled]="busyId() !== ''">{{ busyId() ? 'Deactivating…' : 'Deactivate' }}</button>
+          </div>
+        </section>
+      </div>
+    }
+    @if (notice()) {
+      <div class="modal-backdrop-custom" (click)="notice.set('')">
+        <section class="confirm-dialog card success-dialog" role="dialog" aria-modal="true" aria-labelledby="noticeTitle" (click)="$event.stopPropagation()">
+          <div class="success-icon"><i class="bi bi-check-lg"></i></div>
+          <h2 id="noticeTitle">Success</h2>
+          <p>{{ notice() }}</p>
+          <div class="editor-actions"><button class="btn btn-primary" type="button" (click)="notice.set('')">OK</button></div>
+        </section>
+      </div>
+    }
     @if (editorOpen()) {
       <div class="modal-backdrop-custom" (click)="closeEditor()">
         <section class="editor card" role="dialog" aria-modal="true" aria-labelledby="editorTitle" (click)="$event.stopPropagation()">
@@ -63,9 +88,9 @@ import { CompanySummary, Department } from '../../core/company/company.models';
   styles: [`
     :host{display:block}.page-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1.35rem}.eyebrow{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#58739a}.page-heading h1{font-size:1.45rem;font-weight:650;color:#1d2939;margin:.35rem 0}.page-heading p{font-size:.82rem;color:#667085;margin:0}
     .company-context{display:flex !important;flex-direction:row !important;align-items:center !important;justify-content:flex-start !important;gap:.85rem;padding:.9rem 1rem;min-height:5.25rem}.context-icon{display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:.55rem;background:#eef3fa;color:#3d5e88;font-size:1.1rem}.context-copy{flex:1 1 auto;max-width:28rem;min-width:14rem}.context-copy label{display:block;margin-bottom:.25rem;color:#667085;font-size:.67rem;font-weight:600}.context-count{margin-left:auto;color:#667085;font-size:.72rem;white-space:nowrap}
-    .table-card{overflow:hidden}.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.15rem;border-bottom:1px solid #eaecf0}.table-toolbar strong,.table-toolbar small{display:block}.table-toolbar strong{font-size:.82rem;color:#344054}.table-toolbar small{margin-top:.2rem;color:#98a2b3;font-size:.68rem}.table{font-size:.78rem}.table thead th{padding:.75rem 1rem;background:#f9fafb;color:#667085;font-size:.65rem;font-weight:700;letter-spacing:.04em;white-space:nowrap}.table tbody td{padding:.8rem 1rem;color:#475467}.table tbody td strong{color:#344054}.code-chip{padding:.25rem .45rem;border-radius:.3rem;background:#f2f4f7;color:#475467;font-size:.7rem;font-weight:600}.status{display:inline-flex;padding:.25rem .5rem;border-radius:2rem;background:#ecfdf3;color:#027a48;font-size:.66rem;font-weight:600}.status.inactive{background:#f2f4f7;color:#667085}
+    .table-card{overflow:hidden}.action-button{position:relative}.action-button:hover{background:#eef3fa;border-color:#d0d5dd}.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.15rem;border-bottom:1px solid #eaecf0}.table-toolbar strong,.table-toolbar small{display:block}.table-toolbar strong{font-size:.82rem;color:#344054}.table-toolbar small{margin-top:.2rem;color:#98a2b3;font-size:.68rem}.table{font-size:.78rem}.table thead th{padding:.75rem 1rem;background:#f9fafb;color:#667085;font-size:.65rem;font-weight:700;letter-spacing:.04em;white-space:nowrap}.table tbody td{padding:.8rem 1rem;color:#475467}.table tbody td strong{color:#344054}.code-chip{padding:.25rem .45rem;border-radius:.3rem;background:#f2f4f7;color:#475467;font-size:.7rem;font-weight:600}.status{display:inline-flex;padding:.25rem .5rem;border-radius:2rem;background:#ecfdf3;color:#027a48;font-size:.66rem;font-weight:600}.status.inactive{background:#f2f4f7;color:#667085}
     .empty-state,.empty-inline{display:flex;align-items:center;flex-direction:column;text-align:center;color:#667085}.empty-state{padding:3rem 1.5rem}.empty-state>i{font-size:1.8rem;color:#7890b2}.empty-state h2{margin:.8rem 0 .35rem;color:#344054;font-size:1rem}.empty-state p{max-width:34rem;margin:0;font-size:.78rem;line-height:1.6}.empty-inline{padding:2.5rem 1rem;gap:.4rem}.empty-inline i{font-size:1.5rem;color:#7890b2}.empty-inline strong{color:#344054;font-size:.82rem}.empty-inline span{font-size:.74rem}.loading-state{padding:1.5rem;text-align:center;color:#667085;font-size:.78rem}
-    .modal-backdrop-custom{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:1rem;background:rgb(16 24 40 / 48%)}.editor{width:min(100%,34rem);max-height:90vh;overflow:auto;padding:1.35rem}.editor-heading{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.2rem}.editor-heading h2{margin:.3rem 0 0;color:#1d2939;font-size:1.15rem;font-weight:650}.form-label{color:#344054;font-size:.75rem;font-weight:600}.required{color:#d92d20}.field-hint{margin-top:.3rem;color:#98a2b3;font-size:.66rem}.field-error{margin-top:.3rem;color:#d92d20;font-size:.68rem}.editor-actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1.4rem;padding-top:1rem;border-top:1px solid #eaecf0}
+    .modal-backdrop-custom{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:1rem;background:rgb(16 24 40 / 48%)}.confirm-dialog{width:min(100%,27rem);padding:1.5rem}.confirm-dialog h2{margin:.1rem 0 .55rem;font-size:1.05rem;font-weight:650;color:#1d2939}.confirm-dialog p{margin:0;color:#667085;font-size:.8rem;line-height:1.6}.confirm-icon,.success-icon{display:grid;place-items:center;width:2.7rem;height:2.7rem;margin-bottom:.9rem;border-radius:50%;background:#fff4e5;color:#b54708;font-size:1.2rem}.success-icon{background:#ecfdf3;color:#027a48}.editor{width:min(100%,34rem);max-height:90vh;overflow:auto;padding:1.35rem}.editor-heading{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.2rem}.editor-heading h2{margin:.3rem 0 0;color:#1d2939;font-size:1.15rem;font-weight:650}.form-label{color:#344054;font-size:.75rem;font-weight:600}.required{color:#d92d20}.field-hint{margin-top:.3rem;color:#98a2b3;font-size:.66rem}.field-error{margin-top:.3rem;color:#d92d20;font-size:.68rem}.editor-actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1.4rem;padding-top:1rem;border-top:1px solid #eaecf0}
     @media(max-width:575.98px){.page-heading{flex-direction:column}.page-heading>.btn{width:100%}.context-count{display:none}.editor{padding:1rem}}
   `]
 })
@@ -84,6 +109,8 @@ export class DepartmentsPageComponent {
   readonly notice = signal('');
   readonly editorError = signal('');
   readonly busyId = signal('');
+  readonly confirmTarget = signal<Department | null>(null);
+  readonly confirmError = signal('');
   readonly activeCount = computed(() => this.departments().filter(item => item.isActive).length);
   readonly parentOptions = computed(() => this.departments().filter(item => item.isActive && item.departmentId !== this.editing()?.departmentId));
   readonly form = this.fb.nonNullable.group({
@@ -185,15 +212,33 @@ export class DepartmentsPageComponent {
     });
   }
 
+
   deactivate(item: Department): void {
     if (!item.isActive || this.busyId()) return;
-    if (!window.confirm(`Deactivate department "${item.departmentName}"? It will remain in historical records.`)) return;
+    this.confirmError.set('');
+    this.confirmTarget.set(item);
+  }
+
+  cancelDeactivate(): void {
+    if (this.busyId()) return;
+    this.confirmTarget.set(null);
+    this.confirmError.set('');
+  }
+
+  confirmDeactivate(): void {
+    const item = this.confirmTarget();
+    if (!item || this.busyId()) return;
     this.busyId.set(item.departmentId);
+    this.confirmError.set('');
     this.api.deactivateDepartment(this.selectedCompanyId(), item.departmentId, item.rowVersion)
       .pipe(finalize(() => this.busyId.set('')))
       .subscribe({
-        next: () => { this.notice.set('Department deactivated successfully.'); this.loadDepartments(); },
-        error: err => this.error.set(this.message(err, 'Unable to deactivate the department. Reload and check whether it was changed by another user.'))
+        next: () => {
+          this.confirmTarget.set(null);
+          this.notice.set('Department deactivated successfully.');
+          this.loadDepartments();
+        },
+        error: err => this.confirmError.set(this.message(err, 'Unable to deactivate the department. Reload and check whether it was changed by another user.'))
       });
   }
 
