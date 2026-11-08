@@ -58,11 +58,22 @@ public sealed class DepartmentService(IDepartmentRepository repository) : IDepar
         if (request.ParentDepartmentId == departmentId)
             throw new ArgumentException("A department cannot be its own parent.", nameof(request.ParentDepartmentId));
 
+        var existing = await repository.GetByIdAsync(
+            tenantId, companyId, departmentId, cancellationToken);
+        if (existing is null)
+            return null;
+
         await EnsureParentAsync(tenantId, companyId, request.ParentDepartmentId, cancellationToken);
 
-        return await repository.UpdateAsync(tenantId, companyId, departmentId,
+        var updated = await repository.UpdateAsync(tenantId, companyId, departmentId,
             new UpdateDepartmentRequest(name, description, request.ParentDepartmentId, request.RowVersion),
             cancellationToken);
+
+        if (updated is null)
+            throw new InvalidOperationException(
+                "The department was changed by another user. Reload the department and retry your update.");
+
+        return updated;
     }
 
     public Task<bool> DeactivateAsync(
