@@ -69,6 +69,7 @@ Employee:
 
 Manager:
 - GET /pending-approvals
+- GET /{timesheetId} (submitted direct report details and entries)
 - POST /{timesheetId}/approve
 - POST /{timesheetId}/reject
 
