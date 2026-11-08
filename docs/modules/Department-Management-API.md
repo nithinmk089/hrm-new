@@ -38,7 +38,7 @@ Authorization evaluates the route company against tenant/company/office role ass
 }
 ```
 
-The `rowVersion` value is the Base64 representation of the 8-byte value returned by GET or POST. A stale rowversion results in a conflict response.
+The `rowVersion` value is the Base64 representation of the 8-byte value returned by GET or POST. A missing department returns 404. If the department exists but the submitted rowversion is stale, the API returns 409 Conflict.
 
 ## Behavior and validation
 
