@@ -21,9 +21,11 @@ internal sealed class ApiErrorLogRepository(IDbConnectionFactory connectionFacto
                 [HttpMethod],
                 [RequestPath],
                 [StatusCode],
-                [ErrorType],
-                [ErrorMessage],
-                [StackTrace]
+                [ErrorCode],
+                [Message],
+                [ExceptionDetails],
+                [ApplicationName],
+                [EnvironmentName]
             )
             VALUES
             (
@@ -35,7 +37,9 @@ internal sealed class ApiErrorLogRepository(IDbConnectionFactory connectionFacto
                 @StatusCode,
                 @ErrorType,
                 @ErrorMessage,
-                @StackTrace
+                @StackTrace,
+                @ApplicationName,
+                @EnvironmentName
             );
             """;
 
@@ -43,7 +47,20 @@ internal sealed class ApiErrorLogRepository(IDbConnectionFactory connectionFacto
         await connection.OpenAsync(cancellationToken);
         await connection.ExecuteAsync(new CommandDefinition(
             sql,
-            entry,
+            new
+            {
+                entry.TenantId,
+                entry.UserId,
+                entry.TraceId,
+                entry.HttpMethod,
+                entry.RequestPath,
+                entry.StatusCode,
+                ErrorType = entry.ErrorType,
+                ErrorMessage = entry.ErrorMessage,
+                StackTrace = entry.StackTrace,
+                entry.ApplicationName,
+                entry.EnvironmentName
+            },
             commandTimeout: 5,
             cancellationToken: cancellationToken));
     }
