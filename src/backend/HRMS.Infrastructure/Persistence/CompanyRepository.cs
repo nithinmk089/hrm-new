@@ -161,7 +161,7 @@ internal sealed class CompanyRepository(IDbConnectionFactory connectionFactory) 
         const string sql = """
             UPDATE hrms.Companies
             SET IsActive = 0,
-                DeletedAtUtc = SYSUTCDATETIME()
+                UpdatedAtUtc = SYSUTCDATETIME()
             WHERE CompanyId = @CompanyId
               AND RowVersion = @RowVersion
               AND DeletedAtUtc IS NULL;
