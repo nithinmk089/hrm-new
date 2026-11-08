@@ -108,6 +108,11 @@ public sealed class TimesheetServiceTests
             byte[] rowVersion, CancellationToken cancellationToken) =>
             Task.FromResult(new TimesheetSubmitResult(timesheetId, "Submitted", DateTime.UtcNow, new byte[8]));
 
+        public Task<TimesheetApprovalDetailDto?> GetForApprovalAsync(
+            Guid tenantId, Guid companyId, Guid actorUserId, Guid timesheetId,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<TimesheetApprovalDetailDto?>(null);
+
         public Task<IReadOnlyList<TimesheetApprovalQueueItem>> GetPendingApprovalsAsync(
             Guid tenantId, Guid companyId, Guid actorUserId, CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<TimesheetApprovalQueueItem>>([]);
