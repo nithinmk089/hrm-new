@@ -21,6 +21,7 @@ public static class DependencyInjection
         services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
         services.AddSingleton<IDatabaseMigrator, SqlDatabaseMigrator>();
         services.AddSingleton<IPasswordHasher, AspNetCorePasswordHasher>();
+        services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<IUserIdentityRepository, UserIdentityRepository>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddSingleton<TimeProvider>(TimeProvider.System);
