@@ -65,7 +65,23 @@ context, not trust a CompanyId supplied by the browser. Database foreign keys
 reinforce relational integrity but do not replace authorization or tenant
 filtering.
 
-## 6. Migration discipline
+## 6. Employee data
+
+- Keep the employee's stable identity in `Employees`; store effective-dated
+  organizational assignments in `EmployeeEmployment` so transfers and
+  designation changes do not overwrite employment history.
+- Store reporting-manager changes as effective-dated records in
+  `EmployeeReportingAssignments`.
+- Keep contact points and postal addresses in separate child tables so each
+  employee can have multiple typed values.
+- Store employee document metadata in SQL Server. Store document bytes in
+  protected object storage (for example Azure Blob Storage), not in database
+  varbinary columns. Persist only a storage provider and opaque storage key.
+- Treat employee contact information and documents as confidential personal
+  data. Apply least-privilege access, authorization checks, retention rules,
+  and audit logging in the application layer before exposing these records.
+
+## 7. Migration discipline
 
 - Name scripts `NNN_Description.sql`, using a unique increasing number.
 - Never edit or remove a migration after it has been applied in a shared
