@@ -397,3 +397,41 @@ Pending:
 - Updated DepartmentService test fake for the new repository contract.
 - Local backend build, migration, and frontend build/tests remain to be run by the user. Run migration 028 before testing the activation API.
 
+
+
+### UI-04A Departments integrated (2026-11-08)
+
+- Pull request [#7](https://github.com/nithinmk089/hrm-new/pull/7), **feat(organization): complete department management**, merged into `main`.
+- Merge commit: `18067564f5c98462d1ed9745860f2860f1ef1f57`.
+- User confirmed backend build, migration 028, frontend build/tests, and department create/edit/deactivate/reactivate verification succeeded.
+- Next branch `feature/ui-04b-offices` was created directly from the merge commit above.
+
+## 13. Current implementation checkpoint — UI-04B Offices
+
+Active branch: `feature/ui-04b-offices`.
+
+Inspected backend contract:
+- Controller route: `/api/v1/companies/{companyId}/offices`.
+- Policies: `offices.read`, `offices.create`, `offices.update`, `offices.deactivate`.
+- Create request fields: `officeCode`, `officeName`, `addressLine1`, `addressLine2`, `city`, `stateOrProvince`, `postalCode`, `countryCode`, `timeZoneId`, `isHeadOffice`.
+- Update request fields are the same except officeCode is immutable and RowVersion is required.
+- DTO includes office/company IDs, code/name, address, country, time zone, head-office and active flags, timestamps and RowVersion.
+- Service normalizes office code and country code to uppercase; country code must be two ASCII letters; required code/name limits 30/150; address line max 200; city/state max 100; postal code max 20; timezone ID max 100.
+- Update/deactivation require an 8-byte RowVersion. Duplicate office codes are rejected within the company.
+- Deactivation exists; no reactivation endpoint currently exists. Do not display an Activate action until a backend endpoint and persistence implementation are added, if the product requires reactivation.
+- Company context must use the tenant-scoped company list endpoint and selected CompanyId, never TenantId.
+
+Planned vertical slice:
+1. Inspect repository SQL and stored procedure contracts and office-specific migrations before wiring UI.
+2. Implement offices list with active/inactive status, head-office indicator, address and timezone details.
+3. Implement create/edit modal with country/time-zone inputs and validation.
+4. Implement styled deactivate confirmation and success/error dialogs, preserving RowVersion.
+5. Add office reactivation only if supported through a deliberately added backend operation; confirm permission model and database constraints first.
+6. User runs build/tests/migration and verifies list/create/edit/deactivate locally before proceeding to Designations.
+
+Local checkout:
+```powershell
+git switch main
+git pull --ff-only origin main
+git switch -c feature/ui-04b-offices origin/feature/ui-04b-offices
+```
