@@ -68,3 +68,31 @@ export interface CreateOfficeRequest {
 export interface UpdateOfficeRequest extends Omit<CreateOfficeRequest, 'officeCode'> {
   rowVersion: string;
 }
+
+
+export interface Designation {
+  designationId: string;
+  companyId: string;
+  designationCode: string;
+  designationName: string;
+  description: string | null;
+  jobLevel: number | null;
+  isActive: boolean;
+  createdAtUtc: string;
+  updatedAtUtc: string | null;
+  rowVersion: string;
+}
+
+export interface CreateDesignationRequest {
+  designationCode: string;
+  designationName: string;
+  description: string | null;
+  jobLevel: number | null;
+}
+
+export interface UpdateDesignationRequest {
+  designationName: string;
+  description: string | null;
+  jobLevel: number | null;
+  rowVersion: string;
+}
