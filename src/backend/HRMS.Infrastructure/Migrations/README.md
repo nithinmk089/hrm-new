@@ -12,6 +12,25 @@ Use a zero-padded, increasing numeric prefix followed by a short description:
 - `003_CreateEmployeeManagementTables.sql`
 - `004_CreateIdentityAndSecurityTables.sql`
 - `005_TenantIdentityAndAuthorizationFoundation.sql`
+- `006_RefreshTokenFamilyAndMembership.sql`
+- `007_CompanyPermissions.sql`
+- `008_OrganizationMasterPermissions.sql`
+- `009_DepartmentStoredProcedures.sql`
+- `010_CreateApiErrorLogs.sql`
+- `011_OfficeStoredProcedures.sql`
+- `012_DesignationStoredProcedures.sql`
+- `013_HolidayManagement.sql`
+- `014_HolidayPermissions.sql`
+- `015_LeaveTypeManagement.sql`
+- `016_LeaveTypePermissions.sql`
+- `017_LeaveManagementFoundation.sql`
+- `018_LeaveManagementPermissions.sql`
+- `019_WorkingWeekStoredProcedures.sql`
+- `020_EmployeeUserMappingProcedures.sql`
+- `021_EmployeeLeaveBalanceProcedures.sql`
+- `022_LeaveRequestSubmission.sql`
+- `023_LeaveManagerApprovals.sql`
+- `024_LeaveRequestHistoryAndCancellation.sql`
 
 Once a migration has been applied to any shared environment, do not edit or
 delete it. Add a new migration to change the schema.
@@ -60,7 +79,8 @@ establishes the canonical model:
   or Office scope. Company descendant access is opt-in.
 - `security.RefreshTokens` remains tenant-bound and references a valid tenant
   membership.
-- `audit.AuditLogs` is the canonical audit store.
+- `audit.AuditLogs` is the canonical business audit store.
+- `audit.ErrorLogs` is the existing operational error store. Migration 010 extends it with API trace and HTTP status fields; API error persistence maps to its existing `ErrorCode`, `Message`, and `ExceptionDetails` columns. HTTP 401 and 404 responses are excluded.
 
 Migration 005 adds TenantId to companies and all company-owned HRMS records,
 adds same-tenant company hierarchy constraints, and preserves legacy `hrms`

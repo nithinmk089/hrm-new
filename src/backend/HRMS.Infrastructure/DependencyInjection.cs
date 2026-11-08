@@ -1,6 +1,15 @@
 using HRMS.Application.Abstractions.Persistence;
 using HRMS.Application.Abstractions.Security;
 using HRMS.Application.Companies;
+using HRMS.Application.Departments;
+using HRMS.Application.Offices;
+using HRMS.Application.Designations;
+using HRMS.Application.Holidays;
+using HRMS.Application.LeaveTypes;
+using HRMS.Application.WorkingWeeks;
+using HRMS.Application.EmployeeUserMappings;
+using HRMS.Application.LeaveBalances;
+using HRMS.Application.LeaveRequests;
 using HRMS.Application.Security;
 using HRMS.Infrastructure.Persistence;
 using HRMS.Infrastructure.Security;
@@ -41,6 +50,31 @@ public static class DependencyInjection
 
         services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<ICompanyService, CompanyService>();
+
+        services.AddScoped<IApiErrorLogRepository, ApiErrorLogRepository>();
+
+        services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+        services.AddScoped<IDepartmentService, DepartmentService>();
+        services.AddScoped<IOfficeRepository, OfficeRepository>();
+        services.AddScoped<IOfficeService, OfficeService>();
+        services.AddScoped<IDesignationRepository, DesignationRepository>();
+        services.AddScoped<IDesignationService, DesignationService>();
+        services.AddScoped<IHolidayRepository, HolidayRepository>();
+        services.AddScoped<IHolidayService, HolidayService>();
+        services.AddScoped<ILeaveTypeRepository, LeaveTypeRepository>();
+        services.AddScoped<ILeaveTypeService, LeaveTypeService>();
+        services.AddScoped<IWorkingWeekRepository, WorkingWeekRepository>();
+        services.AddScoped<IWorkingWeekService, WorkingWeekService>();
+        services.AddScoped<IEmployeeUserMappingRepository, EmployeeUserMappingRepository>();
+        services.AddScoped<IEmployeeUserMappingService, EmployeeUserMappingService>();
+        services.AddScoped<IEmployeeLeaveBalanceRepository, EmployeeLeaveBalanceRepository>();
+        services.AddScoped<IEmployeeLeaveBalanceService, EmployeeLeaveBalanceService>();
+        services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
+        services.AddScoped<ILeaveRequestService, LeaveRequestService>();
+        services.AddScoped<ILeaveApprovalRepository, LeaveApprovalRepository>();
+        services.AddScoped<ILeaveApprovalService, LeaveApprovalService>();
+        services.AddScoped<ILeaveRequestLifecycleRepository, LeaveRequestLifecycleRepository>();
+        services.AddScoped<ILeaveRequestLifecycleService, LeaveRequestLifecycleService>();
 
         return services;
     }

@@ -10,7 +10,7 @@ run automatically during API startup and it must never be run in Production.
 
 ## Prerequisites
 
-1. Apply database migrations 001 through 007.
+1. Apply database migrations 001 through 008. Migration 008 adds the department, office and designation permissions required by the development administrator role.
 2. Configure the API connection string and JWT settings using .NET User Secrets.
 3. Use the Development environment.
 4. Set DevelopmentSeed:Enabled to true.
@@ -112,6 +112,5 @@ WHERE TenantId = (SELECT TenantId FROM platform.Tenants WHERE TenantCode = '001'
   );
 ~~~
 
-Then start the API normally and test login, /api/v1/auth/me, and the company
-endpoints. Never paste passwords, access tokens, refresh tokens, or signing
+Then start the API normally and test login, /api/v1/auth/me, the company endpoints, and the organization endpoints after applying migration 009. Never paste passwords, access tokens, refresh tokens, or signing
 keys into chat or logs.
