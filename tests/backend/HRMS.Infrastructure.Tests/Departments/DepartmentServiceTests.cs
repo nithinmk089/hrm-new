@@ -63,6 +63,28 @@ public sealed class DepartmentServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_RejectsStaleRowVersion()
+    {
+        var departmentId = Guid.NewGuid();
+        var companyId = Guid.NewGuid();
+        var existing = new DepartmentDto(
+            departmentId, companyId, "FINANCE", "Finance", null, null,
+            true, DateTime.UtcNow, null, new byte[8]);
+        var repository = new FakeDepartmentRepository
+        {
+            ExistingDepartment = existing,
+            UpdateReturnsNull = true
+        };
+        var service = new DepartmentService(repository);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdateAsync(Guid.NewGuid(), companyId, departmentId,
+                new UpdateDepartmentRequest("Finance & Accounts", null, null, new byte[8])));
+
+        Assert.NotNull(repository.CapturedUpdateRequest);
+    }
+
+    [Fact]
     public async Task UpdateAsync_RejectsSelfParent()
     {
         var repository = new FakeDepartmentRepository();
@@ -85,6 +107,8 @@ public sealed class DepartmentServiceTests
         public UpdateDepartmentRequest? CapturedUpdateRequest { get; private set; }
         public string? ExistingCode { get; init; }
         public bool ParentExists { get; init; } = true;
+        public DepartmentDto? ExistingDepartment { get; init; }
+        public bool UpdateReturnsNull { get; init; }
 
         public Task<IReadOnlyList<DepartmentDto>> GetAllAsync(
             Guid tenantId, Guid companyId, CancellationToken cancellationToken)
@@ -95,7 +119,7 @@ public sealed class DepartmentServiceTests
 
         public Task<DepartmentDto?> GetByIdAsync(
             Guid tenantId, Guid companyId, Guid departmentId, CancellationToken cancellationToken) =>
-            Task.FromResult<DepartmentDto?>(null);
+            Task.FromResult(ExistingDepartment?.DepartmentId == departmentId ? ExistingDepartment : null);
 
         public Task<DepartmentDto?> GetByCodeAsync(
             Guid tenantId, Guid companyId, string departmentCode, CancellationToken cancellationToken) =>
@@ -121,8 +145,9 @@ public sealed class DepartmentServiceTests
             UpdateDepartmentRequest request, CancellationToken cancellationToken)
         {
             CapturedUpdateRequest = request;
-            return Task.FromResult<DepartmentDto?>(CreateDto(
-                departmentId, companyId, "FINANCE", request.DepartmentName));
+            return Task.FromResult<DepartmentDto?>(UpdateReturnsNull
+                ? null
+                : CreateDto(departmentId, companyId, "FINANCE", request.DepartmentName));
         }
 
         public Task<bool> DeactivateAsync(
