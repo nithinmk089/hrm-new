@@ -54,7 +54,9 @@ CREATE TABLE [hrms].[EmployeeUserMappings]
     CONSTRAINT [FK_EmployeeUserMappings_Employee] FOREIGN KEY ([CompanyId], [EmployeeId])
         REFERENCES [hrms].[Employees] ([CompanyId], [EmployeeId]),
     CONSTRAINT [FK_EmployeeUserMappings_User] FOREIGN KEY ([UserId])
-        REFERENCES [security].[Users] ([UserId])
+        REFERENCES [security].[Users] ([UserId]),
+    CONSTRAINT [FK_EmployeeUserMappings_TenantMembership] FOREIGN KEY ([TenantId], [UserId])
+        REFERENCES [security].[UserTenantMemberships] ([TenantId], [UserId])
 );
 GO
 CREATE UNIQUE INDEX [UX_EmployeeUserMappings_ActiveEmployee]
