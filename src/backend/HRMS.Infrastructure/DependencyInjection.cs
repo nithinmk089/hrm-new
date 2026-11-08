@@ -43,6 +43,8 @@ public static class DependencyInjection
         services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<ICompanyService, CompanyService>();
 
+        services.AddScoped<IApiErrorLogRepository, ApiErrorLogRepository>();
+
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<IDepartmentService, DepartmentService>();
 
