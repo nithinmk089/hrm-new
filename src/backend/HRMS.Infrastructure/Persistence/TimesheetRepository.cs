@@ -86,6 +86,27 @@ internal sealed class TimesheetRepository(IDbConnectionFactory connectionFactory
             commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken)));
     }
 
+    public async Task<TimesheetApprovalDetailDto?> GetForApprovalAsync(
+        Guid tenantId, Guid companyId, Guid actorUserId, Guid timesheetId,
+        CancellationToken cancellationToken)
+    {
+        await using var connection = connectionFactory.CreateConnection();
+        using var grid = await connection.QueryMultipleAsync(new CommandDefinition(
+            "hrms.usp_Timesheets_GetForApproval",
+            new { TenantId = tenantId, CompanyId = companyId, ActorUserId = actorUserId, TimesheetId = timesheetId },
+            commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
+
+        var header = await grid.ReadSingleOrDefaultAsync<TimesheetApprovalHeaderRow>();
+        var entries = (await grid.ReadAsync<TimesheetEntryDto>()).AsList();
+        return header is null
+            ? null
+            : new TimesheetApprovalDetailDto(
+                header.TimesheetId, header.EmployeeId, header.EmployeeCode, header.FirstName,
+                header.LastName, header.WeekStartDate, header.WeekEndDate, header.Status,
+                header.SubmittedAtUtc, header.ReviewedByEmployeeId, header.ReviewedAtUtc,
+                header.ReviewComments, header.RowVersion, header.TotalHours, entries);
+    }
+
     public async Task<IReadOnlyList<TimesheetApprovalQueueItem>> GetPendingApprovalsAsync(
         Guid tenantId, Guid companyId, Guid actorUserId, CancellationToken cancellationToken)
     {
@@ -125,7 +146,7 @@ internal sealed class TimesheetRepository(IDbConnectionFactory connectionFactory
         }
     }
 
-    private sealed record TimesheetHeaderRow(
+    private sealed record TimesheetApprovalHeaderRow(\n        Guid TimesheetId, Guid EmployeeId, string EmployeeCode, string FirstName, string LastName,\n        DateOnly WeekStartDate, DateOnly WeekEndDate, string Status, DateTime SubmittedAtUtc,\n        Guid? ReviewedByEmployeeId, DateTime? ReviewedAtUtc, string? ReviewComments,\n        byte[] RowVersion, decimal TotalHours);\n\n    private sealed record TimesheetHeaderRow(
         Guid TimesheetId, DateOnly WeekStartDate, DateOnly WeekEndDate, string Status,
         DateTime? SubmittedAtUtc, Guid? ReviewedByEmployeeId, DateTime? ReviewedAtUtc,
         string? ReviewComments, byte[] RowVersion, decimal TotalHours);
