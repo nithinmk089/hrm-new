@@ -46,7 +46,7 @@ BEGIN
           WHERE TenantId = @TenantId AND CompanyId = @CompanyId
             AND UserId = @ActorUserId AND IsActive = 1
       )
-      AND IsPrimary = 1 AND EmploymentStatus = 'Active'
+      AND IsPrimary = 1 AND EmploymentStatus IN ('Active','OnLeave')
       AND DeletedAtUtc IS NULL
       AND StartDate <= @ToDate AND (EndDate IS NULL OR EndDate >= @FromDate)
     ORDER BY StartDate;
