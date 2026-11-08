@@ -141,7 +141,7 @@ CREATE TABLE [hrms].[LeaveRequests]
     CONSTRAINT [CK_LeaveRequests_Days] CHECK ([DaysRequested] > 0),
     CONSTRAINT [CK_LeaveRequests_HalfDay] CHECK
         (([IsHalfDay] = 0 AND [HalfDayPeriod] IS NULL) OR
-         ([IsHalfDay] = 1 AND [FromDate] = [ToDate] AND [HalfDayPeriod] IN ('AM','PM'))),
+         ([IsHalfDay] = 1 AND [FromDate] = [ToDate] AND [HalfDayPeriod] IS NOT NULL AND [HalfDayPeriod] IN ('AM','PM'))),
     CONSTRAINT [CK_LeaveRequests_Status] CHECK ([Status] IN ('Pending','Approved','Rejected','Cancelled'))
 );
 GO
