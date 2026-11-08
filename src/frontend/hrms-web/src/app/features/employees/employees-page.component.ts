@@ -1,10 +1,15 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { AbstractControl, Component, ValidationErrors, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { CompanyApiService } from '../../core/company/company-api.service';
 import { CompanySummary } from '../../core/company/company.models';
 import { CreateEmployeeRequest, Employee, EmployeeStatus } from '../../core/company/employee.models';
 import { EmployeeApiService } from '../../core/company/employee-api.service';
+
+const trimmedEmailValidator = (control: AbstractControl): ValidationErrors | null => {
+  const value = String(control.value ?? '').trim();
+  return value && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value) ? { email: true } : null;
+};
 
 @Component({
   selector: 'hrms-employees-page',
@@ -111,7 +116,7 @@ export class EmployeesPageComponent {
     middleName: [''],
     lastName: ['', [Validators.required, Validators.maxLength(100)]],
     preferredName: [''],
-    workEmail: ['', [Validators.email, Validators.maxLength(254)]],
+    workEmail: ['', [trimmedEmailValidator, Validators.maxLength(254)]],
     hireDate: ['', Validators.required]
   });
 
