@@ -5,6 +5,7 @@ using HRMS.Application.Departments;
 using HRMS.Application.Offices;
 using HRMS.Application.Designations;
 using HRMS.Application.Holidays;
+using HRMS.Application.LeaveTypes;
 using HRMS.Application.Security;
 using HRMS.Infrastructure.Persistence;
 using HRMS.Infrastructure.Security;
@@ -56,6 +57,8 @@ public static class DependencyInjection
         services.AddScoped<IDesignationService, DesignationService>();
         services.AddScoped<IHolidayRepository, HolidayRepository>();
         services.AddScoped<IHolidayService, HolidayService>();
+        services.AddScoped<ILeaveTypeRepository, LeaveTypeRepository>();
+        services.AddScoped<ILeaveTypeService, LeaveTypeService>();
 
         return services;
     }
