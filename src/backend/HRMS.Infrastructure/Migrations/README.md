@@ -21,6 +21,8 @@ Use a zero-padded, increasing numeric prefix followed by a short description:
 - `012_DesignationStoredProcedures.sql`
 - `013_HolidayManagement.sql`
 - `014_HolidayPermissions.sql`
+- `015_LeaveTypeManagement.sql`
+- `016_LeaveTypePermissions.sql`
 
 Once a migration has been applied to any shared environment, do not edit or
 delete it. Add a new migration to change the schema.
