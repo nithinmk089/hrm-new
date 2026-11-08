@@ -65,7 +65,7 @@ Sensitive compensation, bank, identity-document and employee-document data requi
 
 ## 7. Migration safety and canonical tables
 
-Migration 004 has already been applied in the development environment and must not be edited. Migration 005 must be additive and must not drop or recreate populated canonical tables.
+Migrations 001-004 have already been applied in the development environment and must not be edited. Migration 005 establishes tenant ownership, global identity, memberships, scoped role assignments, and canonical audit relationships. It preserves the existing permission catalogue and does not drop the legacy duplicate HRMS identity/security tables. Those tables remain deprecated until application code has been migrated and a later cleanup migration is reviewed.
 
 Before authoring Migration 005, inspect the exact existing definitions, indexes, constraints, foreign keys, row counts and applied migration ledger for:
 
@@ -77,7 +77,7 @@ Before authoring Migration 005, inspect the exact existing definitions, indexes,
 
 The read-only inspection script is docs/database/005_PreMigrationSchemaInspection.sql.
 
-Migration 005 will be written only after these definitions are confirmed. It must preserve the existing 11 permission records, use explicit transactions and named constraints, and be safe to run through the existing migration runner.
+Migration 005 is implemented as `005_TenantIdentityAndAuthorizationFoundation.sql`. It checks the inspected permission count, blocks if users or companies unexpectedly contain rows, preserves all 11 permission IDs, uses named constraints, and runs through the existing transactional migration runner. The inspected development database reported zero rows in all relevant tables except `security.Permissions` (11 rows). The migration must still be executed and verified locally before application development continues.
 
 ## 8. Application implementation implications
 
