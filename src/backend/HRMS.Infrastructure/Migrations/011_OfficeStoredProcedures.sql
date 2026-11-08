@@ -148,7 +148,8 @@ BEGIN
       AND CompanyId = @CompanyId
       AND OfficeId = @OfficeId
       AND RowVersion = @RowVersion
-      AND DeletedAtUtc IS NULL;
+      AND DeletedAtUtc IS NULL
+      AND (IsActive = 1 OR @IsHeadOffice = 0);
 END;
 GO
 
