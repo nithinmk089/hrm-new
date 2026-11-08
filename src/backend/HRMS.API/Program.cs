@@ -5,6 +5,7 @@ using HRMS.API.Authorization;
 using HRMS.API.ErrorHandling;
 using HRMS.Application.Abstractions.Persistence;
 using HRMS.Application.Abstractions.Security;
+using HRMS.Application.Companies;
 using HRMS.Infrastructure;
 using HRMS.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -276,6 +277,54 @@ app.MapGet("/api/v1/version", () => Results.Ok(new
 }))
 .WithName("GetApplicationVersion")
 .WithTags("Platform");
+
+
+app.MapGet("/api/v1/companies", async (System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
+{
+    var tenantId = ReadTenantId(principal);
+    return tenantId is null ? Results.Forbid() : Results.Ok(await service.GetAllAsync(tenantId.Value, ct));
+})
+.RequireAuthorization("Permission:companies.read").WithName("GetCompanies").WithTags("Companies");
+
+app.MapGet("/api/v1/companies/{companyId:guid}", async (Guid companyId, System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
+{
+    var tenantId = ReadTenantId(principal);
+    if (tenantId is null) return Results.Forbid();
+    var company = await service.GetByIdAsync(tenantId.Value, companyId, ct);
+    return company is null ? Results.NotFound() : Results.Ok(company);
+})
+.RequireAuthorization("Permission:companies.read").WithName("GetCompanyById").WithTags("Companies");
+
+app.MapPost("/api/v1/companies", async (CreateCompanyRequest request, System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
+{
+    var tenantId = ReadTenantId(principal);
+    if (tenantId is null) return Results.Forbid();
+    var company = await service.CreateAsync(tenantId.Value, request, ct);
+    return Results.Created($"/api/v1/companies/{company.CompanyId}", company);
+})
+.RequireAuthorization("Permission:companies.create").WithName("CreateCompany").WithTags("Companies");
+
+app.MapPut("/api/v1/companies/{companyId:guid}", async (Guid companyId, UpdateCompanyRequest request, System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
+{
+    var tenantId = ReadTenantId(principal);
+    if (tenantId is null) return Results.Forbid();
+    var company = await service.UpdateAsync(tenantId.Value, companyId, request, ct);
+    return company is null ? Results.NotFound() : Results.Ok(company);
+})
+.RequireAuthorization("Permission:companies.update").WithName("UpdateCompany").WithTags("Companies");
+
+app.MapPatch("/api/v1/companies/{companyId:guid}/deactivate", async (Guid companyId, DeactivateCompanyRequest request, System.Security.Claims.ClaimsPrincipal principal, ICompanyService service, CancellationToken ct) =>
+{
+    var tenantId = ReadTenantId(principal);
+    if (tenantId is null) return Results.Forbid();
+    var result = await service.DeactivateAsync(tenantId.Value, companyId, request.RowVersion, ct);
+    return result ? Results.NoContent() : Results.Conflict();
+})
+.RequireAuthorization("Permission:companies.deactivate").WithName("DeactivateCompany").WithTags("Companies");
+
+Guid? ReadTenantId(System.Security.Claims.ClaimsPrincipal principal) =>
+    Guid.TryParse(principal.FindFirst("tenant_id")?.Value, out var tenantId) && tenantId != Guid.Empty ? tenantId : null;
+
 
 app.Run();
 
