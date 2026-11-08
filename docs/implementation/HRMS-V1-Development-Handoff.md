@@ -555,3 +555,14 @@ Implemented on `feature/ui-05-holidays`:
 - Ten Angular TestBed/Vitest unit tests covering load, empty companies, company switch, validation, create/date payload, update RowVersion, duplicate date, deactivate confirmation, conflict and inactive actions.
 
 Local build, unit tests, and browser verification pending. No migration required; migrations 013/014 are already part of the baseline.
+
+### UI-05 Holidays integrated (2026-11-08)
+
+- Pull request [#10](https://github.com/nithinmk089/hrm-new/pull/10), **feat(company): add Holidays management UI**, merged into `main`.
+- Merge commit: `746471dee066d81c31fea8e25b3552e9980a66c7`.
+- User-confirmed local verification: all 29 frontend tests passed (4 test files); Angular production build completed successfully.
+- Fixed Bootstrap Icons stylesheet bundling by adding `node_modules/bootstrap-icons/font/bootstrap-icons.css` to Angular build styles and removing the invalid static stylesheet path from `index.html`.
+- A non-blocking CommonJS warning remains for `bootstrap/dist/js/bootstrap.bundle.min.js`; build completes successfully.
+- Development administrator initially received HTTP 403 for Holidays because the seeded SYSTEM_ADMIN role predated migration 014. Rerunning the repeatable development seed granted the newly active holiday permissions; user confirmed the Holidays page then worked.
+- UI-05 implementation includes typed API contracts, company-scoped listing, create/edit/deactivate, duplicate-date messaging, RowVersion concurrency, and ten component tests.
+- Next feature branch must be created from this merge commit on `main`.
