@@ -468,3 +468,12 @@ Local verification required:
 5. Verify duplicate office code and second active head-office errors are displayed clearly.
 6. Verify inactive offices remain visible and cannot be edited/deactivated again.
 7. Do not proceed to Designations until the user confirms local verification.
+
+
+### Frontend unit testing standard and Offices coverage (2026-11-08)
+
+- UI unit tests are required for every feature page and shared service/interceptor/guard with meaningful behavior; do not treat a successful production build as sufficient UI verification.
+- Use the existing Vitest + Angular TestBed setup. Keep tests deterministic by mocking API services with RxJS `of` / `throwError`; no live API or database dependency.
+- Cover initial loading and empty/error states, company/tenant selection behavior, form validation, create/update payload mapping, RowVersion propagation, confirmation flows, success/error outcomes, and active/inactive actions.
+- Added `offices-page.component.spec.ts` with nine test cases: initial company/office loading and selected company, no companies, company switching, required/two-letter country validation, normalized create payload, immutable office code and RowVersion on update, explicit deactivation confirmation, conflict handling, and inactive-office action visibility.
+- Future UI pages should include their unit test file in the same feature branch before requesting merge. Shared components/services should receive focused tests where behavior warrants them.
