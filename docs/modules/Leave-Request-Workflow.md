@@ -7,8 +7,8 @@ The leave-request workflow is implemented in incremental slices:
 1. Chargeable-day calculation (implemented).
 2. Tenant-scoped request submission, overlap protection and atomic balance reservation (implemented).
 3. Manager approval/rejection (implemented).
-4. Requester cancellation and balance restoration.
-5. Employee request history and approval queue details.
+4. Requester cancellation and balance restoration (implemented).
+5. Employee request history (implemented); pagination and richer filtering can follow.
 
 This document is the functional baseline for the remaining slices.
 
@@ -87,6 +87,11 @@ Implemented in the manager approval slice:
 - Decision-time manager assignment, pending status and RowVersion are rechecked in SQL.
 - Approval converts reservations to used days; rejection releases reservations. Both write approval history and ledger entries atomically.
 
-Not yet implemented:
-- Employee request list/detail and approval history endpoints.
-- Requester cancellation and balance restoration.
+Implemented in the requester history and cancellation slice:
+- Employee request list (latest 100) and action-history endpoints are restricted to the authenticated employee mapping.
+- Pending cancellation releases reserved balance; approved cancellation restores used balance only before the leave start date.
+- Cancellation requires the current RowVersion and writes the Cancelled history and negative ledger entry atomically with the request and balance updates.
+
+Remaining enhancements:
+- Pagination/filtering for employee history and manager queue.
+- Company-local date policy for approved leave cancellation; current implementation compares the UTC calendar date.
