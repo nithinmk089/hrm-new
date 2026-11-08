@@ -7,6 +7,7 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: 'dashboard', title: 'Dashboard | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/dashboard/dashboard-page.component').then(m => m.DashboardPageComponent) },
   { path: 'company/departments', title: 'Departments | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/departments-page.component').then(m => m.DepartmentsPageComponent) },
+  { path: 'company/offices', title: 'Offices | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/offices-page.component').then(m => m.OfficesPageComponent) },
   { path: 'company/:section', title: 'Company administration | HRMS', component: PlaceholderPageComponent, canActivate: [authGuard] },
   { path: 'employees', title: 'Employees | HRMS', component: PlaceholderPageComponent, canActivate: [authGuard], data: { title: 'Employee management', description: 'Employee directory and lifecycle management will be delivered in UI-06.' } },
   { path: 'leave', title: 'Leave management | HRMS', component: PlaceholderPageComponent, canActivate: [authGuard], data: { title: 'Leave management', description: 'Leave balances, requests and approvals will be delivered in UI-08.' } },
