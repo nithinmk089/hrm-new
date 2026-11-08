@@ -48,3 +48,9 @@ Do not commit secrets. The empty connection-string value in appsettings is inten
 - Resolve tenant identity from authenticated server-side claims, never from a caller-provided tenant identifier alone.
 - Use cancellation tokens for database operations.
 - Keep transactions around use cases that require atomic multi-step writes.
+
+## API organization
+
+The API uses conventional ASP.NET Core MVC controllers grouped by business module under `HRMS.API/Modules`. Authentication, Company Management, Employee Management, Leave Management and Timesheet Management are separate controller areas. Platform health/version endpoints are kept under Platform.
+
+`Program.cs` is the composition root and maps controllers with `MapControllers()`; business routes must not be added inline there. See [API Controller and Module Organization](../../docs/architecture/API-Controller-and-Module-Organization.md) for routing, authorization, tenant-context and future module-extraction conventions.
