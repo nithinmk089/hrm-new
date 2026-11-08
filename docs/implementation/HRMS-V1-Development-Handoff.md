@@ -322,3 +322,34 @@ The user confirmed the latest Angular build and test suite both succeeded after 
 UI-03 is complete and ready for PR integration. No dashboard summary endpoint was present in the inspected backend controllers. Existing module endpoints are permission-scoped and some require company/employee IDs; the dashboard deliberately does not guess these identifiers or query endpoints with fabricated context. Real metrics remain deferred pending a tenant-scoped, permission-safe dashboard API contract.
 
 Next phase: UI-04 — Departments, Offices, and Designations on `feature/ui-04-organization-masters`. Existing backend controllers are present under `src/backend/HRMS.API/Modules/CompanyManagement/Controllers/`; inspect their request/response contracts and permission policies before wiring frontend CRUD.
+
+
+### UI-03 integration completed (2026-11-08)
+
+- Pull request [#6](https://github.com/nithinmk089/hrm-new/pull/6), **feat(frontend): deliver authenticated HRMS dashboard**, was merged into `main`.
+- Merge commit: `816f9c1942e9ddc326f23fcb5ceee035adfbe0c5`.
+- The user confirmed the Angular build and tests passed after the final dashboard layout fix and supplied screenshots verifying the rendered dashboard.
+- The next branch, `feature/ui-04-organization-masters`, was created directly from the exact UI-03 merge commit above.
+
+## 12. Current implementation checkpoint — UI-04 Organization Masters
+
+Active branch: `feature/ui-04-organization-masters`.
+
+Scope for this phase:
+- Departments
+- Offices
+- Designations
+
+Existing API controllers:
+- `src/backend/HRMS.API/Modules/CompanyManagement/Controllers/DepartmentsController.cs`
+- `src/backend/HRMS.API/Modules/CompanyManagement/Controllers/OfficesController.cs`
+- `src/backend/HRMS.API/Modules/CompanyManagement/Controllers/DesignationsController.cs`
+
+Before implementing UI/API integration, inspect the complete controller request/response DTOs, Application services, validation, list filtering/pagination behavior, permission policy names, and SQL persistence contracts. Preserve tenant scoping and rowversion/deactivation semantics. Never assume the current tenant is a company ID; inspect the company selection/membership relationship and how the authenticated user is authorized for a company. Implement one vertical slice at a time, beginning with Departments, then Offices, then Designations. Update this handoff as each slice is verified.
+
+Local checkout:
+```powershell
+git switch main
+git pull --ff-only origin main
+git switch -c feature/ui-04-organization-masters origin/feature/ui-04-organization-masters
+```
