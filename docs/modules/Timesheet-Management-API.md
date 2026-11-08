@@ -65,7 +65,7 @@ Submission requires at least one entry and a current active reporting manager wi
 
 | Method | Route | Permission | Purpose |
 |---|---|---|---|
-| GET | /pending-approvals | timesheets.read | List submitted timesheets for current direct reports |
+| GET | /pending-approvals | timesheets.read | List submitted timesheets for current direct reports |\n| GET | /{timesheetId} | timesheets.read | Get one submitted direct report timesheet and its entries |
 | POST | /{timesheetId}/approve | timesheets.approve | Approve a submitted direct report timesheet |
 | POST | /{timesheetId}/reject | timesheets.reject | Reject a submitted direct report timesheet |
 
