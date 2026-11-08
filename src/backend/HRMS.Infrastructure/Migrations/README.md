@@ -30,6 +30,7 @@ Use a zero-padded, increasing numeric prefix followed by a short description:
 - `021_EmployeeLeaveBalanceProcedures.sql`
 - `022_LeaveRequestSubmission.sql`
 - `023_LeaveManagerApprovals.sql`
+- `024_LeaveRequestHistoryAndCancellation.sql`
 
 Once a migration has been applied to any shared environment, do not edit or
 delete it. Add a new migration to change the schema.
