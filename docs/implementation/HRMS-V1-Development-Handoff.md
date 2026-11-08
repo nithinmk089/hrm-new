@@ -168,6 +168,6 @@ Status: **In progress — initial Angular workspace and responsive shell committ
 
 
 UI-01 repository checkpoint:
-- Latest feature branch commit at this checkpoint: `6c0b8a5be6068a0a59cdcaa4135680fd6952ad52`.
+- Latest feature branch commit at this checkpoint: `ebc51b1fa6c517081ff1cc5e81f8b95e5e3e225b`.
 - Angular CLI development build is configured to replace the production environment with the local API URL. The API URL is centralized through the `API_BASE_URL` injection token.
-- Added a Vitest smoke test for the application shell. It has been committed but has **not yet been executed**.
+- Registered Angular HttpClient for upcoming centralized API services. Added a Vitest smoke test for the application shell. It has been committed but has **not yet been executed**.
