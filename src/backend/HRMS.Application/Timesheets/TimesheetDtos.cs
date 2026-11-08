@@ -47,6 +47,12 @@ public sealed record TimesheetDecisionResult(
     Guid TimesheetId, string Status, Guid ReviewedByEmployeeId,
     DateTime ReviewedAtUtc, byte[] RowVersion);
 
+public sealed record TimesheetApprovalDetailDto(
+    Guid TimesheetId, Guid EmployeeId, string EmployeeCode, string FirstName, string LastName,
+    DateOnly WeekStartDate, DateOnly WeekEndDate, string Status, DateTime SubmittedAtUtc,
+    Guid? ReviewedByEmployeeId, DateTime? ReviewedAtUtc, string? ReviewComments,
+    byte[] RowVersion, decimal TotalHours, IReadOnlyList<TimesheetEntryDto> Entries);
+
 public sealed record TimesheetApprovalQueueItem(
     Guid TimesheetId, Guid EmployeeId, string EmployeeCode,
     string FirstName, string LastName, DateOnly WeekStartDate,
