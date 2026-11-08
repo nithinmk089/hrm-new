@@ -46,6 +46,34 @@ public sealed class AuthenticationServiceTests
     }
 
     [Fact]
+    public async Task LoginAsync_RehashesPassword_WhenHasherRequestsUpgrade()
+    {
+        var repository = new FakeIdentityRepository(CreateUser());
+        var hasher = new FakePasswordHasher(PasswordVerificationOutcome.SuccessRehashNeeded);
+        var sut = new AuthenticationService(repository, hasher, new FakeAccessTokenGenerator(), TimeProvider.System);
+
+        var result = await sut.LoginAsync(new LoginRequest("person@example.com", "correct", "ACME"));
+
+        Assert.NotNull(result);
+        Assert.Equal(1, repository.PasswordHashUpdateCalls);
+    }
+
+    [Fact]
+    public async Task LoginAsync_ReturnsNull_WhenAccountIsCurrentlyLocked()
+    {
+        var user = CreateUser() with { LockoutEndUtc = DateTime.UtcNow.AddMinutes(5) };
+        var repository = new FakeIdentityRepository(user);
+        var sut = new AuthenticationService(repository, new FakePasswordHasher(PasswordVerificationOutcome.Succeeded),
+            new FakeAccessTokenGenerator(), TimeProvider.System);
+
+        var result = await sut.LoginAsync(new LoginRequest("person@example.com", "correct", "ACME"));
+
+        Assert.Null(result);
+        Assert.Equal(0, repository.FailedLoginCalls);
+        Assert.Equal(0, repository.SuccessfulLoginCalls);
+    }
+
+    [Fact]
     public async Task LoginAsync_ReturnsNull_WhenMembershipLookupDoesNotFindUser()
     {
         var repository = new FakeIdentityRepository(null);
@@ -80,6 +108,7 @@ public sealed class AuthenticationServiceTests
         public string? LastNormalizedTenantCode { get; private set; }
         public int FailedLoginCalls { get; private set; }
         public int SuccessfulLoginCalls { get; private set; }
+        public int PasswordHashUpdateCalls { get; private set; }
 
         public Task<UserLoginRecord?> FindForLoginAsync(
             string normalizedEmail,
@@ -114,7 +143,12 @@ public sealed class AuthenticationServiceTests
         public Task UpdatePasswordHashAsync(
             Guid userId,
             string passwordHash,
-            CancellationToken cancellationToken = default) => Task.CompletedTask;
+            CancellationToken cancellationToken = default)
+        {
+            PasswordHashUpdateCalls++;
+            Assert.Equal("new-hash", passwordHash);
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakePasswordHasher(PasswordVerificationOutcome outcome) : IPasswordHasher
