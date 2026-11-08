@@ -83,12 +83,12 @@ The current backend implementation covers authentication/authorization, company 
 
 **Exit criteria:** login, refresh, current-user loading, protected routes, and logout work against the existing API. Completed and locally verified on 2026-11-08. Effective-permission retrieval and permission-aware navigation remain deferred until a verified backend permissions contract is available.
 
-### UI-03 — Dashboard
+### UI-03 — Dashboard (completed 2026-11-08)
 - Build an initial role-aware dashboard shell.
 - Show only metrics and widgets backed by available APIs/data.
 - Avoid inventing metrics or hard-coding fake production data.
 
-**Exit criteria:** authenticated user lands on a useful dashboard with clear navigation.
+**Exit criteria:** authenticated user lands on a useful dashboard with clear navigation. Completed and locally verified: authenticated user/workspace identity, responsive welcome and workspace panels, module shortcuts, and explicit no-fabricated-metrics state. No dashboard aggregation endpoint currently exists; real metrics remain deferred until a tenant-scoped, permission-safe API is designed.
 
 ### UI-04 — Company organization masters
 Implement CRUD screens and API integration for:
@@ -227,4 +227,4 @@ For each UI phase:
 
 ## 7. Immediate next task
 
-UI-01 (Angular foundation and application shell) has been completed and merged into `main` through PR #4. The current task is **UI-02 — Authentication and authorization experience** on `feature/ui-02-authentication`. Continue from the latest branch state and development handoff. Do not create a new feature branch until UI-02 is completed, verified, and merged into `main`.
+UI-01 (Angular foundation and application shell), UI-02 (authentication experience), and UI-03 (dashboard) have been completed and merged into `main` through PRs #4, #5, and #6 respectively. The next task is **UI-04 — Company organization masters** on `feature/ui-04-organization-masters`. Implement Departments, Offices, and Designations against the existing verified API contracts. Do not create the next feature branch until UI-03 is merged into `main`.
