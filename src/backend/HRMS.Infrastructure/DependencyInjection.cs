@@ -73,6 +73,8 @@ public static class DependencyInjection
         services.AddScoped<ILeaveRequestService, LeaveRequestService>();
         services.AddScoped<ILeaveApprovalRepository, LeaveApprovalRepository>();
         services.AddScoped<ILeaveApprovalService, LeaveApprovalService>();
+        services.AddScoped<ILeaveRequestLifecycleRepository, LeaveRequestLifecycleRepository>();
+        services.AddScoped<ILeaveRequestLifecycleService, LeaveRequestLifecycleService>();
 
         return services;
     }
