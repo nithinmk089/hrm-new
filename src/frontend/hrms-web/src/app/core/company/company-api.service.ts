@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-import { CompanySummary, CreateDepartmentRequest, CreateOfficeRequest, Department, Office, UpdateDepartmentRequest, UpdateOfficeRequest } from './company.models';
+import { CompanySummary, CreateDepartmentRequest, CreateDesignationRequest, CreateOfficeRequest, Department, Designation, Office, UpdateDepartmentRequest, UpdateDesignationRequest, UpdateOfficeRequest } from './company.models';
 
 @Injectable({ providedIn: 'root' })
 export class CompanyApiService {
@@ -27,6 +27,22 @@ export class CompanyApiService {
 
   deactivateDepartment(companyId: string, departmentId: string, rowVersion: string): Observable<void> {
     return this.http.patch<void>(`${this.apiBaseUrl}/companies/${companyId}/departments/${departmentId}/deactivate`, { rowVersion });
+  }
+
+  getDesignations(companyId: string): Observable<Designation[]> {
+    return this.http.get<Designation[]>(`${this.apiBaseUrl}/companies/${companyId}/designations`);
+  }
+
+  createDesignation(companyId: string, request: CreateDesignationRequest): Observable<Designation> {
+    return this.http.post<Designation>(`${this.apiBaseUrl}/companies/${companyId}/designations`, request);
+  }
+
+  updateDesignation(companyId: string, designationId: string, request: UpdateDesignationRequest): Observable<Designation> {
+    return this.http.put<Designation>(`${this.apiBaseUrl}/companies/${companyId}/designations/${designationId}`, request);
+  }
+
+  deactivateDesignation(companyId: string, designationId: string, rowVersion: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiBaseUrl}/companies/${companyId}/designations/${designationId}/deactivate`, { rowVersion });
   }
 
   getOffices(companyId: string): Observable<Office[]> {

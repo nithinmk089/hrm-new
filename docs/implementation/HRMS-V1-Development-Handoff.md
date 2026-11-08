@@ -477,3 +477,39 @@ Local verification required:
 - Cover initial loading and empty/error states, company/tenant selection behavior, form validation, create/update payload mapping, RowVersion propagation, confirmation flows, success/error outcomes, and active/inactive actions.
 - Added `offices-page.component.spec.ts` with nine test cases: initial company/office loading and selected company, no companies, company switching, required/two-letter country validation, normalized create payload, immutable office code and RowVersion on update, explicit deactivation confirmation, conflict handling, and inactive-office action visibility.
 - Future UI pages should include their unit test file in the same feature branch before requesting merge. Shared components/services should receive focused tests where behavior warrants them.
+
+
+### UI-04B Offices integrated (2026-11-08)
+
+- Pull request [#8](https://github.com/nithinmk089/hrm-new/pull/8), **feat(organization): add Offices management UI**, merged into `main`.
+- Merge commit: `727f1d93abcb0d54edf30e8e3aa67734c4904f64`.
+- User confirmed the nine Offices Vitest/Angular TestBed cases and Angular production build passed, and verified the UI in the browser.
+- Next branch `feature/ui-04c-designations` created directly from merge commit `727f1d93abcb0d54edf30e8e3aa67734c4904f64`.
+
+## 14. Current implementation checkpoint — UI-04C Designations
+
+Active branch: `feature/ui-04c-designations`.
+
+Backend API contract verified:
+- Base route: `/api/v1/companies/{companyId}/designations`.
+- Permissions: `designations.read`, `designations.create`, `designations.update`, `designations.deactivate`.
+- Create: `designationCode`, `designationName`, `description`, `jobLevel`.
+- Update: `designationName`, `description`, `jobLevel`, `rowVersion`; code is immutable after creation.
+- Deactivate: PATCH `/{designationId}/deactivate` with RowVersion.
+- Code required, trimmed, uppercase, max 30; name required, max 150; description optional max 500; JobLevel optional positive small integer.
+- Code uniqueness is company-scoped among non-deleted records; stale update/deactivation returns conflict.
+- No activation endpoint exists; inactive records remain historical and do not show an Activate action.
+- Existing SQL migration 012 provides stored procedures. No new database migration expected for this UI slice.
+
+Implemented in current branch:
+- Typed frontend Designation DTO/request contracts and CompanyApiService methods.
+- Lazy authenticated route `/company/designations`.
+- Company-scoped directory, active/inactive status, job level, create/edit/deactivate dialogs.
+- Code normalization, immutable edit code, optional positive job level, RowVersion update/deactivation, error and confirmation states.
+- Nine Vitest/Angular TestBed unit tests covering initial loading, no companies, company switch, validation, normalized create, update RowVersion, confirmation, conflict, and inactive action state.
+
+Local verification pending:
+- Pull branch `feature/ui-04c-designations`.
+- Run `npm test` and `npm run build` in `src/frontend/hrms-web`.
+- Verify list/create/edit/deactivate and duplicate code/invalid job-level scenarios in browser.
+- Do not merge or start the next feature until user confirms.
