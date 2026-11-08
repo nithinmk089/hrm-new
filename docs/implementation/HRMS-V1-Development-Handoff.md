@@ -544,3 +544,14 @@ Design requirements:
 - Duplicate-date conflicts should be presented as a clear validation error.
 - Deactivation uses confirmation modal and RowVersion.
 - Add focused Angular TestBed/Vitest unit tests for loading, no company, selection, validation, date serialization, duplicate-date API error, update RowVersion, deactivate confirmation and inactive state.
+
+
+Implemented on `feature/ui-05-holidays`:
+- Typed Holiday contracts and CompanyApiService list/create/update/deactivate methods.
+- Lazy authenticated route `/company/holidays`; existing sidebar Holidays link already targets this route.
+- Company-scoped holiday directory ordered by date, with mandatory/optional and active/inactive indicators.
+- Create/edit modal with date-only `YYYY-MM-DD` payload, optional flag and description.
+- Duplicate-date validation, RowVersion update/deactivation, styled confirmation and success dialogs.
+- Ten Angular TestBed/Vitest unit tests covering load, empty companies, company switch, validation, create/date payload, update RowVersion, duplicate date, deactivate confirmation, conflict and inactive actions.
+
+Local build, unit tests, and browser verification pending. No migration required; migrations 013/014 are already part of the baseline.
