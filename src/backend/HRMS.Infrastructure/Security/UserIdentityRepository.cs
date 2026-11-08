@@ -57,7 +57,10 @@ internal sealed class UserIdentityRepository(IDbConnectionFactory connectionFact
         CancellationToken cancellationToken = default)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxFailedAttempts);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(lockoutDuration);
+        if (lockoutDuration <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(lockoutDuration));
+        }
         EnsureValidUserId(userId);
 
         const string sql = """

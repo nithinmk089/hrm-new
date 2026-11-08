@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
         services.AddSingleton<IDatabaseMigrator, SqlDatabaseMigrator>();
         services.AddSingleton<IPasswordHasher, AspNetCorePasswordHasher>();
+        services.AddScoped<IUserIdentityRepository, UserIdentityRepository>();
 
         services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<ICompanyService, CompanyService>();
