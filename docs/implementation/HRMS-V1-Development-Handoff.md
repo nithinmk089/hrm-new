@@ -609,3 +609,29 @@ Verification status:
 - Repository changes are committed to this feature branch.
 - Assistant has not run the .NET build, SQL migration or integration tests against the user's local SQL Server. Local verification is required before extending the API or merging.
 - Next: run backend build and tests, apply migration 029, re-seed development permissions, then exercise the five endpoints in Swagger or an API client. Resolve any issues before beginning the employment-assignment slice.
+
+
+## 17. UI-06 Employee Management integrated (2026-11-08)
+
+Status: **Completed, locally verified by the user, and merged into `main`.**
+
+- Pull request [#11](https://github.com/nithinmk089/hrm-new/pull/11), **feat(hrms): implement UI-06 employee management**, merged.
+- Merge commit: `64e5009e25d0481463943782efee3bf2aec797fd`.
+- Feature branch: `feature/ui-06-employee-management`.
+- Backend migration: `029_EmployeeCoreManagement.sql`; the user confirmed migration and development seed succeeded.
+- Backend verification supplied by user: solution build succeeded; `dotnet test .\\HRMS.sln` reported 116 tests, 0 failed, 0 skipped; employee list and complete CRUD/status API workflow verified.
+- Frontend: employee directory, search/status filtering, create, detail, edit, immutable employee code, employment status changes, RowVersion concurrency handling, and pre-save confirmation dialogs for create/edit.
+- Frontend test coverage: ten employee component tests; user confirmed final frontend test suite and production build succeeded after resolving the email validator and confirmation-dialog formatting issues.
+- User confirmed browser workflows: create/edit confirmation dialog, cancel and confirm actions, employee status update, frontend tests, and production build.
+- Latest feature branch head merged: `55197f3b04ef40d51d865e3fa0a1b9534dad1955`.
+- Do not repeat migration 029 unless the local migration history indicates it has not been applied.
+
+### Next phase — UI-07 Working Week and Employee User Mapping
+
+- UI-07 branch must start from the latest `main` after PR #11 and the handoff/plan documentation update.
+- Implement company working-week configuration, office-level working-week overrides, and explicit employee-to-user mapping administration.
+- Preserve ISO weekday numbering (Monday=1 through Sunday=7), company defaults and office overrides.
+- Employee login mapping must remain explicit and authorized; never infer it from matching email addresses.
+- Inspect existing backend routes, DTOs, permissions, and stored procedures before implementing UI. Add backend contracts/migrations only if a required capability is genuinely missing.
+- Add focused tests for load/save, company/office scope, validation, effective schedule display, mapping/unmapping authorization, and concurrency where supported.
+- User local workflow remains: pull branch, run frontend tests/build, verify browser workflows, share results; only then merge the feature PR to `main`.
