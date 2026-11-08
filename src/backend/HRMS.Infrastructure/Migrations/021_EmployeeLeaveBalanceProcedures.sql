@@ -94,8 +94,8 @@ BEGIN
                 THROW 51273, 'A balance must be initialized with a positive transaction before it can be reduced.', 1;
 
             INSERT INTO hrms.EmployeeLeaveBalances
-                (TenantId, CompanyId, EmployeeId, LeaveTypeId, LeaveYear)
-            VALUES (@TenantId, @CompanyId, @EmployeeId, @LeaveTypeId, @LeaveYear);
+                (TenantId, CompanyId, EmployeeId, LeaveTypeId, LeaveYear, CreatedByUserId)
+            VALUES (@TenantId, @CompanyId, @EmployeeId, @LeaveTypeId, @LeaveYear, @ActorUserId);
 
             SET @BalanceId = (SELECT EmployeeLeaveBalanceId FROM hrms.EmployeeLeaveBalances
                 WHERE TenantId = @TenantId AND CompanyId = @CompanyId
@@ -104,7 +104,7 @@ BEGIN
 
         IF @TransactionType = 'Opening'
             UPDATE hrms.EmployeeLeaveBalances SET OpeningDays = OpeningDays + @DaysDelta,
-                UpdatedAtUtc = SYSUTCDATETIME()
+                UpdatedAtUtc = SYSUTCDATETIME(), UpdatedByUserId = @ActorUserId
             WHERE EmployeeLeaveBalanceId = @BalanceId;
         ELSE IF @TransactionType = 'Accrual'
             UPDATE hrms.EmployeeLeaveBalances SET AccruedDays = AccruedDays + @DaysDelta,
