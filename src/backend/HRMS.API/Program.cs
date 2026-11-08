@@ -1,12 +1,14 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Text;
+using HRMS.API.Authorization;
 using HRMS.API.ErrorHandling;
 using HRMS.Application.Abstractions.Persistence;
 using HRMS.Application.Abstractions.Security;
 using HRMS.Infrastructure;
 using HRMS.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 
@@ -48,7 +50,10 @@ builder.Services
         };
     });
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthorization();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 var allowedOrigins = builder.Configuration
     .GetSection("Authentication:AllowedOrigins")

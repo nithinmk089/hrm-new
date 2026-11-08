@@ -20,5 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../../src/backend/HRMS.Infrastructure/HRMS.Infrastructure.csproj" />
+    <ProjectReference Include="../../../src/backend/HRMS.API/HRMS.API.csproj" />
   </ItemGroup>
 </Project>

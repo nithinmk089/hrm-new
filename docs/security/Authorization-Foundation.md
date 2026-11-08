@@ -42,21 +42,35 @@ Supported scope behavior:
 A company-level assignment does not automatically inherit into subsidiaries.
 Office-level assignments do not grant access to the whole company.
 
-## Trusted identity context
+## Trusted identity and resource context
 
-UserId, TenantId and MembershipId must be derived from the validated JWT claims.
-Never accept these identifiers as trusted values from a request body or query
-string. CompanyId and OfficeId identify the resource being accessed and must
-be resolved and validated against tenant-owned resource records by the API or
-module service.
+UserId, TenantId and MembershipId are derived only from the validated JWT
+principal claims `sub`, `tenant_id` and `membership_id`. They are never read
+from a request body, query string or arbitrary header.
 
-## Current implementation increment
+The API accepts resource identifiers from route values named `companyId` and
+`officeId`. These values are treated only as resource selectors, not as proof
+of access. The permission repository checks the assignment against the
+tenant-scoped company/office records. An office route without a company route
+is denied.
 
-The application exposes `IPermissionAuthorizationService`. The SQL repository
-checks membership, tenant, role, permission and scope together on every check.
-This avoids relying on stale permission claims embedded in a long-lived token.
+## ASP.NET Core integration
 
-The current increment provides the evaluation service and persistence query.
-ASP.NET Core authorization policies/handlers and endpoint integration are a
-separate follow-up increment. Module endpoints must remain protected until
-those policies are wired.
+Protected endpoints can now declare policies using the stable permission
+catalogue codes:
+
+```csharp
+app.MapGet("/api/v1/companies/{companyId:guid}", GetCompany)
+    .RequireAuthorization("Permission:companies.read");
+```
+
+The dynamic policy provider requires an authenticated principal. The handler
+extracts the three identity claims, reads optional route scope, and delegates
+the decision to `IPermissionAuthorizationService`. Missing or malformed
+identity/scope context is denied. The database evaluator is called on each
+authorization decision, so role or membership changes are not dependent on
+stale permission claims embedded in the access token.
+
+Do not add `TenantId`, `UserId`, `MembershipId`, role or permission inputs
+to endpoint request DTOs. Do not expose module endpoints until each operation
+has an appropriate permission policy and its repository enforces tenant scope.
