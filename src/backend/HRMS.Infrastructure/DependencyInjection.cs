@@ -1,4 +1,5 @@
 using HRMS.Application.Abstractions.Persistence;
+using HRMS.Application.Companies;
 using HRMS.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +17,9 @@ public static class DependencyInjection
 
         services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
         services.AddSingleton<IDatabaseMigrator, SqlDatabaseMigrator>();
+
+        services.AddScoped<ICompanyRepository, CompanyRepository>();
+        services.AddScoped<ICompanyService, CompanyService>();
 
         return services;
     }
