@@ -12,7 +12,10 @@ IF COL_LENGTH(N'audit.ErrorLogs', N'TraceId') IS NULL
 
 IF COL_LENGTH(N'audit.ErrorLogs', N'StatusCode') IS NULL
     ALTER TABLE [audit].[ErrorLogs] ADD [StatusCode] smallint NULL;
+GO
 
+-- Start a new batch so SQL Server compiles constraints and indexes after
+-- the optional columns above have been added.
 IF NOT EXISTS
 (
     SELECT 1
