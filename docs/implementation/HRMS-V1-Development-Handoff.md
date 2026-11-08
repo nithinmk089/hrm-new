@@ -6,12 +6,12 @@
 
 - Repository: [nithinmk089/hrm-new](https://github.com/nithinmk089/hrm-new)
 - Main branch is the integration branch.
-- Current work was developed on `feature/timesheet-management-v1`.
-- Feature branch head before this handoff documentation: `f5bca9863f9c9e90b8fef1c41f8629b899656934` (fix timesheet permission identity insert).
-- The feature branch was 41 commits ahead of main and 0 behind immediately before the handoff documentation commit.
-- The current Timesheet branch includes the earlier authentication, organization, employee/leave foundation and workflow work in its history.
-- PR #1 previously merged authentication/authorization foundation into main (squash commit `795e10abd0176a92a36ac0b4fe48d4af5cb60c4a`). Do not attempt to merge PR #1 again.
-- A new PR should be created from `feature/timesheet-management-v1` to `main` for the current integration.
+- The backend and Timesheet V1 work was developed on `feature/timesheet-management-v1` and integrated into `main` through PR [#3](https://github.com/nithinmk089/hrm-new/pull/3).
+- PR #3 title: **Integrate HRMS V1 backend and Timesheet Management**; status: merged.
+- PR #3 squash merge commit / current `main` head at integration: `17d5697fa2f2feb44fbdd2b6df58de01daf2f57f`.
+- PR #3 included 43 commits, 18 changed files in the final PR diff, plus the prior branch history already present in the source branch.
+- PR #1 previously merged authentication/authorization foundation into main (squash commit `795e10abd0176a92a36ac0b4fe48d4af5cb60c4a`). It is already integrated; do not attempt to merge PR #1 again.
+- `main` is now the authoritative shared baseline. Start the next frontend feature branch from the latest `main`.
 
 ## 2. Confirmed local verification
 
@@ -126,17 +126,17 @@ Frontend stack: Angular 21+, strict TypeScript, standalone components, Bootstrap
 
 ## 6. Exact next-session instructions
 
-1. Read this handoff and `docs/implementation/HRMS-V1-Implementation-Plan.md`.
-2. Confirm current `main` includes the Timesheet/backend branch merge.
-3. Ask the user to switch/pull the updated main branch locally if required:
+1. Read this handoff and `docs/implementation/HRMS-V1-Implementation-Plan.md` from the latest `main`.
+2. In the user's local PowerShell terminal, sync the merged main branch:
    ```powershell
    git switch main
    git pull --rebase origin main
    ```
-4. Start UI-01 only. Inspect the repository for existing frontend files before scaffolding; do not overwrite unrelated files.
-5. Create a dedicated frontend feature branch from the latest main.
-6. Implement the Angular application shell and verify build/tests.
-7. Keep this handoff updated after each meaningful phase, including commit/PR references, files, migrations, tests, and known issues.
+   If Git reports local uncommitted changes, inspect and preserve them; do not reset or discard them.
+3. Start UI-01 only. Inspect the repository for existing frontend files before scaffolding; do not overwrite unrelated files.
+4. Create a dedicated frontend feature branch from the latest main, for example `feature/angular-application-shell`.
+5. Implement the Angular application shell and verify build/tests.
+6. Keep this handoff updated after each meaningful phase, including commit/PR references, files, migrations, tests, and known issues.
 
 ## 7. User working environment
 
