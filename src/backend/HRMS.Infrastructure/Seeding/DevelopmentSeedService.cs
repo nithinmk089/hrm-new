@@ -314,9 +314,14 @@ internal sealed class DevelopmentSeedService(
                 FROM security.Permissions
                 WHERE IsActive = 1
                   AND PermissionCode IN
-                      ('companies.read', 'companies.create', 'companies.update', 'companies.deactivate')
-            ) <> 4
-                THROW 51107, 'Company permission catalogue is incomplete. Apply database migration 007 before seeding development data.', 1;
+                  (
+                      'companies.read', 'companies.create', 'companies.update', 'companies.deactivate',
+                      'departments.read', 'departments.create', 'departments.update', 'departments.deactivate',
+                      'offices.read', 'offices.create', 'offices.update', 'offices.deactivate',
+                      'designations.read', 'designations.create', 'designations.update', 'designations.deactivate'
+                  )
+            ) <> 16
+                THROW 51107, 'Company and organization permission catalogues are incomplete. Apply database migrations 007 and 008 before seeding development data.', 1;
 
             INSERT INTO security.RolePermissions (TenantId, RoleId, PermissionId, GrantedBy)
             SELECT @TenantId, @RoleId, p.PermissionId, @Actor
