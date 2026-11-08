@@ -73,7 +73,7 @@ The current backend implementation covers authentication/authorization, company 
 
 **Exit criteria:** application builds; shell and navigation render responsively; shared styles/components are reusable.
 
-### UI-02 — Authentication and authorization experience
+### UI-02 — Authentication and authorization experience (completed 2026-11-08)
 - Login screen and authentication state management.
 - Integrate existing login, refresh, logout, and current-user APIs.
 - Implement secure token/session handling consistent with the existing backend cookie and refresh-token design; do not expose refresh tokens to browser JavaScript.
@@ -81,7 +81,7 @@ The current backend implementation covers authentication/authorization, company 
 - Add route guards and permission-aware menu/action visibility.
 - Handle expired sessions and logout cleanly.
 
-**Exit criteria:** login, refresh, current-user loading, protected routes, and logout work against the existing API.
+**Exit criteria:** login, refresh, current-user loading, protected routes, and logout work against the existing API. Completed and locally verified on 2026-11-08. Effective-permission retrieval and permission-aware navigation remain deferred until a verified backend permissions contract is available.
 
 ### UI-03 — Dashboard
 - Build an initial role-aware dashboard shell.
@@ -227,4 +227,4 @@ For each UI phase:
 
 ## 7. Immediate next task
 
-Start with **UI-01 — Angular foundation and application shell**. Before creating files, inspect the repository and confirm whether `src/frontend/` already exists on the current main branch. Do not overwrite unrelated frontend work. Keep the frontend implementation in a dedicated feature branch and use the repository's current backend/API conventions.
+UI-01 (Angular foundation and application shell) has been completed and merged into `main` through PR #4. The current task is **UI-02 — Authentication and authorization experience** on `feature/ui-02-authentication`. Continue from the latest branch state and development handoff. Do not create a new feature branch until UI-02 is completed, verified, and merged into `main`.
