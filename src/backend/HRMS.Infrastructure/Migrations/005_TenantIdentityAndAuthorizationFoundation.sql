@@ -65,7 +65,8 @@ SELECT @DropUserForeignKeys = @DropUserForeignKeys
     + N' DROP CONSTRAINT ' + QUOTENAME(fk.name) + N';' + CHAR(10)
 FROM sys.foreign_keys AS fk
 INNER JOIN sys.tables AS parent_object ON parent_object.object_id = fk.parent_object_id
-WHERE fk.referenced_object_id = OBJECT_ID(N'security.Users');
+WHERE fk.referenced_object_id = OBJECT_ID(N'security.Users')
+   OR fk.parent_object_id = OBJECT_ID(N'security.Users');
 
 IF @DropUserForeignKeys <> N''
     EXEC sys.sp_executesql @DropUserForeignKeys;
