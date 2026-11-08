@@ -39,7 +39,6 @@ For rejection, comments are required. Comments are optional for approval. The se
 - `400 Bad Request`: invalid RowVersion or comments.
 - `401 Unauthorized`: missing/invalid access token.
 - `403 Forbidden`: missing permission.
-- `404 Not Found`: request not found in the authenticated company.
-- `409 Conflict`: request is not pending, stale RowVersion, manager mismatch, or inconsistent reservation.
+- `409 Conflict`: request not found in the authenticated company, request is not pending, stale RowVersion, manager mismatch, or inconsistent reservation.
 
 The SQL procedure uses tenant and company predicates for every request, manager, balance and ledger operation.
