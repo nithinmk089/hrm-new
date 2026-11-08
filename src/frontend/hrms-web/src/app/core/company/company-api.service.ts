@@ -28,4 +28,8 @@ export class CompanyApiService {
   deactivateDepartment(companyId: string, departmentId: string, rowVersion: string): Observable<void> {
     return this.http.patch<void>(`${this.apiBaseUrl}/companies/${companyId}/departments/${departmentId}/deactivate`, { rowVersion });
   }
+
+  activateDepartment(companyId: string, departmentId: string, rowVersion: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiBaseUrl}/companies/${companyId}/departments/${departmentId}/activate`, { rowVersion });
+  }
 }
