@@ -62,7 +62,7 @@ establishes the canonical model:
 - `security.RefreshTokens` remains tenant-bound and references a valid tenant
   membership.
 - `audit.AuditLogs` is the canonical business audit store.
-- `audit.ErrorLogs` stores failed API responses (excluding HTTP 401 and 404) for operational diagnostics.
+- `audit.ErrorLogs` is the existing operational error store. Migration 010 extends it with API trace and HTTP status fields; API error persistence maps to its existing `ErrorCode`, `Message`, and `ExceptionDetails` columns. HTTP 401 and 404 responses are excluded.
 
 Migration 005 adds TenantId to companies and all company-owned HRMS records,
 adds same-tenant company hierarchy constraints, and preserves legacy `hrms`
