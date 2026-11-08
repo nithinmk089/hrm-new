@@ -12,6 +12,7 @@ Use a zero-padded, increasing numeric prefix followed by a short description:
 - `003_CreateEmployeeManagementTables.sql`
 - `004_CreateIdentityAndSecurityTables.sql`
 - `005_TenantIdentityAndAuthorizationFoundation.sql`
+- `010_CreateApiErrorLogs.sql`
 
 Once a migration has been applied to any shared environment, do not edit or
 delete it. Add a new migration to change the schema.
@@ -60,7 +61,8 @@ establishes the canonical model:
   or Office scope. Company descendant access is opt-in.
 - `security.RefreshTokens` remains tenant-bound and references a valid tenant
   membership.
-- `audit.AuditLogs` is the canonical audit store.
+- `audit.AuditLogs` is the canonical business audit store.
+- `audit.ErrorLogs` stores failed API responses (excluding HTTP 401 and 404) for operational diagnostics.
 
 Migration 005 adds TenantId to companies and all company-owned HRMS records,
 adds same-tenant company hierarchy constraints, and preserves legacy `hrms`
