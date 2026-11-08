@@ -21,6 +21,10 @@ public interface ITimesheetRepository
         Guid tenantId, Guid companyId, Guid actorUserId, Guid timesheetId,
         byte[] rowVersion, CancellationToken cancellationToken);
 
+    Task<TimesheetApprovalDetailDto?> GetForApprovalAsync(
+        Guid tenantId, Guid companyId, Guid actorUserId, Guid timesheetId,
+        CancellationToken cancellationToken);
+
     Task<IReadOnlyList<TimesheetApprovalQueueItem>> GetPendingApprovalsAsync(
         Guid tenantId, Guid companyId, Guid actorUserId, CancellationToken cancellationToken);
 
