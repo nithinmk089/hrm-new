@@ -10,4 +10,6 @@ public sealed record ApiErrorLogEntry(
     int StatusCode,
     string ErrorType,
     string? ErrorMessage,
-    string? StackTrace);
+    string? StackTrace,
+    string ApplicationName,
+    string EnvironmentName);
