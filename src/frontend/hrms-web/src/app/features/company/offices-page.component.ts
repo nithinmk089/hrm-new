@@ -16,8 +16,8 @@ import { CompanySummary, Office } from '../../core/company/company.models';
 
     <section class="company-context card mb-3">
       <div class="context-icon"><i class="bi bi-building"></i></div>
-      <div class="context-copy"><label for="companySelect">Company</label><select id="companySelect" class="form-select form-select-sm" [value]="selectedCompanyId()" (change)="onCompanyChange($event)" [disabled]="companiesLoading() || companies().length === 0"><option value="">Select a company</option>@for(company of companies(); track company.companyId){<option [value]="company.companyId">{{ company.displayName }} ({{ company.companyCode }})</option>}</select></div>
-      <span class="context-count">{{ activeCount() }} active offices</span>
+      <div class="context-copy"><label for="companySelect">Company</label><select id="companySelect" class="form-select form-select-sm" [value]="selectedCompanyId()" (change)="onCompanyChange($event)" [disabled]="companiesLoading() || companies().length === 0"><option value="">Select a company</option>@for(company of companies(); track company.companyId){<option [value]="company.companyId" [selected]="company.companyId === selectedCompanyId()">{{ company.displayName }} ({{ company.companyCode }})</option>}</select></div>
+      <span class="context-count">{{ activeCount() }} {{ activeCount() === 1 ? 'active office' : 'active offices' }}</span>
     </section>
 
     @if(error()){<div class="alert alert-danger" role="alert">{{ error() }}</div>}
