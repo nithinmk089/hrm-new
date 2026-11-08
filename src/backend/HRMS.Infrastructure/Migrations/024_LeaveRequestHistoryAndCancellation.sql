@@ -203,7 +203,6 @@ BEGIN
         UPDATE hrms.LeaveRequests
         SET Status = 'Cancelled',
             CancelledAtUtc = @CancelledAtUtc,
-            ReviewComments = CASE WHEN @Comments IS NOT NULL THEN @Comments ELSE ReviewComments END,
             UpdatedAtUtc = @CancelledAtUtc,
             UpdatedByUserId = @ActorUserId
         WHERE TenantId = @TenantId AND CompanyId = @CompanyId
