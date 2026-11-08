@@ -282,3 +282,29 @@ Active branch: `feature/ui-03-dashboard`.
 Start UI-03 by inspecting existing dashboard component, shell, API contracts, and available dashboard-related backend endpoints. Do not invent metrics or display fabricated business data. First identify which real APIs/data can support the initial dashboard. If no dashboard aggregation endpoint exists, implement a useful navigation-first dashboard with accurate user/workspace context and clearly labeled empty states; propose a backend endpoint only when the required source data and authorization rules are confirmed.
 
 After implementation, update this handoff, ask the user to run local build/tests, then merge UI-03 into `main` before creating another feature branch.
+
+
+## 11. UI-03 Dashboard implementation checkpoint (2026-11-08)
+
+Status: **Initial dashboard vertical slice committed; local verification pending.**
+
+Backend/API inspection found no dedicated dashboard aggregation endpoint. Existing module APIs are permission-scoped and require company IDs and, for some employee-specific resources, employee IDs. Do not call these from the dashboard using guessed IDs or derive employee identity from email. No fabricated totals or pending counts are displayed.
+
+Implemented on `feature/ui-03-dashboard`:
+- Replaced generic dashboard welcome content with authenticated user display name from the in-memory AuthService session.
+- Added current workspace name and tenant code from the authenticated login/refresh response.
+- Added current date label and module quick-access links.
+- Added a clear note explaining that employee totals, leave summaries and approval counts will be displayed only after a dedicated tenant-scoped dashboard data contract is available.
+- Updated the global application header and sidebar tenant panel to show the authenticated display name and tenant name rather than hardcoded placeholder values.
+- Added initials derived from the actual user/workspace labels for their avatars.
+
+Commits:
+- `87030653553fa181c3cb2c28ac9d9eaf23845282` — personalized dashboard workspace landing page.
+- `3a5e3520dcca3c259e6b2c5409f1e97d973ca108` — authenticated identity in the global shell.
+- `2aa6481a44e0ea711d0e753f8418e464b7658691` — this handoff checkpoint.
+
+Next:
+1. User pulls `feature/ui-03-dashboard` and runs frontend build/tests.
+2. Visually verify dashboard on desktop and mobile; confirm display name and tenant match the authenticated account.
+3. If the user wants real metrics in UI-03, first define a backend dashboard summary endpoint with tenant scoping and permission-safe aggregates; do not infer company/employee identifiers in the browser.
+4. Once verified, merge UI-03 into `main`, then create the next feature branch from the exact latest main commit.
