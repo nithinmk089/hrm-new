@@ -18,7 +18,8 @@ HRMS.API/
 │   │   └── Controllers/
 │   │       ├── CompaniesController.cs
 │   │       ├── DepartmentsController.cs
-│   │       └── OfficesController.cs
+│   │       ├── OfficesController.cs
+│   │       └── DesignationsController.cs
 │   ├── EmployeeManagement/
 │   │   └── Controllers/
 │   ├── LeaveManagement/
