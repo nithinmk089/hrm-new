@@ -8,6 +8,7 @@ using HRMS.Application.Holidays;
 using HRMS.Application.LeaveTypes;
 using HRMS.Application.WorkingWeeks;
 using HRMS.Application.EmployeeUserMappings;
+using HRMS.Application.LeaveBalances;
 using HRMS.Application.Security;
 using HRMS.Infrastructure.Persistence;
 using HRMS.Infrastructure.Security;
@@ -65,6 +66,8 @@ public static class DependencyInjection
         services.AddScoped<IWorkingWeekService, WorkingWeekService>();
         services.AddScoped<IEmployeeUserMappingRepository, EmployeeUserMappingRepository>();
         services.AddScoped<IEmployeeUserMappingService, EmployeeUserMappingService>();
+        services.AddScoped<IEmployeeLeaveBalanceRepository, EmployeeLeaveBalanceRepository>();
+        services.AddScoped<IEmployeeLeaveBalanceService, EmployeeLeaveBalanceService>();
 
         return services;
     }
