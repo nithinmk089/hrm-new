@@ -353,3 +353,34 @@ git switch main
 git pull --ff-only origin main
 git switch -c feature/ui-04-organization-masters origin/feature/ui-04-organization-masters
 ```
+
+
+### UI-04A — Departments implementation checkpoint (2026-11-08)
+
+Status: **First frontend vertical slice committed; local build/test and API verification pending.**
+
+Backend contract inspected:
+- Company list: `GET /api/v1/companies`, returns tenant-scoped CompanyDto values with `companyId`, `companyCode`, `displayName`, and `isActive`.
+- Department list/detail/create/update/deactivate are under `/api/v1/companies/{companyId}/departments`.
+- Policies: `departments.read`, `departments.create`, `departments.update`, `departments.deactivate`.
+- Department create request: `departmentCode`, `departmentName`, `description`, `parentDepartmentId`.
+- Department update request: `departmentName`, `description`, `parentDepartmentId`, `rowVersion`.
+- Department DTO includes company ID, parent department ID, active flag, timestamps, and rowversion.
+- Department code is immutable during update; code is normalized uppercase by the application service. Parent must be an active department in the same company; self-parenting is rejected.
+- Deactivation requires the current 8-byte rowversion and returns conflict when concurrency/deactivation cannot be completed.
+
+Implemented:
+- `core/company/company.models.ts` — typed company and department contracts.
+- `core/company/company-api.service.ts` — company list and department CRUD/deactivation HTTP methods.
+- `features/company/departments-page.component.ts` — company selection, department list, active/inactive status, create/edit dialog, optional parent selection, deactivation confirmation, loading/empty/error states, and rowversion-based updates.
+- `app.routes.ts` — dedicated lazy-loaded `/company/departments` route ahead of generic company placeholder route.
+
+Company context:
+- The authenticated session exposes Tenant ID but not Company ID. The UI therefore loads companies using the tenant-scoped companies endpoint and uses the selected returned Company ID for department calls. It never substitutes Tenant ID for Company ID.
+- If exactly one active company is returned, it is selected automatically. With multiple companies, the user must select one. Only active companies are offered for maintenance.
+
+Pending:
+1. User pulls the branch and runs Angular build/tests.
+2. Verify the Departments page loads companies and departments against the local API; verify create, edit, parent selection, and deactivate using an authorized account.
+3. Resolve any compile/runtime/API contract issues before implementing Offices.
+4. Continue with Offices and Designations only after Departments is locally verified.
