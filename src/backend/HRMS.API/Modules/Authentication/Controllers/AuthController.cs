@@ -121,7 +121,7 @@ public sealed class AuthController(
 
     private bool HasTrustedOrigin()
     {
-        var origin = Request.Headers.Origin.ToString();
+        var origin = Request.Headers["Origin"].ToString();
         if (string.IsNullOrWhiteSpace(origin))
         {
             return true;
