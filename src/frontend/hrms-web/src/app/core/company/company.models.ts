@@ -119,3 +119,21 @@ export interface CreateHolidayRequest {
 export interface UpdateHolidayRequest extends CreateHolidayRequest {
   rowVersion: string;
 }
+
+
+export interface WorkingWeekDay {
+  dayOfWeek: number;
+  isWorkingDay: boolean;
+}
+
+export interface WorkingWeek {
+  companyId: string;
+  officeId: string | null;
+  isConfigured: boolean;
+  isInherited: boolean;
+  days: WorkingWeekDay[];
+}
+
+export interface SaveWorkingWeekRequest {
+  days: WorkingWeekDay[];
+}
