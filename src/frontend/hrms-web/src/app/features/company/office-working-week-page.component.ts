@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { forkJoin, finalize } from 'rxjs';
 import { CompanyApiService } from '../../core/company/company-api.service';
-import { CompanySummary, Office, WorkingWeek, WorkingWeekDay } from '../../core/company/company.models';
+import { CompanySummary, Office, WorkingWeekDay } from '../../core/company/company.models';
 
 @Component({
   selector: 'hrms-office-working-week-page',
