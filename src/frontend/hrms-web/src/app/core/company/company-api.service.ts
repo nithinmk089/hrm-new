@@ -85,6 +85,14 @@ export class CompanyApiService {
     return this.http.put<WorkingWeek>(`${this.apiBaseUrl}/companies/${companyId}/working-week`, request);
   }
 
+  getOfficeWorkingWeek(companyId: string, officeId: string): Observable<WorkingWeek> {
+    return this.http.get<WorkingWeek>(`${this.apiBaseUrl}/companies/${companyId}/offices/${officeId}/working-week`);
+  }
+
+  saveOfficeWorkingWeek(companyId: string, officeId: string, request: SaveWorkingWeekRequest): Observable<WorkingWeek> {
+    return this.http.put<WorkingWeek>(`${this.apiBaseUrl}/companies/${companyId}/offices/${officeId}/working-week`, request);
+  }
+
   activateDepartment(companyId: string, departmentId: string, rowVersion: string): Observable<void> {
     return this.http.patch<void>(`${this.apiBaseUrl}/companies/${companyId}/departments/${departmentId}/activate`, { rowVersion });
   }
