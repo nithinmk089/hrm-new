@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-import { CompanySummary, CreateDepartmentRequest, CreateDesignationRequest, CreateOfficeRequest, CreateHolidayRequest, Department, Designation, Holiday, Office, UpdateDepartmentRequest, UpdateDesignationRequest, UpdateHolidayRequest, UpdateOfficeRequest } from './company.models';
+import { CompanySummary, CreateDepartmentRequest, CreateDesignationRequest, CreateOfficeRequest, CreateHolidayRequest, Department, Designation, Holiday, Office, UpdateDepartmentRequest, UpdateDesignationRequest, UpdateHolidayRequest, UpdateOfficeRequest, WorkingWeek, SaveWorkingWeekRequest } from './company.models';
 
 @Injectable({ providedIn: 'root' })
 export class CompanyApiService {
@@ -75,6 +75,14 @@ export class CompanyApiService {
 
   deactivateOffice(companyId: string, officeId: string, rowVersion: string): Observable<void> {
     return this.http.patch<void>(`${this.apiBaseUrl}/companies/${companyId}/offices/${officeId}/deactivate`, { rowVersion });
+  }
+
+  getCompanyWorkingWeek(companyId: string): Observable<WorkingWeek> {
+    return this.http.get<WorkingWeek>(`${this.apiBaseUrl}/companies/${companyId}/working-week`);
+  }
+
+  saveCompanyWorkingWeek(companyId: string, request: SaveWorkingWeekRequest): Observable<WorkingWeek> {
+    return this.http.put<WorkingWeek>(`${this.apiBaseUrl}/companies/${companyId}/working-week`, request);
   }
 
   activateDepartment(companyId: string, departmentId: string, rowVersion: string): Observable<void> {
