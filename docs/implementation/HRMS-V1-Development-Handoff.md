@@ -690,3 +690,41 @@ npm test -- --watch=false
 ```
 
 **Branch policy:** Do not merge this feature branch into `main` until explicitly requested.
+
+
+---
+
+## 18. UI-07 completion and UI-08 handoff (2026-11-10)
+
+### UI-07 integrated
+
+- Pull request [#12](https://github.com/nithinmk089/hrm-new/pull/12), **feat(hrms): complete UI-07 working week and employee user mapping**, merged into `main`.
+- Squash merge commit: `e03b84e42401706227d5b35727faa5d9655f7b5c`.
+- Feature branch: `feature/ui-07-working-week-user-mapping`.
+- User confirmed successful local verification of backend build/tests and frontend build/tests after implementing UI-07A, UI-07B and UI-07C.
+- UI-07 includes company working-week configuration, office-level schedule overrides/inheritance, and explicit employee-to-user mapping with tenant-scoped available-user lookup.
+- No email-based identity matching is permitted.
+
+### Current branch — UI-08 Leave Management
+
+- Branch created from the updated `main`: `feature/ui-08-leave-management`.
+- Current scope: employee leave balance summary, leave submission, own request list/history/cancellation, manager pending approval queue, request history/details, approve/reject.
+- Existing backend endpoints and contracts are present; inspect and integrate them before considering backend changes.
+- Existing APIs:
+  - `GET /api/v1/companies/{companyId}/employees/{employeeId}/leave-balances?year={year}` (balance read, `leave-balances.read`).
+  - `POST /api/v1/companies/{companyId}/leave-requests` (submit, `leave-requests.create`; employee resolved server-side).
+  - `GET /api/v1/companies/{companyId}/leave-requests/mine` (own requests, `leave-requests.read`).
+  - `GET /api/v1/companies/{companyId}/leave-requests/mine/{leaveRequestId}/history` (own history, `leave-requests.read`).
+  - `POST /api/v1/companies/{companyId}/leave-requests/{leaveRequestId}/cancel` (cancel own request, `leave-requests.cancel`).
+  - `GET /api/v1/companies/{companyId}/leave-requests/pending-approvals` (manager queue, `leave-requests.read`).
+  - `POST /api/v1/companies/{companyId}/leave-requests/{leaveRequestId}/approve` (`leave-requests.approve`).
+  - `POST /api/v1/companies/{companyId}/leave-requests/{leaveRequestId}/reject` (`leave-requests.reject`).
+  - `GET /api/v1/companies/{companyId}/leave-types` (active leave-type choices; `leave-types.read`).
+- Balance endpoint requires an EmployeeId route parameter. The frontend must obtain the signed-in employee identity through a safe existing mapping/session contract; do not infer employee identity from email. If no safe self-identity endpoint is available, inspect current auth/session and employee mapping API before adding the smallest tenant-safe backend contract.
+- Leave submission returns calculated excluded dates and yearly reservations; render server-returned calculations and never duplicate authoritative business rules in the browser.
+- RowVersion values are Base64 in JSON. Pass them unchanged to cancel/approve/reject actions.
+- Half-day requests must be one calendar day and follow the selected leave type's AllowHalfDay setting. Rejection comments are mandatory.
+- Existing backend tests cover day calculation, request submission, lifecycle, approval and balances. No new database migration is expected for the initial UI integration.
+- Required quality: focused Angular TestBed/Vitest tests for loading, company selection, request validation/payload, excluded dates, cancellation eligibility/confirmation, manager queue, decision comments, RowVersion, authorization and conflict handling.
+- Local verification for UI-08 is pending. Do not mark complete until the user confirms frontend build/tests and browser workflow verification; run backend build/tests if backend code changes.
+- Do not merge UI-08 into `main` until explicitly requested after user verification.
