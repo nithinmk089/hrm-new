@@ -8,6 +8,40 @@ namespace HRMS.Infrastructure.Persistence;
 
 internal sealed class EmployeeUserMappingRepository(IDbConnectionFactory connectionFactory) : IEmployeeUserMappingRepository
 {
+    public async Task<IReadOnlyList<AvailableTenantUserDto>> GetAvailableTenantUsersAsync(Guid tenantId, string? search, CancellationToken cancellationToken)
+    {
+        const string sql = """
+            SELECT u.UserId, u.DisplayName, u.Email
+            FROM security.Users AS u
+            INNER JOIN security.UserTenantMemberships AS membership
+                ON membership.UserId = u.UserId
+               AND membership.TenantId = @TenantId
+               AND membership.MembershipStatus = 'Active'
+            WHERE u.IsEnabled = 1
+              AND u.IsDeleted = 0
+              AND
+              (
+                  @Search IS NULL
+                  OR u.DisplayName LIKE N'%' + @Search + N'%'
+                  OR u.Email LIKE N'%' + @Search + N'%'
+              )
+              AND NOT EXISTS
+              (
+                  SELECT 1
+                  FROM hrms.EmployeeUserMappings AS mapping
+                  WHERE mapping.TenantId = @TenantId
+                    AND mapping.UserId = u.UserId
+                    AND mapping.IsActive = 1
+              )
+            ORDER BY u.DisplayName, u.Email;
+            """;
+
+        await using var connection = connectionFactory.CreateConnection();
+        var users = await connection.QueryAsync<AvailableTenantUserDto>(
+            new CommandDefinition(sql, new { TenantId = tenantId, Search = search }, cancellationToken: cancellationToken));
+        return users.AsList();
+    }
+
     public async Task<EmployeeUserMappingDto?> GetByEmployeeAsync(Guid tenantId, Guid companyId, Guid employeeId, CancellationToken cancellationToken)
     {
         await using var connection = connectionFactory.CreateConnection();
