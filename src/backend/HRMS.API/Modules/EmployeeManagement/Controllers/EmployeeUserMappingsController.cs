@@ -16,7 +16,7 @@ public sealed class EmployeeUserMappingsController(IEmployeeUserMappingService s
     {
         var tenantId = User.ReadTenantId();
         if (tenantId is null) return Forbid();
-        var users = await service.GetAvailableTenantUsersAsync(tenantId.Value, search, cancellationToken);
+        var users = await service.GetAvailableTenantUsersAsync(tenantId.Value, companyId, search, cancellationToken);
         return Ok(users);
     }
 
