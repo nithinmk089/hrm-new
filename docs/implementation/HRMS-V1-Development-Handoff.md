@@ -635,3 +635,58 @@ Status: **Completed, locally verified by the user, and merged into `main`.**
 - Inspect existing backend routes, DTOs, permissions, and stored procedures before implementing UI. Add backend contracts/migrations only if a required capability is genuinely missing.
 - Add focused tests for load/save, company/office scope, validation, effective schedule display, mapping/unmapping authorization, and concurrency where supported.
 - User local workflow remains: pull branch, run frontend tests/build, verify browser workflows, share results; only then merge the feature PR to `main`.
+
+
+---
+
+## UI-07C – Employee-to-User Mapping Administration (implementation handoff)
+
+**Branch:** `feature/ui-07-working-week-user-mapping`
+
+**Scope implemented:**
+- Added an Employee-to-User Mapping administration page at `/employee-user-mappings`.
+- Added navigation under Workspace.
+- Company and active employee selection.
+- Displays the active mapping for the selected employee.
+- Lists only enabled tenant users with an active membership who do not already have an active employee mapping.
+- Search available users by display name or email.
+- Explicitly maps a selected user to an employee; email addresses are never used for automatic matching.
+- Supports mapping deactivation with an explicit confirmation step.
+- Uses the existing mapping create/deactivate APIs and optimistic row-version check.
+
+**Backend extension:**
+- Added `GET /api/v1/companies/{companyId}/employee-user-mappings/available-users?search={term}`.
+- Requires `employee-mappings.read`.
+- The lookup is constrained to the authenticated tenant and a valid active company, reads canonical `security.Users` and `security.UserTenantMemberships`, and excludes users already actively mapped in that tenant.
+- Existing create procedure remains authoritative for validating active employees, active tenant membership, and uniqueness.
+
+**Files changed for UI-07C:**
+- `src/backend/HRMS.Application/EmployeeUserMappings/EmployeeUserMappingDto.cs`
+- `src/backend/HRMS.Application/EmployeeUserMappings/IEmployeeUserMappingRepository.cs`
+- `src/backend/HRMS.Application/EmployeeUserMappings/IEmployeeUserMappingService.cs`
+- `src/backend/HRMS.Application/EmployeeUserMappings/EmployeeUserMappingService.cs`
+- `src/backend/HRMS.Infrastructure/Persistence/EmployeeUserMappingRepository.cs`
+- `src/backend/HRMS.API/Modules/EmployeeManagement/Controllers/EmployeeUserMappingsController.cs`
+- `src/frontend/hrms-web/src/app/core/company/employee.models.ts`
+- `src/frontend/hrms-web/src/app/core/company/employee-api.service.ts`
+- `src/frontend/hrms-web/src/app/features/employees/employee-user-mappings-page.component.ts`
+- `src/frontend/hrms-web/src/app/app.routes.ts`
+- `src/frontend/hrms-web/src/app/app.component.ts`
+- `tests/backend/HRMS.Infrastructure.Tests/EmployeeUserMappings/EmployeeUserMappingServiceTests.cs`
+- `docs/modules/Employee-User-Mapping-API.md`
+
+**Verification status:** Code committed to the feature branch. Local frontend/backend builds and test suites have not yet been run for UI-07C. Do not mark UI-07C complete until the developer runs the verification commands and resolves any reported errors.
+
+**Next local verification:**
+```powershell
+cd "D:\Nithin\Projects\My Company Projects\HR Management\hrm-new"
+
+dotnet build .\HRMS.sln
+dotnet test .\HRMS.sln
+
+cd src/frontend/hrms-web
+npm run build
+npm test -- --watch=false
+```
+
+**Branch policy:** Do not merge this feature branch into `main` until explicitly requested.
