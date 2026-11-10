@@ -225,6 +225,8 @@ For each UI phase:
 - Approved-timesheet amendment workflow.
 - Advanced analytics not supported by implemented APIs.
 
-## 7. Immediate next task
+## 7. Current task
 
-UI-01 (Angular foundation and application shell), UI-02 (authentication experience), and UI-03 (dashboard) have been completed and merged into `main` through PRs #4, #5, and #6 respectively. The next task is **UI-04 — Company organization masters** on `feature/ui-04-organization-masters`. Implement Departments, Offices, and Designations against the existing verified API contracts. Do not create the next feature branch until UI-03 is merged into `main`.
+UI-01 through UI-07 have been completed and integrated into `main`. UI-07 was merged through PR #12, merge commit `e03b84e42401706227d5b35727faa5d9655f7b5c`.
+
+The current implementation task is **UI-08 — Leave Management** on `feature/ui-08-leave-management`. Implement employee self-service (balances, submission, request history and cancellation) and manager approvals (queue, request details/history, approve/reject) against the existing leave APIs and DTOs. Preserve all server-side calendar, balance reservation, tenant-scope, reporting-line and concurrency rules. Do not add backend endpoints or migrations unless inspection proves an existing contract is insufficient.
