@@ -43,3 +43,29 @@ export interface UpdateEmployeeStatusRequest {
   terminationDate: string | null;
   rowVersion: string;
 }
+
+export interface EmployeeUserMapping {
+  employeeUserMappingId: string;
+  companyId: string;
+  employeeId: string;
+  userId: string;
+  isActive: boolean;
+  createdAtUtc: string;
+  updatedAtUtc: string | null;
+  rowVersion: string;
+}
+
+export interface AvailableTenantUser {
+  userId: string;
+  displayName: string;
+  email: string;
+}
+
+export interface CreateEmployeeUserMappingRequest {
+  employeeId: string;
+  userId: string;
+}
+
+export interface DeactivateEmployeeUserMappingRequest {
+  rowVersion: string;
+}
