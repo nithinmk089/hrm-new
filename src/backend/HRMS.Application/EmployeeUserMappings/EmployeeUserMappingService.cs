@@ -2,6 +2,12 @@ namespace HRMS.Application.EmployeeUserMappings;
 
 public sealed class EmployeeUserMappingService(IEmployeeUserMappingRepository repository) : IEmployeeUserMappingService
 {
+    public Task<IReadOnlyList<AvailableTenantUserDto>> GetAvailableTenantUsersAsync(Guid tenantId, string? search, CancellationToken cancellationToken = default)
+    {
+        if (tenantId == Guid.Empty) throw new ArgumentException("A valid tenant identifier is required.", nameof(tenantId));
+        return repository.GetAvailableTenantUsersAsync(tenantId, string.IsNullOrWhiteSpace(search) ? null : search.Trim(), cancellationToken);
+    }
+
     public Task<EmployeeUserMappingDto?> GetByEmployeeAsync(Guid tenantId, Guid companyId, Guid employeeId, CancellationToken cancellationToken = default)
     {
         EnsureScope(tenantId, companyId);
