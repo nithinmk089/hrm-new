@@ -43,6 +43,8 @@ public sealed class EmployeeUserMappingServiceTests
     private sealed class FakeRepository : IEmployeeUserMappingRepository
     {
         public Guid? TenantId { get; private set; }
+        public Task<IReadOnlyList<AvailableTenantUserDto>> GetAvailableTenantUsersAsync(Guid tenantId, Guid companyId, string? search, CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<AvailableTenantUserDto>>([]);
         public Guid? CompanyId { get; private set; }
         public CreateEmployeeUserMappingRequest? Request { get; private set; }
 
