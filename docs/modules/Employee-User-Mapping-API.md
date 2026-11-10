@@ -8,6 +8,7 @@ Base route: `/api/v1/companies/{companyId}/employee-user-mappings`
 All endpoints require authentication and tenant/company permission.
 
 - `GET /by-employee/{employeeId}` — `employee-mappings.read`
+- `GET /available-users?search={term}` — `employee-mappings.read`; lists enabled users with active membership in the authenticated tenant who do not already have an active employee mapping.
 - `POST /` — `employee-mappings.manage`
 - `PATCH /{mappingId}/deactivate` — `employee-mappings.manage`
 

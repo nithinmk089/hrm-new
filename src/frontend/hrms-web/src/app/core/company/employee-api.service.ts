@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-import { CreateEmployeeRequest, Employee, EmployeeStatus, UpdateEmployeeRequest, UpdateEmployeeStatusRequest } from './employee.models';
+import { AvailableTenantUser, CreateEmployeeRequest, CreateEmployeeUserMappingRequest, DeactivateEmployeeUserMappingRequest, Employee, EmployeeStatus, EmployeeUserMapping, UpdateEmployeeRequest, UpdateEmployeeStatusRequest } from './employee.models';
 
 @Injectable({ providedIn: 'root' })
 export class EmployeeApiService {
@@ -30,5 +30,22 @@ export class EmployeeApiService {
 
   updateEmployeeStatus(companyId: string, employeeId: string, request: UpdateEmployeeStatusRequest): Observable<void> {
     return this.http.patch<void>(`${this.apiBaseUrl}/companies/${companyId}/employees/${employeeId}/status`, request);
+  }
+
+  getEmployeeUserMapping(companyId: string, employeeId: string): Observable<EmployeeUserMapping> {
+    return this.http.get<EmployeeUserMapping>(`${this.apiBaseUrl}/companies/${companyId}/employee-user-mappings/by-employee/${employeeId}`);
+  }
+
+  getAvailableTenantUsers(companyId: string, search?: string): Observable<AvailableTenantUser[]> {
+    const params = search?.trim() ? new HttpParams().set('search', search.trim()) : new HttpParams();
+    return this.http.get<AvailableTenantUser[]>(`${this.apiBaseUrl}/companies/${companyId}/employee-user-mappings/available-users`, { params });
+  }
+
+  createEmployeeUserMapping(companyId: string, request: CreateEmployeeUserMappingRequest): Observable<EmployeeUserMapping> {
+    return this.http.post<EmployeeUserMapping>(`${this.apiBaseUrl}/companies/${companyId}/employee-user-mappings`, request);
+  }
+
+  deactivateEmployeeUserMapping(companyId: string, mappingId: string, request: DeactivateEmployeeUserMappingRequest): Observable<void> {
+    return this.http.patch<void>(`${this.apiBaseUrl}/companies/${companyId}/employee-user-mappings/${mappingId}/deactivate`, request);
   }
 }
