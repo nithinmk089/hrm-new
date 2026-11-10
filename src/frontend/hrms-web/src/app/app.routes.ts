@@ -14,6 +14,7 @@ export const routes: Routes = [
   { path: 'company/office-working-weeks', title: 'Office Working Weeks | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/office-working-week-page.component').then(m => m.OfficeWorkingWeekPageComponent) },
   { path: 'company/:section', title: 'Company administration | HRMS', component: PlaceholderPageComponent, canActivate: [authGuard] },
   { path: 'employees', title: 'Employees | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/employees/employees-page.component').then(m => m.EmployeesPageComponent) },
+  { path: 'employee-user-mappings', title: 'Employee User Mapping | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/employees/employee-user-mappings-page.component').then(m => m.EmployeeUserMappingsPageComponent) },
   { path: 'leave', title: 'Leave management | HRMS', component: PlaceholderPageComponent, canActivate: [authGuard], data: { title: 'Leave management', description: 'Leave balances, requests and approvals will be delivered in UI-08.' } },
   { path: 'timesheets', title: 'Timesheets | HRMS', component: PlaceholderPageComponent, canActivate: [authGuard], data: { title: 'Timesheet management', description: 'Employee timesheets and manager approvals will be delivered in UI-09.' } },
   { path: '**', redirectTo: 'dashboard' }
