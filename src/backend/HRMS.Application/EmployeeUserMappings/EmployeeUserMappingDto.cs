@@ -11,3 +11,5 @@ public sealed record EmployeeUserMappingDto(
     byte[] RowVersion);
 public sealed record CreateEmployeeUserMappingRequest(Guid EmployeeId, Guid UserId);
 public sealed record DeactivateEmployeeUserMappingRequest(byte[] RowVersion);
+
+public sealed record AvailableTenantUserDto(Guid UserId, string DisplayName, string Email);
