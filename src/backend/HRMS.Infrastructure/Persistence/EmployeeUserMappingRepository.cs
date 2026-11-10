@@ -22,6 +22,7 @@ internal sealed class EmployeeUserMappingRepository(IDbConnectionFactory connect
                   SELECT 1 FROM hrms.Companies AS company
                   WHERE company.TenantId = @TenantId
                     AND company.CompanyId = @CompanyId
+                    AND company.IsActive = 1
                     AND company.DeletedAtUtc IS NULL
               )
               AND u.IsEnabled = 1
