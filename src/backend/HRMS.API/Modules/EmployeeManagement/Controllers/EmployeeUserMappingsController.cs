@@ -10,6 +10,16 @@ namespace HRMS.API.Modules.EmployeeManagement.Controllers;
 [Authorize]
 public sealed class EmployeeUserMappingsController(IEmployeeUserMappingService service) : ControllerBase
 {
+    [HttpGet("available-users")]
+    [Authorize(Policy = "Permission:employee-mappings.read")]
+    public async Task<IActionResult> GetAvailableUsers(Guid companyId, [FromQuery] string? search, CancellationToken cancellationToken)
+    {
+        var tenantId = User.ReadTenantId();
+        if (tenantId is null) return Forbid();
+        var users = await service.GetAvailableTenantUsersAsync(tenantId.Value, search, cancellationToken);
+        return Ok(users);
+    }
+
     [HttpGet("by-employee/{employeeId:guid}")]
     [Authorize(Policy = "Permission:employee-mappings.read")]
     public async Task<IActionResult> GetByEmployee(Guid companyId, Guid employeeId, CancellationToken cancellationToken)
