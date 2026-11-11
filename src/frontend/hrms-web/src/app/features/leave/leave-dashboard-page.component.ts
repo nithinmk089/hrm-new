@@ -13,7 +13,7 @@ import { LeaveApiService } from '../../core/company/leave-api.service';
   template: `
     <div class="page-heading">
       <div><div class="eyebrow">EMPLOYEE SELF-SERVICE</div><h1>Leave management</h1><p>Review your annual leave balance and submit a leave request.</p></div>
-      <button class="btn btn-primary" type="button" [disabled]="!selectedCompanyId() || loading()" (click)="openApply()"><i class="bi bi-plus-lg me-2"></i>Apply for leave</button>
+      <button class="btn btn-primary" type="button" [disabled]="!selectedCompanyId() || loading() || !employeeId() || balances().length===0" (click)="openApply()"><i class="bi bi-plus-lg me-2"></i>Apply for leave</button>
     </div>
     <section class="company-context card mb-3">
       <div class="context-icon"><i class="bi bi-building"></i></div>
@@ -109,7 +109,7 @@ export class LeaveDashboardPageComponent {
           this.loadBalances();
         },
         error:e=>{
-          if(e?.status===404){this.employeeId.set('');this.leaveTypes.set([]);this.balances.set([]);this.error.set('No active employee-user mapping was found for your account in this company. Ask HR to map your login to your employee profile.');}
+          if(e?.status===404){this.employeeId.set('');this.leaveTypes.set([]);this.balances.set([]);}
           else this.error.set(this.message(e,'Unable to load your leave information.'));
         }
       });
