@@ -21,8 +21,8 @@ import { LeaveApiService } from '../../core/company/leave-api.service';
     <section class="card selector-card">
       <div class="selector-grid">
         <div><label class="form-label" for="company">Company</label><select id="company" class="form-select" [value]="companyId()" (change)="onCompanyChange($event)" [disabled]="companiesLoading()"><option value="">Select company</option>@for(company of companies();track company.companyId){<option [value]="company.companyId">{{company.displayName}} ({{company.companyCode}})</option>}</select></div>
-        <div><label class="form-label" for="employee">Employee</label><select id="employee" class="form-select" [value]="employeeId()" (change)="onEmployeeChange($event)" [disabled]="!companyId() || employeesLoading()"><option value="">Select active employee</option>@for(employee of employees();track employee.employeeId){<option [value]="employee.employeeId">{{employee.employeeCode}} — {{employee.firstName}} {{employee.lastName}}</option>}</select></div>
-        <div><label class="form-label" for="leaveYear">Leave year</label><input id="leaveYear" class="form-control" type="number" min="2000" max="2100" [value]="year()" (change)="onYearChange($event)"></div>
+        <div><label class="form-label" for="employee">Employee</label><select id="employee" class="form-select" [value]="employeeId()" (change)="onEmployeeChange($event)" [disabled]="!companyId() || employeesLoading()"><option value="">{{!companyId() ? "Select a company first" : employeesLoading() ? "Loading employees…" : "Select active employee"}}</option>@if(companyId()){@for(employee of employees();track employee.employeeId){<option [value]="employee.employeeId">{{employee.employeeCode}} — {{employee.firstName}} {{employee.lastName}}</option>}}</select></div>
+        <div><label class="form-label" for="leaveYear">Leave year</label><input id="leaveYear" class="form-control" type="number" min="2000" max="2100" [value]="year()" (change)="onYearChange($event)" [disabled]="!companyId()"></div>
       </div>
     </section>
     @if(loading()){<div class="loading-state"><span class="spinner-border spinner-border-sm me-2"></span>Loading leave balances…</div>}
@@ -94,6 +94,7 @@ export class LeaveBalanceProvisioningPageComponent {
   onCompanyChange(event:Event):void{this.onCompanyChangeValue((event.target as HTMLSelectElement).value);}
   private onCompanyChangeValue(id:string):void{
     this.companyId.set(id);this.employeeId.set('');this.employees.set([]);this.leaveTypes.set([]);this.balances.set([]);this.error.set('');
+    this.form.reset({leaveTypeId:'',transactionType:'Opening',daysDelta:0,notes:''});this.formError.set('');this.success.set('');
     if(!id)return;
     this.employeesLoading.set(true);
     this.employeeApi.getEmployees(id,undefined,'Active').pipe(finalize(()=>this.employeesLoading.set(false))).subscribe({
@@ -102,13 +103,13 @@ export class LeaveBalanceProvisioningPageComponent {
     });
     this.leaveApi.getLeaveTypes(id).subscribe({next:items=>this.leaveTypes.set(items),error:()=>this.error.set('Unable to load active leave types.')});
   }
-  onEmployeeChange(event:Event):void{this.employeeId.set((event.target as HTMLSelectElement).value);this.loadBalances();}
+  onEmployeeChange(event:Event):void{if(!this.companyId()){this.employeeId.set('');this.balances.set([]);return;}this.employeeId.set((event.target as HTMLSelectElement).value);this.balances.set([]);this.loadBalances();}
   onYearChange(event:Event):void{
     const value=Number((event.target as HTMLInputElement).value);
     if(Number.isInteger(value)&&value>=2000&&value<=2100){this.year.set(value);this.loadBalances();}
   }
   loadBalances():void{
-    if(!this.companyId()||!this.employeeId())return;
+    if(!this.companyId()||!this.employeeId()){this.balances.set([]);return;}
     this.loading.set(true);this.error.set('');
     this.leaveApi.getEmployeeBalances(this.companyId(),this.employeeId(),this.year()).pipe(finalize(()=>this.loading.set(false))).subscribe({
       next:items=>this.balances.set(items),
