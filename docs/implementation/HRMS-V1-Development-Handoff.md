@@ -771,3 +771,19 @@ npm test -- --watch=false
 - Existing `leave-balances.adjust` permission is required. The API remains authoritative for tenant/company/employee/leave-type validation and balance invariants.
 - No local build/test/browser verification has been performed by the assistant. User verification is required.
 - UI-08 now includes HR balance provisioning alongside employee self-service and manager approvals; it is not deferred.
+
+
+### UI-08 company Leave Type Administration implementation snapshot (verification pending)
+
+- Screenshot review identified `/company/leave-types` still resolving to the generic feature placeholder. This is a required setup dependency for HR leave balance provisioning and employee leave submission.
+- Existing backend endpoints and permissions were inspected and reused; no backend rewrite or migration added:
+  - GET `/api/v1/companies/{companyId}/leave-types` (`leave-types.read`).
+  - POST `/api/v1/companies/{companyId}/leave-types` (`leave-types.create`).
+  - PUT `/api/v1/companies/{companyId}/leave-types/{leaveTypeId}` (`leave-types.update`, RowVersion).
+  - PATCH `/api/v1/companies/{companyId}/leave-types/{leaveTypeId}/deactivate` (`leave-types.deactivate`, RowVersion).
+- Added frontend create/update/deactivate request contracts and API service methods.
+- Added `LeaveTypesPageComponent` at `/company/leave-types`, replacing the generic placeholder route. It supports company selection, listing active/inactive leave types, creating, editing and soft-deactivating leave types.
+- Configuration includes paid/unpaid, approval requirement, annual entitlement (nullable), half-day support and carry-forward cap. Client validation follows the backend carry-forward rules; backend remains authoritative.
+- The existing navigation entry already linked to `/company/leave-types` and now resolves to the functional page.
+- HR balance provisioning and leave application can now use company-configured active leave types.
+- No local build/test/browser verification has been performed by the assistant. User verification is required.
