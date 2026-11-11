@@ -802,3 +802,14 @@ npm test -- --watch=false
 - Provisioning page now displays a dynamic cap hint and validates the projected annual/carry-forward amount before posting. Backend remains authoritative.
 - Migration 025 must be applied to the local SQL Server database before testing. No migration has been applied by the assistant.
 - Local build, tests, and SQL integration verification remain pending.
+
+
+### Leave balance provisioning UI guard fixes (verification pending)
+
+- User screenshot showed an employee value and balance cards visible while Company displayed `Select company`. Tightened component state and template guards.
+- Employee selector now displays `Select a company first` and stays disabled until a company is selected; employee options are rendered only while a company is selected.
+- Leave year is disabled until a company is selected.
+- Clearing company resets employee ID, employee list, leave types, balances, transaction form and success/error messages. Employee-change and balance-load handlers also guard against missing company/employee context.
+- Added a component test for clearing company and verifying that employee/balance state is cleared and the employee selector is disabled.
+- Fixed sidebar active-state matching so `/leave` does not also highlight when current route is `/leave/balances` (`routerLinkActiveOptions.exact=true`).
+- Local build/browser verification remains pending.
