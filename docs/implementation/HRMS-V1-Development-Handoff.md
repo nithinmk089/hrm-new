@@ -813,3 +813,11 @@ npm test -- --watch=false
 - Added a component test for clearing company and verifying that employee/balance state is cleared and the employee selector is disabled.
 - Fixed sidebar active-state matching so `/leave` does not also highlight when current route is `/leave/balances` (`routerLinkActiveOptions.exact=true`).
 - Local build/browser verification remains pending.
+
+
+### Follow-up: validate company selection against loaded company options
+
+- A subsequent screenshot still showed employee options while the company selector displayed its placeholder. Strengthened the gate: employee options, enabled state, leave-year input, balance loading and transaction submission now require `companyId` to match an actual loaded `CompanySummary` entry, not merely a non-empty string.
+- This also protects against stale/invalid company IDs that do not correspond to the visible company selector value.
+- Browser cache/build freshness may still need checking after pulling; hard reload after rebuilding the Angular app.
+- Local verification remains pending.
