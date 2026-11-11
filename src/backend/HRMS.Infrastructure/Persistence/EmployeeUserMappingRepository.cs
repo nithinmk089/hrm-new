@@ -50,6 +50,37 @@ internal sealed class EmployeeUserMappingRepository(IDbConnectionFactory connect
         return users.AsList();
     }
 
+    public async Task<MyEmployeeMappingDto?> GetMineAsync(Guid tenantId, Guid companyId, Guid userId, CancellationToken cancellationToken)
+    {
+        const string sql = """
+            SELECT TOP (1) mapping.CompanyId, mapping.EmployeeId
+            FROM hrms.EmployeeUserMappings AS mapping
+            INNER JOIN hrms.Employees AS employee
+                ON employee.TenantId = mapping.TenantId
+               AND employee.CompanyId = mapping.CompanyId
+               AND employee.EmployeeId = mapping.EmployeeId
+               AND employee.IsActive = 1
+               AND employee.DeletedAtUtc IS NULL
+            WHERE mapping.TenantId = @TenantId
+              AND mapping.CompanyId = @CompanyId
+              AND mapping.UserId = @UserId
+              AND mapping.IsActive = 1
+              AND mapping.DeletedAtUtc IS NULL
+              AND EXISTS
+              (
+                  SELECT 1 FROM hrms.Companies AS company
+                  WHERE company.TenantId = @TenantId
+                    AND company.CompanyId = @CompanyId
+                    AND company.IsActive = 1
+                    AND company.DeletedAtUtc IS NULL
+              );
+            """;
+
+        await using var connection = connectionFactory.CreateConnection();
+        return await connection.QuerySingleOrDefaultAsync<MyEmployeeMappingDto>(new CommandDefinition(
+            sql, new { TenantId = tenantId, CompanyId = companyId, UserId = userId }, cancellationToken: cancellationToken));
+    }
+
     public async Task<EmployeeUserMappingDto?> GetByEmployeeAsync(Guid tenantId, Guid companyId, Guid employeeId, CancellationToken cancellationToken)
     {
         await using var connection = connectionFactory.CreateConnection();
