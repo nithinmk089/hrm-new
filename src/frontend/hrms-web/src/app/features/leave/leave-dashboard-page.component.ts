@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
 import { CompanyApiService } from '../../core/company/company-api.service';
@@ -81,7 +81,7 @@ export class LeaveDashboardPageComponent {
   readonly error=signal('');
   readonly editorError=signal('');
   readonly submissionResult=signal<LeaveRequestSubmissionResult|null>(null);
-  readonly selectedLeaveType=computed(()=>this.leaveTypes().find(x=>x.leaveTypeId===this.form.controls.leaveTypeId.value)??null);
+  selectedLeaveType():LeaveType|null{return this.leaveTypes().find(x=>x.leaveTypeId===this.form.controls.leaveTypeId.value)??null;}
   readonly form=this.fb.nonNullable.group({
     leaveTypeId:['',[Validators.required]],
     fromDate:['',[Validators.required]],
