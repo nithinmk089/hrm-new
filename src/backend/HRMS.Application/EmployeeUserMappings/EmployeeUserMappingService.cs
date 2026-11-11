@@ -15,6 +15,13 @@ public sealed class EmployeeUserMappingService(IEmployeeUserMappingRepository re
         return repository.GetByEmployeeAsync(tenantId, companyId, employeeId, cancellationToken);
     }
 
+    public Task<MyEmployeeMappingDto?> GetMineAsync(Guid tenantId, Guid companyId, Guid userId, CancellationToken cancellationToken = default)
+    {
+        EnsureScope(tenantId, companyId);
+        EnsureId(userId, nameof(userId));
+        return repository.GetMineAsync(tenantId, companyId, userId, cancellationToken);
+    }
+
     public Task<EmployeeUserMappingDto> CreateAsync(Guid tenantId, Guid companyId, CreateEmployeeUserMappingRequest request, CancellationToken cancellationToken = default)
     {
         EnsureScope(tenantId, companyId);
