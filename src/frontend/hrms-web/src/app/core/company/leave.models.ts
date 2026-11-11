@@ -74,3 +74,45 @@ export interface LeaveRequestSubmissionResult {
   yearAllocations: LeaveYearReservation[];
   excludedDates: string[];
 }
+
+
+export interface EmployeeLeaveRequestItem {
+  leaveRequestId: string;
+  companyId: string;
+  employeeId: string;
+  leaveTypeId: string;
+  leaveTypeCode: string;
+  leaveTypeName: string;
+  fromDate: string;
+  toDate: string;
+  isHalfDay: boolean;
+  halfDayPeriod: string | null;
+  daysRequested: number;
+  reason: string;
+  status: string;
+  submittedAtUtc: string;
+  reviewedByEmployeeId: string | null;
+  reviewedAtUtc: string | null;
+  reviewComments: string | null;
+  cancelledAtUtc: string | null;
+  rowVersion: string;
+}
+
+export interface LeaveRequestHistoryItem {
+  action: string;
+  actorEmployeeId: string;
+  comments: string | null;
+  actionAtUtc: string;
+}
+
+export interface LeaveRequestCancellationRequest {
+  rowVersion: string;
+  comments: string | null;
+}
+
+export interface LeaveRequestCancellationResult {
+  leaveRequestId: string;
+  status: string;
+  cancelledAtUtc: string;
+  rowVersion: string;
+}
