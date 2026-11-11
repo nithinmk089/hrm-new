@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-import { EmployeeLeaveBalance, LeaveRequestSubmissionResult, LeaveType, MyEmployeeMapping, SubmitLeaveRequest } from './leave.models';
+import { EmployeeLeaveBalance, EmployeeLeaveRequestItem, LeaveRequestCancellationRequest, LeaveRequestCancellationResult, LeaveRequestHistoryItem, LeaveRequestSubmissionResult, LeaveType, MyEmployeeMapping, SubmitLeaveRequest } from './leave.models';
 
 @Injectable({ providedIn: 'root' })
 export class LeaveApiService {
@@ -26,5 +26,19 @@ export class LeaveApiService {
   submitLeaveRequest(companyId: string, request: SubmitLeaveRequest): Observable<LeaveRequestSubmissionResult> {
     return this.http.post<LeaveRequestSubmissionResult>(
       `${this.apiBaseUrl}/companies/${companyId}/leave-requests`, request);
+  }
+
+  getMyLeaveRequests(companyId: string): Observable<EmployeeLeaveRequestItem[]> {
+    return this.http.get<EmployeeLeaveRequestItem[]>(`${this.apiBaseUrl}/companies/${companyId}/leave-requests/mine`);
+  }
+
+  getMyLeaveRequestHistory(companyId: string, leaveRequestId: string): Observable<LeaveRequestHistoryItem[]> {
+    return this.http.get<LeaveRequestHistoryItem[]>(
+      `${this.apiBaseUrl}/companies/${companyId}/leave-requests/mine/${leaveRequestId}/history`);
+  }
+
+  cancelMyLeaveRequest(companyId: string, leaveRequestId: string, request: LeaveRequestCancellationRequest): Observable<LeaveRequestCancellationResult> {
+    return this.http.post<LeaveRequestCancellationResult>(
+      `${this.apiBaseUrl}/companies/${companyId}/leave-requests/${leaveRequestId}/cancel`, request);
   }
 }
