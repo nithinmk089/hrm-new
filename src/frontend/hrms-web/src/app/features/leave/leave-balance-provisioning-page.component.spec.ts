@@ -15,7 +15,7 @@ const leaveType:LeaveType={leaveTypeId:'type-1',companyId:'company-1',leaveTypeC
 const balance:EmployeeLeaveBalance={employeeLeaveBalanceId:'balance-1',companyId:'company-1',employeeId:'employee-1',leaveTypeId:'type-1',leaveTypeCode:'ANNUAL',leaveTypeName:'Annual Leave',leaveYear:new Date().getFullYear(),openingDays:20,accruedDays:0,carriedForwardDays:0,adjustmentDays:0,usedDays:0,reservedDays:0,availableDays:20,rowVersion:'AAAAAAAAB9E='};
 
 describe('LeaveBalanceProvisioningPageComponent',()=>{
- const setup=async()=>{
+ const setup=async(selectCompany=true)=>{
   const companyApi={getCompanies:vi.fn().mockReturnValue(of([company]))};
   const employeeApi={getEmployees:vi.fn().mockReturnValue(of([employee]))};
   const leaveApi={
@@ -26,9 +26,26 @@ describe('LeaveBalanceProvisioningPageComponent',()=>{
   await TestBed.configureTestingModule({imports:[LeaveBalanceProvisioningPageComponent],providers:[
    {provide:CompanyApiService,useValue:companyApi},{provide:EmployeeApiService,useValue:employeeApi},{provide:LeaveApiService,useValue:leaveApi}
   ]}).compileComponents();
-  const fixture=TestBed.createComponent(LeaveBalanceProvisioningPageComponent);fixture.detectChanges();await fixture.whenStable();fixture.detectChanges();
+  const fixture=TestBed.createComponent(LeaveBalanceProvisioningPageComponent);fixture.detectChanges();await fixture.whenStable();
+  if(selectCompany)fixture.componentInstance.onCompanyChange({target:{value:'company-1'}} as unknown as Event);
+  await fixture.whenStable();fixture.detectChanges();
   return{fixture,component:fixture.componentInstance,companyApi,employeeApi,leaveApi};
  };
+ it('does not auto-select a single company or load employees before explicit company selection',async()=>{
+  const{component,fixture,employeeApi,leaveApi}=await setup(false);
+  expect(component.companies()).toHaveLength(1);
+  expect(component.companyId()).toBe('');
+  expect(component.employees()).toEqual([]);
+  expect(component.leaveTypes()).toEqual([]);
+  expect(employeeApi.getEmployees).not.toHaveBeenCalled();
+  expect(leaveApi.getLeaveTypes).not.toHaveBeenCalled();
+  const companySelect=fixture.nativeElement.querySelector('#company') as HTMLSelectElement;
+  const employeeSelect=fixture.nativeElement.querySelector('#employee') as HTMLSelectElement;
+  expect(companySelect.value).toBe('');
+  expect(employeeSelect.disabled).toBe(true);
+  expect(employeeSelect.options).toHaveLength(1);
+  expect(employeeSelect.options[0].textContent).toContain('Select a company first');
+ });
  it('loads company, active employees and leave types',async()=>{
   const{component,employeeApi,leaveApi}=await setup();
   expect(component.companyId()).toBe('company-1');expect(employeeApi.getEmployees).toHaveBeenCalledWith('company-1',undefined,'Active');
