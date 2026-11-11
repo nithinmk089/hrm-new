@@ -65,7 +65,6 @@ internal sealed class EmployeeUserMappingRepository(IDbConnectionFactory connect
               AND mapping.CompanyId = @CompanyId
               AND mapping.UserId = @UserId
               AND mapping.IsActive = 1
-              AND mapping.DeletedAtUtc IS NULL
               AND EXISTS
               (
                   SELECT 1 FROM hrms.Companies AS company
