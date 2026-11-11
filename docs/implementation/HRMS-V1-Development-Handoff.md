@@ -741,3 +741,17 @@ npm test -- --watch=false
 - Added component tests for mapping, balance display, missing balance/mapping states, date and half-day validation, payload normalization, excluded-date display and API conflict feedback.
 - No SQL migration was added.
 - Verification is pending: user must run backend build/tests and frontend build/tests and verify the browser flow. Do not merge UI-08 until the user confirms.
+
+
+### UI-08B implementation snapshot — employee leave history and cancellation (verification pending)
+
+- Reused the existing backend lifecycle APIs; no backend endpoint or SQL migration was added.
+- Added typed frontend contracts for the employee's leave request list, action history, cancellation request and cancellation result.
+- Added LeaveApiService methods for GET /api/v1/companies/{companyId}/leave-requests/mine, GET /api/v1/companies/{companyId}/leave-requests/mine/{leaveRequestId}/history, and POST /api/v1/companies/{companyId}/leave-requests/{leaveRequestId}/cancel.
+- Added LeaveRequestsPanelComponent to the employee leave dashboard. It lists the authenticated employee's latest requests with leave type, date range, days, submitted date and status; loads workflow history on demand; and offers cancellation for Pending requests and Approved requests whose start date is still in the future.
+- Cancellation eligibility in the UI is only an affordance. The stored procedure remains authoritative and validates status, start date, employee ownership and RowVersion.
+- Cancellation sends the request's Base64 RowVersion unchanged and optional trimmed comments; it handles stale RowVersion/conflict and authorization errors and refreshes the request list after success.
+- Added focused tests for request loading/empty state, cancellation eligibility, history loading, cancellation payload/RowVersion, refresh and conflict handling.
+- HR leave balance provisioning is intentionally deferred and is not part of UI-08.
+- No local build/test/browser verification has been performed by the assistant. User verification is required before marking UI-08B complete.
+- Next: user pulls the branch and runs frontend build/tests; after passing, continue UI-08C manager pending approvals and UI-08D manager decisions.
