@@ -21,7 +21,7 @@ public sealed class EmployeeUserMappingsController(IEmployeeUserMappingService s
     }
 
     [HttpGet("mine")]
-    [Authorize(Policy = "Permission:employee-mappings.read")]
+    [Authorize(Policy = "Permission:leave-balances.read")]
     public async Task<IActionResult> GetMine(Guid companyId, CancellationToken cancellationToken)
     {
         var tenantId = User.ReadTenantId();
