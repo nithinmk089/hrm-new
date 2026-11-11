@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-import { ApplyLeaveBalanceTransactionRequest, EmployeeLeaveBalance, EmployeeLeaveRequestItem, LeaveRequestCancellationRequest, LeaveRequestCancellationResult, LeaveRequestHistoryItem, LeaveRequestSubmissionResult, LeaveType, MyEmployeeMapping, SubmitLeaveRequest } from './leave.models';
+import { ApplyLeaveBalanceTransactionRequest, CreateLeaveTypeRequest, DeactivateLeaveTypeRequest, UpdateLeaveTypeRequest, EmployeeLeaveBalance, EmployeeLeaveRequestItem, LeaveRequestCancellationRequest, LeaveRequestCancellationResult, LeaveRequestHistoryItem, LeaveRequestSubmissionResult, LeaveType, MyEmployeeMapping, SubmitLeaveRequest } from './leave.models';
 
 @Injectable({ providedIn: 'root' })
 export class LeaveApiService {
@@ -51,5 +51,17 @@ export class LeaveApiService {
   applyEmployeeBalanceTransaction(companyId: string, employeeId: string, request: ApplyLeaveBalanceTransactionRequest): Observable<EmployeeLeaveBalance> {
     return this.http.post<EmployeeLeaveBalance>(
       `${this.apiBaseUrl}/companies/${companyId}/employees/${employeeId}/leave-balances/transactions`, request);
+  }
+
+  createLeaveType(companyId: string, request: CreateLeaveTypeRequest): Observable<LeaveType> {
+    return this.http.post<LeaveType>(`${this.apiBaseUrl}/companies/${companyId}/leave-types`, request);
+  }
+
+  updateLeaveType(companyId: string, leaveTypeId: string, request: UpdateLeaveTypeRequest): Observable<LeaveType> {
+    return this.http.put<LeaveType>(`${this.apiBaseUrl}/companies/${companyId}/leave-types/${leaveTypeId}`, request);
+  }
+
+  deactivateLeaveType(companyId: string, leaveTypeId: string, request: DeactivateLeaveTypeRequest): Observable<void> {
+    return this.http.patch<void>(`${this.apiBaseUrl}/companies/${companyId}/leave-types/${leaveTypeId}/deactivate`, request);
   }
 }
