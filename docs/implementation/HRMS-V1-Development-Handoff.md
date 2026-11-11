@@ -821,3 +821,13 @@ npm test -- --watch=false
 - This also protects against stale/invalid company IDs that do not correspond to the visible company selector value.
 - Browser cache/build freshness may still need checking after pulling; hard reload after rebuilding the Angular app.
 - Local verification remains pending.
+
+
+### Root cause and definitive fix: no automatic company selection in leave provisioning
+
+- Re-inspection of the actual component constructor found the root cause: when the companies API returned exactly one company, it automatically called `onCompanyChangeValue(items[0].companyId)`. This populated employees and leave types even though the company selector still showed its placeholder. Earlier guards did not remove this auto-selection.
+- Removed automatic company selection entirely. Company options load, but companyId stays empty until the user explicitly changes the company dropdown.
+- Employee and leave-type API calls now occur only after that explicit selection. Employee dropdown remains disabled and contains only the `Select a company first` placeholder before selection.
+- Updated content conditions to use the valid loaded-company selection predicate.
+- Updated provisioning tests to explicitly select the company for workflows that need it, and added a regression test with exactly one company proving no employee or leave-type request occurs before explicit selection.
+- Local build/test/browser verification remains pending.
