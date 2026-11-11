@@ -34,6 +34,17 @@ describe('LeaveBalanceProvisioningPageComponent',()=>{
   expect(component.companyId()).toBe('company-1');expect(employeeApi.getEmployees).toHaveBeenCalledWith('company-1',undefined,'Active');
   expect(leaveApi.getLeaveTypes).toHaveBeenCalledWith('company-1');expect(component.employees()).toHaveLength(1);expect(component.leaveTypes()).toHaveLength(1);
  });
+ it('clears employee and balance data when the company selection is cleared',async()=>{
+  const{component,fixture,leaveApi}=await setup();
+  component.onEmployeeChange({target:{value:'employee-1'}} as unknown as Event);await fixture.whenStable();
+  expect(component.balances()).toEqual([balance]);
+  component.onCompanyChange({target:{value:''}} as unknown as Event);fixture.detectChanges();
+  expect(component.companyId()).toBe('');expect(component.employeeId()).toBe('');
+  expect(component.employees()).toEqual([]);expect(component.leaveTypes()).toEqual([]);expect(component.balances()).toEqual([]);
+  const employeeSelect=fixture.nativeElement.querySelector('#employee') as HTMLSelectElement;
+  expect(employeeSelect.disabled).toBe(true);expect(employeeSelect.options[0].textContent).toContain('Select a company first');
+  expect(leaveApi.getEmployeeBalances).toHaveBeenCalledTimes(1);
+ });
  it('loads annual balances for the selected employee and year',async()=>{
   const{component,leaveApi,fixture}=await setup();
   component.onEmployeeChange({target:{value:'employee-1'}} as unknown as Event);await fixture.whenStable();
