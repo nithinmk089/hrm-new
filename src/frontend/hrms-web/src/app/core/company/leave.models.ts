@@ -116,3 +116,14 @@ export interface LeaveRequestCancellationResult {
   cancelledAtUtc: string;
   rowVersion: string;
 }
+
+
+export type LeaveBalanceTransactionType = 'Opening' | 'Accrual' | 'CarryForward' | 'Adjustment';
+
+export interface ApplyLeaveBalanceTransactionRequest {
+  leaveTypeId: string;
+  leaveYear: number;
+  transactionType: LeaveBalanceTransactionType;
+  daysDelta: number;
+  notes: string | null;
+}
