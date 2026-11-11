@@ -51,6 +51,9 @@ public sealed class EmployeeUserMappingServiceTests
         public Task<EmployeeUserMappingDto?> GetByEmployeeAsync(Guid tenantId, Guid companyId, Guid employeeId, CancellationToken cancellationToken) =>
             Task.FromResult<EmployeeUserMappingDto?>(null);
 
+        public Task<MyEmployeeMappingDto?> GetMineAsync(Guid tenantId, Guid companyId, Guid userId, CancellationToken cancellationToken) =>
+            Task.FromResult<MyEmployeeMappingDto?>(new MyEmployeeMappingDto(companyId, Guid.NewGuid()));
+
         public Task<EmployeeUserMappingDto> CreateAsync(Guid tenantId, Guid companyId, CreateEmployeeUserMappingRequest request, CancellationToken cancellationToken)
         {
             TenantId = tenantId;
