@@ -26,7 +26,7 @@ import { LeaveApiService } from '../../core/company/leave-api.service';
     @else if(!selectedCompanyId()){<div class="empty-state card"><i class="bi bi-arrow-up-circle"></i><h2>Select a company</h2><p>Choose your company to view your leave balance.</p></div>}
     @else {
       <div class="section-heading"><div><h2>Annual leave balance</h2><p>Available, used and pending-reservation days for {{selectedYear()}}.</p></div><button class="btn btn-light btn-sm" type="button" (click)="loadDashboard()" [disabled]="loading()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button></div>
-      @if(loading()){<div class="loading-state"><span class="spinner-border spinner-border-sm me-2"></span>Loading your leave information…</div>}
+      @if(loading() || balancesLoading()){<div class="loading-state"><span class="spinner-border spinner-border-sm me-2"></span>Loading your leave information…</div>}
       @else if(!employeeId()){<div class="empty-state card"><i class="bi bi-person-exclamation"></i><h2>Employee account mapping required</h2><p>Your login is not linked to an active employee record in this company. Contact your HR administrator to configure the explicit employee-user mapping. Your email address is not used to guess this association.</p></div>}
       @else if(balances().length===0){<div class="empty-state card"><i class="bi bi-calendar2-check"></i><h2>No leave balances provisioned</h2><p>There are no leave balance records for {{selectedYear()}}. Please contact HR to provision your annual leave balances before applying.</p></div>}
       @else {
@@ -75,6 +75,7 @@ export class LeaveDashboardPageComponent {
   readonly selectedYear=signal(new Date().getFullYear());
   readonly companiesLoading=signal(true);
   readonly loading=signal(false);
+  readonly balancesLoading=signal(false);
   readonly saving=signal(false);
   readonly editorOpen=signal(false);
   readonly error=signal('');
@@ -116,7 +117,8 @@ export class LeaveDashboardPageComponent {
   }
   private loadBalances():void{
     const companyId=this.selectedCompanyId(),employeeId=this.employeeId();if(!companyId||!employeeId)return;
-    this.leaveApi.getMyBalances(companyId,employeeId,this.selectedYear()).subscribe({
+    this.balancesLoading.set(true);
+    this.leaveApi.getMyBalances(companyId,employeeId,this.selectedYear()).pipe(finalize(()=>this.balancesLoading.set(false))).subscribe({
       next:items=>this.balances.set(items),
       error:e=>this.error.set(this.message(e,'Unable to load your leave balances.'))
     });
