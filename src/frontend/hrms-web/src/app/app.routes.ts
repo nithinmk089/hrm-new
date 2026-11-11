@@ -10,6 +10,7 @@ export const routes: Routes = [
   { path: 'company/offices', title: 'Offices | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/offices-page.component').then(m => m.OfficesPageComponent) },
   { path: 'company/designations', title: 'Designations | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/designations-page.component').then(m => m.DesignationsPageComponent) },
   { path: 'company/holidays', title: 'Holidays | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/holidays-page.component').then(m => m.HolidaysPageComponent) },
+  { path: 'company/leave-types', title: 'Leave Types | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/leave-types-page.component').then(m => m.LeaveTypesPageComponent) },
   { path: 'company/working-week', title: 'Working Week | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/working-week-page.component').then(m => m.WorkingWeekPageComponent) },
   { path: 'company/office-working-weeks', title: 'Office Working Weeks | HRMS', canActivate: [authGuard], loadComponent: () => import('./features/company/office-working-week-page.component').then(m => m.OfficeWorkingWeekPageComponent) },
   { path: 'company/:section', title: 'Company administration | HRMS', component: PlaceholderPageComponent, canActivate: [authGuard] },
