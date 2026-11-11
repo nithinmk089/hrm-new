@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-import { EmployeeLeaveBalance, EmployeeLeaveRequestItem, LeaveRequestCancellationRequest, LeaveRequestCancellationResult, LeaveRequestHistoryItem, LeaveRequestSubmissionResult, LeaveType, MyEmployeeMapping, SubmitLeaveRequest } from './leave.models';
+import { ApplyLeaveBalanceTransactionRequest, EmployeeLeaveBalance, EmployeeLeaveRequestItem, LeaveRequestCancellationRequest, LeaveRequestCancellationResult, LeaveRequestHistoryItem, LeaveRequestSubmissionResult, LeaveType, MyEmployeeMapping, SubmitLeaveRequest } from './leave.models';
 
 @Injectable({ providedIn: 'root' })
 export class LeaveApiService {
@@ -40,5 +40,16 @@ export class LeaveApiService {
   cancelMyLeaveRequest(companyId: string, leaveRequestId: string, request: LeaveRequestCancellationRequest): Observable<LeaveRequestCancellationResult> {
     return this.http.post<LeaveRequestCancellationResult>(
       `${this.apiBaseUrl}/companies/${companyId}/leave-requests/${leaveRequestId}/cancel`, request);
+  }
+
+  getEmployeeBalances(companyId: string, employeeId: string, year: number): Observable<EmployeeLeaveBalance[]> {
+    const params = new HttpParams().set('year', String(year));
+    return this.http.get<EmployeeLeaveBalance[]>(
+      `${this.apiBaseUrl}/companies/${companyId}/employees/${employeeId}/leave-balances`, { params });
+  }
+
+  applyEmployeeBalanceTransaction(companyId: string, employeeId: string, request: ApplyLeaveBalanceTransactionRequest): Observable<EmployeeLeaveBalance> {
+    return this.http.post<EmployeeLeaveBalance>(
+      `${this.apiBaseUrl}/companies/${companyId}/employees/${employeeId}/leave-balances/transactions`, request);
   }
 }
