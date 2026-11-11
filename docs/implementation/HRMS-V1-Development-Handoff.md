@@ -787,3 +787,18 @@ npm test -- --watch=false
 - The existing navigation entry already linked to `/company/leave-types` and now resolves to the functional page.
 - HR balance provisioning and leave application can now use company-configured active leave types.
 - No local build/test/browser verification has been performed by the assistant. User verification is required.
+
+
+### Leave balance entitlement cap correction — implementation pending local verification
+
+- User screenshot showed Leave Type AnnualEntitlementDays=10 while HR provisioning accepted Opening=11. Root cause: the existing `usp_EmployeeLeaveBalances_ApplyTransaction` did not check leave type policy caps.
+- Added migration `src/backend/HRMS.Infrastructure/Migrations/025_LeaveBalanceEntitlementLimits.sql`, replacing the transaction procedure with serialized checks inside the transaction.
+- Policy now enforced server-side:
+  - Opening + Accrual + Adjustment balance may not exceed `LeaveTypes.AnnualEntitlementDays` when configured (NULL means uncapped).
+  - CarryForward is a separate allowance; positive carry-forward is rejected unless enabled and may not exceed `MaxCarryForwardDays`.
+  - Negative transactions are only permitted for Adjustment; reductions cannot take the relevant total below zero or below used + reserved days.
+  - The leave type and balance rows are locked during validation/update so concurrent transactions cannot overrun the cap.
+- Application service now rejects negative non-Adjustment transactions before repository execution.
+- Provisioning page now displays a dynamic cap hint and validates the projected annual/carry-forward amount before posting. Backend remains authoritative.
+- Migration 025 must be applied to the local SQL Server database before testing. No migration has been applied by the assistant.
+- Local build, tests, and SQL integration verification remain pending.
