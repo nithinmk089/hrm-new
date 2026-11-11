@@ -20,6 +20,17 @@ public sealed class EmployeeUserMappingsController(IEmployeeUserMappingService s
         return Ok(users);
     }
 
+    [HttpGet("mine")]
+    [Authorize(Policy = "Permission:employee-mappings.read")]
+    public async Task<IActionResult> GetMine(Guid companyId, CancellationToken cancellationToken)
+    {
+        var tenantId = User.ReadTenantId();
+        var userId = User.ReadUserId();
+        if (tenantId is null || userId is null) return Forbid();
+        var mapping = await service.GetMineAsync(tenantId.Value, companyId, userId.Value, cancellationToken);
+        return mapping is null ? NotFound() : Ok(mapping);
+    }
+
     [HttpGet("by-employee/{employeeId:guid}")]
     [Authorize(Policy = "Permission:employee-mappings.read")]
     public async Task<IActionResult> GetByEmployee(Guid companyId, Guid employeeId, CancellationToken cancellationToken)
