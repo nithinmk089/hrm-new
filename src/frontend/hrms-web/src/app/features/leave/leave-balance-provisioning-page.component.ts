@@ -121,6 +121,26 @@ export class LeaveBalanceProvisioningPageComponent {
     if(this.form.invalid||!this.companyId()||!this.employeeId())return;
     if(value.daysDelta===0){this.formError.set('Days must be greater than zero or less than zero.');return;}
     if(value.transactionType!=='Adjustment'&&value.daysDelta<0){this.formError.set('Only Adjustment transactions can reduce a balance.');return;}
+    const selectedType=this.leaveTypes().find(type=>type.leaveTypeId===value.leaveTypeId);
+    const currentBalance=this.balances().find(balance=>balance.leaveTypeId===value.leaveTypeId);
+    if(!selectedType){this.formError.set('Select a valid active leave type.');return;}
+    if(value.transactionType==='CarryForward'){
+      if(value.daysDelta>0&&!selectedType.allowCarryForward){this.formError.set('Carry forward is not enabled for this leave type.');return;}
+      const currentCarry=currentBalance?.carriedForwardDays??0;
+      if(currentCarry+value.daysDelta<0){this.formError.set('Carried-forward days cannot be reduced below zero.');return;}
+      if(selectedType.allowCarryForward&&currentCarry+value.daysDelta>selectedType.maxCarryForwardDays){
+        this.formError.set('This leave type allows a maximum of '+selectedType.maxCarryForwardDays+' carry-forward days. Current: '+currentCarry+'; requested change: '+value.daysDelta+'.');return;
+      }
+    }else{
+      const currentAnnual=(currentBalance?.openingDays??0)+(currentBalance?.accruedDays??0)+(currentBalance?.adjustmentDays??0);
+      const projectedAnnual=currentAnnual+value.daysDelta;
+      if(projectedAnnual<0){this.formError.set('Annual entitlement cannot be reduced below zero.');return;}
+      if(selectedType.annualEntitlementDays!==null&&projectedAnnual>selectedType.annualEntitlementDays){
+        this.formError.set('This leave type allows a maximum annual entitlement of '+selectedType.annualEntitlementDays+' days. Current: '+currentAnnual+'; requested change: '+value.daysDelta+'.');return;
+      }
+      const consumed=(currentBalance?.usedDays??0)+(currentBalance?.reservedDays??0);
+      if(projectedAnnual<consumed){this.formError.set('Entitlement cannot be reduced below '+consumed+' used and reserved days.');return;}
+    }
     const request:ApplyLeaveBalanceTransactionRequest={
       leaveTypeId:value.leaveTypeId,leaveYear:this.year(),transactionType:value.transactionType,
       daysDelta:value.daysDelta,notes:value.notes.trim()||null
@@ -130,6 +150,13 @@ export class LeaveBalanceProvisioningPageComponent {
       next:()=>{this.success.set('Leave balance transaction saved successfully.');this.formError.set('');this.loadBalances();this.form.patchValue({daysDelta:0,notes:''});},
       error:error=>this.formError.set(this.message(error,'Unable to save the balance transaction.'))
     });
+  }
+  daysHint():string{
+    const type=this.leaveTypes().find(item=>item.leaveTypeId===this.form.controls.leaveTypeId.value);
+    const transaction=this.form.controls.transactionType.value;
+    if(!type)return 'Select a leave type to see its entitlement limit.';
+    if(transaction==='CarryForward')return type.allowCarryForward?'Maximum carry forward: '+type.maxCarryForwardDays+' days.':'Carry forward is disabled for this leave type.';
+    return type.annualEntitlementDays===null?'No annual entitlement cap is configured.':'Annual entitlement limit: '+type.annualEntitlementDays+' days.';
   }
   private message(error:any,fallback:string):string{
     if(error?.status===400)return error?.error?.detail||error?.error?.title||'The balance transaction is invalid.';
