@@ -26,7 +26,7 @@ import { LeaveApiService } from '../../core/company/leave-api.service';
       </div>
     </section>
     @if(loading()){<div class="loading-state"><span class="spinner-border spinner-border-sm me-2"></span>Loading leave balances…</div>}
-    @else if(companyId() && employeeId()){
+    @else if(hasCompanySelection() && employeeId()){
       <div class="section-heading"><div><h2>Annual entitlement balances</h2><p>{{selectedEmployeeName()}} · Leave year {{year()}}</p></div><button class="btn btn-light btn-sm" type="button" (click)="loadBalances()" [disabled]="loading()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button></div>
       @if(balances().length===0){<div class="empty-state card"><i class="bi bi-calendar2-plus"></i><h2>No balances initialized</h2><p>Choose a leave type below and create an Opening transaction to provision this employee's annual entitlement.</p></div>}
       @else {
@@ -49,7 +49,7 @@ import { LeaveApiService } from '../../core/company/leave-api.service';
           <div class="actions"><button class="btn btn-primary" type="submit" [disabled]="saving() || form.invalid"><span [class.spinner-border]="saving()" [class.spinner-border-sm]="saving()" class="me-2"></span>{{saving()?'Saving transaction…':'Save balance transaction'}}</button></div>
         </form>
       </section>
-    } @else if(companyId()){<div class="empty-state card"><i class="bi bi-person-lines-fill"></i><h2>Select an employee</h2><p>Choose an active employee to view and provision annual leave balances.</p></div>}
+    } @else if(hasCompanySelection()){<div class="empty-state card"><i class="bi bi-person-lines-fill"></i><h2>Select an employee</h2><p>Choose an active employee to view and provision annual leave balances.</p></div>}
     <section class="info-panel card"><i class="bi bi-shield-check"></i><div><strong>Audited balance management</strong><p>Opening, accrual, carry-forward and adjustment transactions are processed by the server. Balance changes and ledger entries are committed atomically. Used and reserved days cannot be reduced below the amount already consumed or reserved.</p></div></section>
   `,
   styles: [`
@@ -86,7 +86,7 @@ export class LeaveBalanceProvisioningPageComponent {
 
   constructor(){
     this.companyApi.getCompanies().pipe(finalize(()=>this.companiesLoading.set(false))).subscribe({
-      next:items=>{this.companies.set(items);if(items.length===1)this.onCompanyChangeValue(items[0].companyId);},
+      next:items=>{this.companies.set(items);},
       error:()=>this.error.set('Unable to load companies.')
     });
   }
