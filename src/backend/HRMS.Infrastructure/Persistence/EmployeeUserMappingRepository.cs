@@ -55,6 +55,14 @@ internal sealed class EmployeeUserMappingRepository(IDbConnectionFactory connect
         const string sql = """
             SELECT TOP (1) mapping.CompanyId, mapping.EmployeeId
             FROM hrms.EmployeeUserMappings AS mapping
+            INNER JOIN security.Users AS userAccount
+                ON userAccount.UserId = mapping.UserId
+               AND userAccount.IsEnabled = 1
+               AND userAccount.IsDeleted = 0
+            INNER JOIN security.UserTenantMemberships AS membership
+                ON membership.TenantId = mapping.TenantId
+               AND membership.UserId = mapping.UserId
+               AND membership.MembershipStatus = 'Active'
             INNER JOIN hrms.Employees AS employee
                 ON employee.TenantId = mapping.TenantId
                AND employee.CompanyId = mapping.CompanyId
