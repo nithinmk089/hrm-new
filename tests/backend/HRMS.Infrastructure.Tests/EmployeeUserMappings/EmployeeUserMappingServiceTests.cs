@@ -6,6 +6,23 @@ namespace HRMS.Infrastructure.Tests.EmployeeUserMappings;
 public sealed class EmployeeUserMappingServiceTests
 {
     [Fact]
+    public async Task GetMineAsync_UsesAuthenticatedUserAndCompanyScope()
+    {
+        var repository = new FakeRepository();
+        var service = new EmployeeUserMappingService(repository);
+        var tenantId = Guid.NewGuid();
+        var companyId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        var result = await service.GetMineAsync(tenantId, companyId, userId);
+
+        Assert.NotNull(result);
+        Assert.Equal(tenantId, repository.TenantId);
+        Assert.Equal(companyId, repository.CompanyId);
+        Assert.Equal(userId, repository.UserId);
+    }
+
+    [Fact]
     public async Task CreateAsync_PreservesAuthenticatedScopeAndIds()
     {
         var repository = new FakeRepository();
@@ -47,12 +64,18 @@ public sealed class EmployeeUserMappingServiceTests
             Task.FromResult<IReadOnlyList<AvailableTenantUserDto>>([]);
         public Guid? CompanyId { get; private set; }
         public CreateEmployeeUserMappingRequest? Request { get; private set; }
+        public Guid? UserId { get; private set; }
 
         public Task<EmployeeUserMappingDto?> GetByEmployeeAsync(Guid tenantId, Guid companyId, Guid employeeId, CancellationToken cancellationToken) =>
             Task.FromResult<EmployeeUserMappingDto?>(null);
 
-        public Task<MyEmployeeMappingDto?> GetMineAsync(Guid tenantId, Guid companyId, Guid userId, CancellationToken cancellationToken) =>
-            Task.FromResult<MyEmployeeMappingDto?>(new MyEmployeeMappingDto(companyId, Guid.NewGuid()));
+        public Task<MyEmployeeMappingDto?> GetMineAsync(Guid tenantId, Guid companyId, Guid userId, CancellationToken cancellationToken)
+        {
+            TenantId = tenantId;
+            CompanyId = companyId;
+            UserId = userId;
+            return Task.FromResult<MyEmployeeMappingDto?>(new MyEmployeeMappingDto(companyId, Guid.NewGuid()));
+        }
 
         public Task<EmployeeUserMappingDto> CreateAsync(Guid tenantId, Guid companyId, CreateEmployeeUserMappingRequest request, CancellationToken cancellationToken)
         {
