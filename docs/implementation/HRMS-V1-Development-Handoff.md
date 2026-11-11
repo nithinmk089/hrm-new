@@ -728,3 +728,16 @@ npm test -- --watch=false
 - Required quality: focused Angular TestBed/Vitest tests for loading, company selection, request validation/payload, excluded dates, cancellation eligibility/confirmation, manager queue, decision comments, RowVersion, authorization and conflict handling.
 - Local verification for UI-08 is pending. Do not mark complete until the user confirms frontend build/tests and browser workflow verification; run backend build/tests if backend code changes.
 - Do not merge UI-08 into `main` until explicitly requested after user verification.
+
+
+### UI-08A implementation snapshot (verification pending)
+
+- Added `GET /api/v1/companies/{companyId}/employee-user-mappings/mine`, protected by `leave-balances.read`. It derives the user from validated JWT claims and returns only the active mapped employee ID for that company. It never searches by email.
+- The self-mapping query verifies the active company and active employee, and scopes the mapping by authenticated tenant, company and user.
+- Added frontend leave models and `LeaveApiService` for self mapping, leave types, annual balances and leave submission.
+- Replaced the leave placeholder route with the employee leave dashboard.
+- The dashboard shows leave balances and used/reserved/available breakdowns, an explicit no-mapping state, and an apply-leave dialog with leave type, date range, half-day AM/PM and reason.
+- Submission sends date-only values and the server-derived identity is authoritative. The UI displays server-returned annual allocations and excluded dates; it does not calculate chargeable days locally.
+- Added component tests for mapping, balance display, missing balance/mapping states, date and half-day validation, payload normalization, excluded-date display and API conflict feedback.
+- No SQL migration was added.
+- Verification is pending: user must run backend build/tests and frontend build/tests and verify the browser flow. Do not merge UI-08 until the user confirms.
