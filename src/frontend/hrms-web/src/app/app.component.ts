@@ -12,6 +12,7 @@ import { AuthService } from './core/auth/auth.service';
 <a class="nav-link" routerLink="/employees" routerLinkActive="active" (click)="closeMenu()"><i class="bi bi-people"></i>Employees</a>
 <a class="nav-link" routerLink="/employee-user-mappings" routerLinkActive="active" (click)="closeMenu()"><i class="bi bi-person-check"></i>Employee user mapping</a>
 <a class="nav-link" routerLink="/leave" routerLinkActive="active" (click)="closeMenu()"><i class="bi bi-calendar2-week"></i>Leave management</a>
+<a class="nav-link" routerLink="/leave/balances" routerLinkActive="active" (click)="closeMenu()"><i class="bi bi-calendar2-plus"></i>Leave balance provisioning</a>
 <a class="nav-link" routerLink="/timesheets" routerLinkActive="active" (click)="closeMenu()"><i class="bi bi-clock-history"></i>Timesheets</a>
 <span class="nav-caption group-caption">ORGANIZATION</span>
 <a class="nav-link" routerLink="/company/companies" routerLinkActive="active" (click)="closeMenu()"><i class="bi bi-buildings"></i>Companies</a>
