@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { LeaveRequestsPanelComponent } from './leave-requests-panel.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
 import { CompanyApiService } from '../../core/company/company-api.service';
@@ -9,7 +10,7 @@ import { LeaveApiService } from '../../core/company/leave-api.service';
 @Component({
   selector: 'hrms-leave-dashboard-page',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, LeaveRequestsPanelComponent],
   template: `
     <div class="page-heading">
       <div><div class="eyebrow">EMPLOYEE SELF-SERVICE</div><h1>Leave management</h1><p>Review your annual leave balance and submit a leave request.</p></div>
@@ -42,6 +43,7 @@ import { LeaveApiService } from '../../core/company/leave-api.service';
           }
         </div>
       }
+      <hrms-leave-requests-panel [companyId]="selectedCompanyId()" />
       <section class="info-panel card mt-3"><i class="bi bi-info-circle"></i><div><strong>How leave balances work</strong><p>Submitting a request reserves the calculated working days. Approval moves reserved days to used days; rejection or eligible cancellation releases the reservation. Company working weeks, office schedules and holidays are calculated by the server.</p></div></section>
     }
     @if(submissionResult()){<div class="modal-backdrop-custom" (click)="submissionResult.set(null)"><section class="dialog card" role="dialog" aria-modal="true" aria-labelledby="submissionTitle" (click)="$event.stopPropagation()"><div class="success-icon"><i class="bi bi-check-lg"></i></div><h2 id="submissionTitle">Leave request submitted</h2><p>Your request for <strong>{{submissionResult()?.request?.daysRequested}} day(s)</strong> has been recorded with status <strong>{{submissionResult()?.request?.status}}</strong>.</p><div class="result-summary">@for(item of submissionResult()?.yearAllocations??[];track item.leaveYear){<div><span>{{item.leaveYear}} allocation</span><strong>{{item.days}} days</strong></div>}</div>@if((submissionResult()?.excludedDates??[]).length>0){<div class="excluded-dates"><strong>Excluded dates</strong><span>{{formatDates(submissionResult()!.excludedDates)}}</span><small>These dates were excluded from the chargeable leave calculation by the server.</small></div>}<div class="actions"><button class="btn btn-primary" type="button" (click)="submissionResult.set(null)">Done</button></div></section></div>}
