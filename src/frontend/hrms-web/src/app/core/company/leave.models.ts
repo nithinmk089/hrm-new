@@ -127,3 +127,12 @@ export interface ApplyLeaveBalanceTransactionRequest {
   daysDelta: number;
   notes: string | null;
 }
+
+
+export interface CreateLeaveTypeRequest {
+  leaveTypeCode: string; leaveTypeName: string; description: string | null;
+  isPaid: boolean; requiresApproval: boolean; annualEntitlementDays: number | null;
+  allowHalfDay: boolean; allowCarryForward: boolean; maxCarryForwardDays: number;
+}
+export interface UpdateLeaveTypeRequest extends Omit<CreateLeaveTypeRequest, 'leaveTypeCode'> { rowVersion: string; }
+export interface DeactivateLeaveTypeRequest { rowVersion: string; }
