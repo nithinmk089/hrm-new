@@ -24,6 +24,9 @@ public sealed class EmployeeLeaveBalanceService(IEmployeeLeaveBalanceRepository 
             throw new ArgumentException("TransactionType must be Opening, Accrual, CarryForward or Adjustment.", nameof(request.TransactionType));
         if (request.DaysDelta == 0 || request.DaysDelta is < -366 or > 366)
             throw new ArgumentException("DaysDelta must be non-zero and within -366 to 366.", nameof(request.DaysDelta));
+        if (!string.Equals(request.TransactionType?.Trim(), "Adjustment", StringComparison.OrdinalIgnoreCase)
+            && request.DaysDelta < 0)
+            throw new ArgumentException("Negative balance transactions are only allowed for Adjustment.", nameof(request.DaysDelta));
         var notes = string.IsNullOrWhiteSpace(request.Notes) ? null : request.Notes.Trim();
         if (notes?.Length > 500)
             throw new ArgumentException("Notes cannot exceed 500 characters.", nameof(request.Notes));
