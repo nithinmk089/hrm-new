@@ -755,3 +755,19 @@ npm test -- --watch=false
 - HR leave balance provisioning is intentionally deferred and is not part of UI-08.
 - No local build/test/browser verification has been performed by the assistant. User verification is required before marking UI-08B complete.
 - Next: user pulls the branch and runs frontend build/tests; after passing, continue UI-08C manager pending approvals and UI-08D manager decisions.
+
+
+### UI-08 HR leave balance provisioning implementation snapshot (verification pending)
+
+- User requested HR leave balance provisioning be included in UI-08 so the leave lifecycle can be completed and tested together.
+- Existing backend contract inspected and reused; no backend API rewrite or SQL migration added:
+  - `GET /api/v1/companies/{companyId}/employees/{employeeId}/leave-balances?year={year}` (`leave-balances.read`).
+  - `POST /api/v1/companies/{companyId}/employees/{employeeId}/leave-balances/transactions` (`leave-balances.adjust`).
+- Existing transaction types are Opening, Accrual, CarryForward and Adjustment. SQL stored procedure applies the balance change and writes the transaction ledger row atomically. Negative adjustments are constrained by the database balance invariant; negative initial provisioning is not supported.
+- Added frontend transaction request models and `LeaveApiService` methods for HR employee balance retrieval and transaction submission.
+- Added `/leave/balances` route and Leave balance provisioning navigation entry.
+- Added `LeaveBalanceProvisioningPageComponent`: company selection, active employee selection, leave year, current balance breakdown, leave type and transaction type selection, positive/negative day input validation, notes, save feedback, and refresh after successful transaction.
+- Added five component tests for company/employee/type loading, balance loading, Opening transaction payload, negative non-adjustment validation and permission error feedback.
+- Existing `leave-balances.adjust` permission is required. The API remains authoritative for tenant/company/employee/leave-type validation and balance invariants.
+- No local build/test/browser verification has been performed by the assistant. User verification is required.
+- UI-08 now includes HR balance provisioning alongside employee self-service and manager approvals; it is not deferred.
